@@ -53,6 +53,7 @@ for d,dv in zip(docs, docs_visual):
         dv.ravel()[w] += 1
 
 #display the documents
+'''
 nrow=ncol= np.ceil(np.sqrt(N_DOCS))
 vmin = np.min(map(np.min,docs_visual))
 vmax = np.max(map(np.max,docs_visual))
@@ -62,17 +63,24 @@ for d,dv in enumerate(docs_visual):
     pb.xticks([])
     pb.yticks([])
 pb.suptitle('the "documents"')
+'''
 
 m = LDAtest(docs,vocab,N_TOPICS)
 
+
 x = m.get_vb_param().copy()
-m.optimize(method='steepest',maxiter=1000)
+m.optimize(method='steepest',maxiter=5)
 m.set_vb_param(x)
-m.optimize(method='FR',maxiter=1000)
+m.optimize(method='FR',maxiter=5)
+
+print(m.eigvals)
+'''
 pb.figure()
 m.plot_tracks()
+'''
 
 #display learned topics
+'''
 def plot_inferred_topics():
     nrow=ncol= np.ceil(np.sqrt(N_TOPICS))
     pb.figure()
@@ -84,7 +92,8 @@ def plot_inferred_topics():
 plot_inferred_topics()
 pb.suptitle('inferred topics')
 pb.show()
-
+'''
+'''
 #plot true topics
 nrow=ncol= np.ceil(np.sqrt(N_TOPICS))
 pb.figure()
@@ -94,6 +103,7 @@ for i,topic in enumerate(topics):
     pb.xticks([])
     pb.yticks([])
 pb.suptitle('true topics')
+'''
 
 
 

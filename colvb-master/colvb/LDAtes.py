@@ -7,14 +7,15 @@ import matplotlib as mlp
 #mlp.use('cairo.pdf')
 from scipy.special import gammaln, digamma
 from scipy import sparse
-from col_vb import col_vb
+from col_vb2 import col_vb2
 from weave_fns import LDA_mult
+from ad import adnumber
 
 def softmax(x):
     ex = np.exp(x-x.max(1)[:,None])
     return ex/ex.sum(1)[:,None]
 
-class LDAtest(col_vb):
+class LDAtest(col_vb2):
     """Collapsed Latent Dirichlet Allocation"""
 
     def __init__(self, documents,vocabulary, K,alpha_0=1.,beta_0=1.):
@@ -26,7 +27,8 @@ class LDAtest(col_vb):
         :K: number of topics
 
         """
-        col_vb.__init__(self)
+
+        col_vb2.__init__(self)
         assert len(vocabulary.shape)==1
         assert np.max(map(np.max,documents)) <= vocabulary.size
         for doc in documents:
@@ -37,9 +39,12 @@ class LDAtest(col_vb):
         self.D = len(documents)
         self.Nd = map(np.size,documents)
         self.V = vocabulary.size
+
         self.K = K
 
+
         #this is used when packing/unpacking  the model, to reshape a vector into our document shapes
+
         self.document_index = np.vstack((np.hstack((0,np.cumsum(self.Nd)[:-1])),np.cumsum(self.Nd))).T*self.K
 
         #reversing the way that words are counted. In the data's form
@@ -97,6 +102,12 @@ class LDAtest(col_vb):
         natgrad = np.hstack(map(np.ravel,natgrad))
         grad = natgrad*np.hstack(map(np.ravel,self.phi))
         return grad,natgrad
+
+    def eivals(self):
+        """calculates the eigenvalues of the Hessian wrt. r_{dnk}"""
+
+        return 0
+
 
     def print_topics(self,wordlim=10):
         vocab_indexes = [np.argsort(b)[::-1] for b in self.beta_p]
