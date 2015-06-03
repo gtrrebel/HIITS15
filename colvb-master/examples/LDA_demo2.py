@@ -4,8 +4,8 @@
 import numpy as np
 import pylab as pb
 import sys
-sys.path.append('..')
-from colvb import LDAtes
+sys.path.append('../colvb')
+from LDAtes import LDAtest
 
 #generate some documents
 WORDSIZE=3 # words are square matrices with a single nonzero entry
@@ -63,7 +63,7 @@ for d,dv in enumerate(docs_visual):
     pb.yticks([])
 pb.suptitle('the "documents"')
 
-m = LDAtes(docs,vocab,N_TOPICS)
+m = LDAtest(docs,vocab,N_TOPICS)
 
 x = m.get_vb_param().copy()
 m.optimize(method='steepest',maxiter=1000)

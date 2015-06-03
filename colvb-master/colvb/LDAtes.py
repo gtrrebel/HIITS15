@@ -14,7 +14,7 @@ def softmax(x):
     ex = np.exp(x-x.max(1)[:,None])
     return ex/ex.sum(1)[:,None]
 
-class LDA(col_vb):
+class LDAtest(col_vb):
     """Collapsed Latent Dirichlet Allocation"""
 
     def __init__(self, documents,vocabulary, K,alpha_0=1.,beta_0=1.):
