@@ -1,6 +1,7 @@
 # Copyright (c) 2012 James Hensman
 # Licensed under the GPL v3 (see LICENSE.txt)
-
+import sys
+sys.path.append('/home/othe/Desktop/HIIT/Moduleita/pyautodiff-python2-ast')
 import numpy as np
 #import pylab as pb
 import matplotlib as mlp
@@ -10,6 +11,9 @@ from scipy import sparse
 from col_vb2 import col_vb2
 from weave_fns import LDA_mult
 from ad import adnumber
+from ad.admath import *
+from autodiff import function, gradient
+from autodiff import Function, Gradient
 
 def softmax(x):
     ex = np.exp(x-x.max(1)[:,None])
@@ -103,11 +107,17 @@ class LDAtest(col_vb2):
         grad = natgrad*np.hstack(map(np.ravel,self.phi))
         return grad,natgrad
 
-    def eivals(self):
-        """calculates the eigenvalues of the Hessian wrt. r_{dnk}"""
-
+    def invest(self):
+        """Investigating the general behaviour"""
+        print(len(self.phi[0]))
+        print(self.boundEval())
         return 0
 
+    @gradient
+    def boundEval(self):
+        """theano-evaluation of ELBO"""
+        """TODO"""
+        return None
 
     def print_topics(self,wordlim=10):
         vocab_indexes = [np.argsort(b)[::-1] for b in self.beta_p]

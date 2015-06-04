@@ -73,7 +73,11 @@ m.optimize(method='steepest',maxiter=5)
 m.set_vb_param(x)
 m.optimize(method='FR',maxiter=5)
 
-print(m.eigvals)
+
+'''Investigation of the bound
+print(m.invest())
+'''
+
 '''
 pb.figure()
 m.plot_tracks()

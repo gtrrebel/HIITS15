@@ -3,7 +3,7 @@
 
 from MOG import MOG
 from LDA import LDA
-from LDAtes import LDAteste
+from LDAtes import LDAtest
 from LDA2 import LDA2
 from MMOG import MMOG
 from MOHGP import MOHGP
