@@ -14,6 +14,7 @@ from ad.admath import *
 import theano.tensor as T
 from theano import *
 from autodiff import function, gradient, hessian_vector, Function, Gradient, Symbolic, tag
+import time
 
 class MOG2(collapsed_mixture2):
     """
@@ -56,6 +57,7 @@ class MOG2(collapsed_mixture2):
             +self.H\
             -0.5*self.N*self.D*np.log(np.pi)
 
+
     def vb_grad_natgrad(self):
         """Gradients of the bound"""
         x_m = self.X[:,:,None]-self.mun[None,:,:]
@@ -70,6 +72,18 @@ class MOG2(collapsed_mixture2):
 
         return grad.flatten(), natgrad.flatten()
 
+    def vb_grad_natgradTest(self):
+        """Gradients of the bound"""
+        x_m = self.X[:,:,None]-self.mun[None,:,:]
+        dS = x_m[:,:,None,:]*x_m[:,None,:,:]
+        SnidS = self.Sns_inv[None,:,:,:]*dS
+        dlndtS_dphi = np.dot(np.ones(self.D), np.dot(np.ones(self.D), SnidS))
+
+        grad_phi =  (-0.5*self.D/self.kNs + 0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0) + self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.) + (self.Hgrad-0.5*dlndtS_dphi*self.vNs)
+        natgrad = grad_phi - np.sum(self.phi*grad_phi, 1)[:,None] # corrects for softmax (over) parameterisation
+        grad = natgrad*self.phi
+        return np.zeros(560)[:, None]- self.Sns_halflogdet-0.5*dlndtS_dphi*self.vNs
+
     def invest(self):
         """Investigating the general behaviour"""
         '''
@@ -79,8 +93,33 @@ class MOG2(collapsed_mixture2):
         print(len(self.phi_hat))
         print(len((self.Sns[0]) * (self.Sns[0])))
         '''
-        print(self.boundEval(self.phi))
-        print(len(self.gradientEval(self.phi)[0]))
+
+        '''
+        print self.phi.shape
+        print self.phi.sum(0).shape
+        t1 = time.time()
+        print
+        print "real"
+        g1 = self.vb_grad_natgradTest()
+        print type(g1)
+        print g1.shape
+        print(g1)
+        t2 = time.time()
+        print
+        print "theano"
+        g2 = self.gradientEval(self.phi)
+        print type(g2)
+        print g2.shape
+        print(g2)
+        t3 = time.time()
+        print(g2)
+        print
+        print(t2 -t1, t3 - t2)
+        print g1 - g2
+        print self.boundEval(self.phi)
+        '''
+
+        #print self.hessainEval1(self.phi, vectors= np.zeros((560, 15))) # ei toimi
         return 0
 
     @function
@@ -96,17 +135,28 @@ class MOG2(collapsed_mixture2):
         mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
         Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
         bound = 0
-        entropy = -np.tensordot(np.log(phi), phi)
-        bound += entropy
-        for k in range(self.K):
-            boundHelp = ((Sks[:, :, k])*(Sks[:, :, k])).sum()
-            bound += gammaln(alphas[k]) - self.D/2.*np.log(kappas[k]) - nus[k]/2. * 1/2.*np.log(boundHelp)
-            bound += 1/2. * np.sum([gammaln((nus[k]+1.-d)/2.) for d in range(1,self.D+1)],0)
+        bound += -np.tensordot(np.log(phi), phi) #entropy H_L
+        bound += gammaln(alphas).sum()
+        bound += -self.D/2. * np.log(kappas).sum()
+        bound += gammaln((nus-np.arange(self.D)[:,None])/2.).sum()
+        boundH = 0
+        #for k in range(self.K):
+        #    boundH += 0.5*np.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
+        #bound -= boundH
         return bound
 
     @gradient
     def gradientEval(self, phi):
         """pyautodiff-evaluation of gradient of ELBO"""
+        '''
+        Working parts:
+
+        gammaln-vnu
+        gammaln-alph : symmetric implementoitu, DP demossa
+        H_L (entropy)
+        D*log(kappas)
+        det : outo virhetta, 10^(-2) luokkaa
+        '''
         phi_hats = phi.sum(0)
         alphas = self.alpha + phi_hats
         kappas = self.k0 + phi_hats
@@ -117,12 +167,14 @@ class MOG2(collapsed_mixture2):
         mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
         Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
         bound = 0
-        entropy = -np.tensordot(np.log(phi), phi)
-        bound += entropy
+        bound += -np.tensordot(np.log(phi), phi) #entropy H_L
+        bound += gammaln(alphas).sum()
+        bound += -self.D/2. * np.log(kappas).sum()
+        bound += gammaln((nus-np.arange(self.D)[:,None])/2.).sum()
+        boundH = 0
         for k in range(self.K):
-            boundHelp = ((Sks[:, :, k])*(Sks[:, :, k])).sum()
-            bound += gammaln(alphas[k]) - self.D/2.*np.log(kappas[k]) - nus[k]/2. * 1/2.*np.log(boundHelp)
-            bound += 1/2. * np.sum([gammaln((nus[k]+1.-d)/2.) for d in range(1,self.D+1)],0)
+            boundH += 0.5*np.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
+        bound -= boundH
         return bound
 
     @hessian_vector
@@ -138,12 +190,14 @@ class MOG2(collapsed_mixture2):
         mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
         Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
         bound = 0
-        entropy = -np.tensordot(np.log(phi), phi)
-        bound += entropy
-        for k in range(self.K):
-            boundHelp = ((Sks[:, :, k])*(Sks[:, :, k])).sum()
-            bound += gammaln(alphas[k]) - self.D/2.*np.log(kappas[k]) - nus[k]/2. * 1/2.*np.log(boundHelp)
-            bound += 1/2. * np.sum([gammaln((nus[k]+1.-d)/2.) for d in range(1,self.D+1)],0)
+        bound += -np.tensordot(np.log(phi), phi) #entropy H_L
+        bound += gammaln(alphas).sum()
+        bound += -self.D/2. * np.log(kappas).sum()
+        bound += gammaln((nus-np.arange(self.D)[:,None])/2.).sum()
+        boundH = 0
+        #for k in range(self.K):
+        #    boundH += 0.5*np.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
+        #bound -= boundH
         return bound
 
     def hessianEval2(self, phi):
