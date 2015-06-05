@@ -40,6 +40,7 @@ class collapsed_mixture2(col_vb2):
         self.phi_ = phi_.reshape(self.N,self.K)
         self.phi, logphi, self.H = softmax_weave(self.phi_)
         self.phi_hat = self.phi.sum(0)
+        self.alphas = self.alpha + self.phi_hat
         self.Hgrad = -logphi
         if self.prior_Z=='DP':
             self.phi_tilde_plus_hat = self.phi_hat[::-1].cumsum()[::-1]

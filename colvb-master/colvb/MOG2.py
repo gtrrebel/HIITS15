@@ -11,8 +11,9 @@ from scipy import stats
 from col_mix2 import collapsed_mixture2
 from ad import adnumber
 from ad.admath import *
-from autodiff import function, gradient
-from autodiff import Function, Gradient
+import theano.tensor as T
+from theano import *
+from autodiff import function, gradient, hessian_vector, Function, Gradient, Symbolic, tag
 
 class MOG2(collapsed_mixture2):
     """
@@ -71,15 +72,84 @@ class MOG2(collapsed_mixture2):
 
     def invest(self):
         """Investigating the general behaviour"""
+        '''
         print(self.phi[0][0])
-        print(self.boundEval())
+        print(len(self.phi))
+        print(len(self.phi[0]))
+        print(len(self.phi_hat))
+        print(len((self.Sns[0]) * (self.Sns[0])))
+        '''
+        print(self.boundEval(self.phi))
+        print(len(self.gradientEval(self.phi)[0]))
         return 0
 
-    @gradient
-    def boundEval(self):
+    @function
+    def boundEval(self, phi):
         """theano-evaluation of ELBO"""
+        phi_hats = phi.sum(0)
+        alphas = self.alpha + phi_hats
+        kappas = self.k0 + phi_hats
+        nus = self.v0 + phi_hats
+        Ybars = np.tensordot(self.X, phi,((0),(0)))
+        Cks = np.tensordot(phi, self.XXT,((0),(0))).T
+        mks = (self.k0*self.m0[:,None] + Ybars)/kappas[None,:]
+        mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
+        Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
+        bound = 0
+        entropy = -np.tensordot(np.log(phi), phi)
+        bound += entropy
+        for k in range(self.K):
+            boundHelp = ((Sks[:, :, k])*(Sks[:, :, k])).sum()
+            bound += gammaln(alphas[k]) - self.D/2.*np.log(kappas[k]) - nus[k]/2. * 1/2.*np.log(boundHelp)
+            bound += 1/2. * np.sum([gammaln((nus[k]+1.-d)/2.) for d in range(1,self.D+1)],0)
+        return bound
+
+    @gradient
+    def gradientEval(self, phi):
+        """pyautodiff-evaluation of gradient of ELBO"""
+        phi_hats = phi.sum(0)
+        alphas = self.alpha + phi_hats
+        kappas = self.k0 + phi_hats
+        nus = self.v0 + phi_hats
+        Ybars = np.tensordot(self.X, phi,((0),(0)))
+        Cks = np.tensordot(phi, self.XXT,((0),(0))).T
+        mks = (self.k0*self.m0[:,None] + Ybars)/kappas[None,:]
+        mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
+        Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
+        bound = 0
+        entropy = -np.tensordot(np.log(phi), phi)
+        bound += entropy
+        for k in range(self.K):
+            boundHelp = ((Sks[:, :, k])*(Sks[:, :, k])).sum()
+            bound += gammaln(alphas[k]) - self.D/2.*np.log(kappas[k]) - nus[k]/2. * 1/2.*np.log(boundHelp)
+            bound += 1/2. * np.sum([gammaln((nus[k]+1.-d)/2.) for d in range(1,self.D+1)],0)
+        return bound
+
+    @hessian_vector
+    def hessainEval1(self, phi):
+        """pyautodiff-evaluation of Hessian of ELBO part 1"""
+        phi_hats = phi.sum(0)
+        alphas = self.alpha + phi_hats
+        kappas = self.k0 + phi_hats
+        nus = self.v0 + phi_hats
+        Ybars = np.tensordot(self.X, phi,((0),(0)))
+        Cks = np.tensordot(phi, self.XXT,((0),(0))).T
+        mks = (self.k0*self.m0[:,None] + Ybars)/kappas[None,:]
+        mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
+        Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
+        bound = 0
+        entropy = -np.tensordot(np.log(phi), phi)
+        bound += entropy
+        for k in range(self.K):
+            boundHelp = ((Sks[:, :, k])*(Sks[:, :, k])).sum()
+            bound += gammaln(alphas[k]) - self.D/2.*np.log(kappas[k]) - nus[k]/2. * 1/2.*np.log(boundHelp)
+            bound += 1/2. * np.sum([gammaln((nus[k]+1.-d)/2.) for d in range(1,self.D+1)],0)
+        return bound
+
+    def hessianEval2(self, phi):
+        """pyautodiff-evaluation of Hessian of ELBO part 1"""
         """TODO"""
-        return None
+        
 
     def predict_components_ln(self, Xnew):
         """The predictive density under each component"""

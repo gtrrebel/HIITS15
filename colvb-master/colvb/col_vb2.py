@@ -28,8 +28,6 @@ class col_vb2(GPy.core.model.Model):
         self.tracks = []
         self.tracktypes = []
 
-        self.eigvals = []
-
         self.hyperparam_interval=50
 
         self.default_method = 'HS'
