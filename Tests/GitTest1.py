@@ -3,7 +3,6 @@ import numpy as np
 import sys
 sys.path.append('/home/othe/Desktop/HIIT/Moduleita/pyautodiff-python2-ast')
 from autodiff import hessian_vector
-from theano import shared
 from theano import function
 import theano
 import theano.tensor as T
@@ -50,16 +49,30 @@ def determinant(v):
 	z = T.vector('z')
 	w = (z**2).reshape((d,d))
 	cost2 = T.nlinalg.det(w)
-	print(cost2)
 	input = [z]
 	H2 = theano.gradient.hessian(cost2, wrt = input)
 	f2 = theano.function(input, H2)
 	return f2(v)[0]
 
-print theano1(a)
-x = T.dvector('x')
-y = x ** 2
-cost = y.sum()
-gy = T.grad(cost, x)
-H, updates = theano.scan(lambda i, gy,x : T.grad(gy[i], x), sequences=T.arange(gy.shape[0]), non_sequences=[gy, x])
-f = function([x], H, updates=updates)
+
+def digam1(v):
+	"""digamma"""
+	z = T.vector('z')
+	w = z.sum()
+	cost = T.psi(w)
+	input = [z]
+	f2 = theano.function(input, cost)
+	return f2(v)
+
+def digam2(v):
+	"""digamma"""
+	z = T.scalar('z')
+	cost = T.psi(z)
+	input = [z]
+	H2 = theano.gradient.jacobian(cost, wrt = input)
+	f2 = theano.function(input, H2)
+	return f2(v)[0].item(0)
+
+
+print digam1(a)
+print digam2(3.14) # vaiheessa

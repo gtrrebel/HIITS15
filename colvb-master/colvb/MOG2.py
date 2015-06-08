@@ -118,33 +118,51 @@ class MOG2(collapsed_mixture2):
         print g1 - g2
         print self.boundEval(self.phi)
         '''
-        print self.boundEval(self.phi)
-        print self.gradientEval(self.phi)
-        print self.hessianEval1(self.phi, vectors= np.zeros((560, 15))) # ei toimi
+        print self.eval(0)
+        print self.eval(1)
+        print self.eval(2).shape
+        #print self.gradientEval(self.phi)
+        #print self.hessianEval1(self.phi, vectors= np.zeros((560, 15))) # ei toimi
         return 0
 
-    @function
-    def boundEval(self, phi):
-        """theano-evaluation of ELBO"""
+    def eval(self, opt):
+        phis = np.copy(self.phi).flatten()
+        
+        x = T.dvector('x')
+        phi = x.reshape((self.N, self.K))
         phi_hats = phi.sum(0)
         alphas = self.alpha + phi_hats
         kappas = self.k0 + phi_hats
         nus = self.v0 + phi_hats
-        Ybars = np.tensordot(self.X, phi,((0),(0)))
-        Cks = np.tensordot(phi, self.XXT,((0),(0))).T
+        Ybars = T.tensordot(self.X, phi,((0),(0)))
+        Cks = T.tensordot(phi, self.XXT,((0),(0))).T
         mks = (self.k0*self.m0[:,None] + Ybars)/kappas[None,:]
         mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
         Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
         bound = 0
-        bound += -np.tensordot(np.log(phi), phi) #entropy H_L
-        bound += gammaln(alphas).sum()
-        bound += -self.D/2. * np.log(kappas).sum()
-        bound += gammaln((nus-np.arange(self.D)[:,None])/2.).sum()
+
+        bound += -T.tensordot(T.log(phi), phi) #entropy H_L
+        bound += -self.D/2. * T.log(kappas).sum()
+        '''
+        bound += T.gammaln(alphas).sum()
+        bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()
+        '''
         boundH = 0
         for k in range(self.K):
-            boundH += 0.5*np.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
-        #bound -= boundH
-        return bound
+            boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
+        bound -= boundH
+
+
+        input = [x]
+        if (opt == 0):
+            f = theano.function(input, bound)
+        elif (opt == 1):
+            grad = theano.gradient.jacobian(bound, wrt=input)[0].reshape((self.N, self.K))
+            f = theano.function(input, grad)
+        elif (opt == 2):
+            hess = theano.gradient.hessian(bound, wrt=input)[0]
+            f = theano.function(input, hess)
+        return f(phis)
 
     @gradient
     def gradientEval(self, phi):
