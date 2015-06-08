@@ -118,8 +118,9 @@ class MOG2(collapsed_mixture2):
         print g1 - g2
         print self.boundEval(self.phi)
         '''
-
-        #print self.hessainEval1(self.phi, vectors= np.zeros((560, 15))) # ei toimi
+        print self.boundEval(self.phi)
+        print self.gradientEval(self.phi)
+        print self.hessianEval1(self.phi, vectors= np.zeros((560, 15))) # ei toimi
         return 0
 
     @function
@@ -140,8 +141,8 @@ class MOG2(collapsed_mixture2):
         bound += -self.D/2. * np.log(kappas).sum()
         bound += gammaln((nus-np.arange(self.D)[:,None])/2.).sum()
         boundH = 0
-        #for k in range(self.K):
-        #    boundH += 0.5*np.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
+        for k in range(self.K):
+            boundH += 0.5*np.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
         #bound -= boundH
         return bound
 
@@ -178,8 +179,10 @@ class MOG2(collapsed_mixture2):
         return bound
 
     @hessian_vector
-    def hessainEval1(self, phi):
+    def hessianEval1(self, phi):
         """pyautodiff-evaluation of Hessian of ELBO part 1"""
+        bound = phi.sum()
+        '''
         phi_hats = phi.sum(0)
         alphas = self.alpha + phi_hats
         kappas = self.k0 + phi_hats
@@ -191,13 +194,15 @@ class MOG2(collapsed_mixture2):
         Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
         bound = 0
         bound += -np.tensordot(np.log(phi), phi) #entropy H_L
+
         bound += gammaln(alphas).sum()
         bound += -self.D/2. * np.log(kappas).sum()
         bound += gammaln((nus-np.arange(self.D)[:,None])/2.).sum()
         boundH = 0
-        #for k in range(self.K):
-        #    boundH += 0.5*np.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
-        #bound -= boundH
+        for k in range(self.K):
+            boundH += 0.5*np.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
+        bound -= boundH
+        '''
         return bound
 
     def hessianEval2(self, phi):
