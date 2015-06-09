@@ -13,22 +13,25 @@ pb.ion()
 np.random.seed(0)
 
 #make some Data which appears in clusters:
-Nclust = 15
-dim = 2
-Nmin = 25
-Nmax = 50
+Nclust = 3# orig = 15
+dim = 2# orig = 2
+Nmin = 2# orig = 25
+Nmax = 4# orig = 50
 Ndata = np.random.randint(Nmin, Nmax, Nclust)
-means = np.random.randn(Nclust, dim)*5
+means = np.random.randn(Nclust, dim)*2 #orig = *5
 aa = [np.random.randn(dim, dim+1) for i in range(Nclust)]
 Sigmas = [np.dot(a, a.T) for a in aa]
 X = np.vstack([np.random.multivariate_normal(mu, cov, (n,)) for mu, cov, n in zip(means, Sigmas, Ndata)])/100
-Nrestarts=3
-Nclust = 15
+Nrestarts= 2# orig = 3
+Nclust = 2# orig = 15
 
 m = MOG2(X, Nclust, prior_Z='DP')
-print(m.invest())
+print m.D, m.N, m.K
+m.makeFunctions()
+print 'done'
 
 #starts = [np.random.randn(m.N*m.K) for i in range(Nrestarts)]
+
 from scipy.cluster import vq
 starts = []
 for i in range(Nrestarts):
@@ -39,7 +42,7 @@ for i in range(Nrestarts):
 for method in ['steepest', 'PR', 'FR', 'HS']:
     for st in starts:
         m.set_vb_param(st)
-        m.optimize(method=method, maxiter=1e1)
+        m.optimize(method=method, maxiter=1e4)
 
 '''
 m.plot_tracks()

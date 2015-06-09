@@ -84,50 +84,7 @@ class MOG2(collapsed_mixture2):
         grad = natgrad*self.phi
         return np.zeros(560)[:, None]- self.Sns_halflogdet-0.5*dlndtS_dphi*self.vNs
 
-    def invest(self):
-        """Investigating the general behaviour"""
-        '''
-        print(self.phi[0][0])
-        print(len(self.phi))
-        print(len(self.phi[0]))
-        print(len(self.phi_hat))
-        print(len((self.Sns[0]) * (self.Sns[0])))
-        '''
-
-        '''
-        print self.phi.shape
-        print self.phi.sum(0).shape
-        t1 = time.time()
-        print
-        print "real"
-        g1 = self.vb_grad_natgradTest()
-        print type(g1)
-        print g1.shape
-        print(g1)
-        t2 = time.time()
-        print
-        print "theano"
-        g2 = self.gradientEval(self.phi)
-        print type(g2)
-        print g2.shape
-        print(g2)
-        t3 = time.time()
-        print(g2)
-        print
-        print(t2 -t1, t3 - t2)
-        print g1 - g2
-        print self.boundEval(self.phi)
-        '''
-        print self.eval(0)
-        print self.eval(1)
-        print self.eval(2).shape
-        #print self.gradientEval(self.phi)
-        #print self.hessianEval1(self.phi, vectors= np.zeros((560, 15))) # ei toimi
-        return 0
-
-    def eval(self, opt):
-        phis = np.copy(self.phi).flatten()
-        
+    def makeFunctions(self):
         x = T.dvector('x')
         phi = x.reshape((self.N, self.K))
         phi_hats = phi.sum(0)
@@ -140,13 +97,10 @@ class MOG2(collapsed_mixture2):
         mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
         Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
         bound = 0
-
         bound += -T.tensordot(T.log(phi), phi) #entropy H_L
         bound += -self.D/2. * T.log(kappas).sum()
-        '''
         bound += T.gammaln(alphas).sum()
         bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()
-        '''
         boundH = 0
         for k in range(self.K):
             boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
@@ -154,79 +108,30 @@ class MOG2(collapsed_mixture2):
 
 
         input = [x]
-        if (opt == 0):
-            f = theano.function(input, bound)
-        elif (opt == 1):
-            grad = theano.gradient.jacobian(bound, wrt=input)[0].reshape((self.N, self.K))
-            f = theano.function(input, grad)
-        elif (opt == 2):
-            hess = theano.gradient.hessian(bound, wrt=input)[0]
-            f = theano.function(input, hess)
-        return f(phis)
+        self.f1 = theano.function(input, bound)
+        grad = theano.gradient.jacobian(bound, wrt=input)[0].reshape((self.N, self.K))
+        self.f2 = theano.function(input, grad)
+        hess = theano.gradient.hessian(bound, wrt=input)[0]
+        self.f3 = theano.function(input, hess)
 
-    @gradient
-    def gradientEval(self, phi):
-        """pyautodiff-evaluation of gradient of ELBO"""
-        '''
-        Working parts:
+    def hessianEigenvalues(self):
+        hessian = self.f3(np.copy(self.phi).flatten())
+        return np.linalg.eig(hessian)[0]
 
-        gammaln-vnu
-        gammaln-alph : symmetric implementoitu, DP demossa
-        H_L (entropy)
-        D*log(kappas)
-        det : outo virhetta, 10^(-2) luokkaa
-        '''
-        phi_hats = phi.sum(0)
-        alphas = self.alpha + phi_hats
-        kappas = self.k0 + phi_hats
-        nus = self.v0 + phi_hats
-        Ybars = np.tensordot(self.X, phi,((0),(0)))
-        Cks = np.tensordot(phi, self.XXT,((0),(0))).T
-        mks = (self.k0*self.m0[:,None] + Ybars)/kappas[None,:]
-        mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
-        Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
-        bound = 0
-        bound += -np.tensordot(np.log(phi), phi) #entropy H_L
-        bound += gammaln(alphas).sum()
-        bound += -self.D/2. * np.log(kappas).sum()
-        bound += gammaln((nus-np.arange(self.D)[:,None])/2.).sum()
-        boundH = 0
-        for k in range(self.K):
-            boundH += 0.5*np.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
-        bound -= boundH
-        return bound
+    def printHessian(self):
+        hessian = self.f3(np.copy(self.phi).flatten())
+        k = 3
+        help = lambda x: '  ' if (str(x)[0] == '0') else '* '
+        for b in hessian:
+            s = ''
+            for a in b:
+                s += help(a)
+            print s
+        print
 
-    @hessian_vector
-    def hessianEval1(self, phi):
-        """pyautodiff-evaluation of Hessian of ELBO part 1"""
-        bound = phi.sum()
-        '''
-        phi_hats = phi.sum(0)
-        alphas = self.alpha + phi_hats
-        kappas = self.k0 + phi_hats
-        nus = self.v0 + phi_hats
-        Ybars = np.tensordot(self.X, phi,((0),(0)))
-        Cks = np.tensordot(phi, self.XXT,((0),(0))).T
-        mks = (self.k0*self.m0[:,None] + Ybars)/kappas[None,:]
-        mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
-        Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
-        bound = 0
-        bound += -np.tensordot(np.log(phi), phi) #entropy H_L
-
-        bound += gammaln(alphas).sum()
-        bound += -self.D/2. * np.log(kappas).sum()
-        bound += gammaln((nus-np.arange(self.D)[:,None])/2.).sum()
-        boundH = 0
-        for k in range(self.K):
-            boundH += 0.5*np.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
-        bound -= boundH
-        '''
-        return bound
-
-    def hessianEval2(self, phi):
-        """pyautodiff-evaluation of Hessian of ELBO part 1"""
-        """TODO"""
-        
+    def indexOfSpectrum(self):
+        eigvals = self.hessianEigenvalues()
+        return sum(1.0 for eigval in eigvals if eigval < 0)/(self.N*self.K)
 
     def predict_components_ln(self, Xnew):
         """The predictive density under each component"""

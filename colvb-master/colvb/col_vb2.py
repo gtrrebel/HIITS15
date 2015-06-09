@@ -227,6 +227,9 @@ class col_vb2(GPy.core.model.Model):
             grad,natgrad = -grad,-natgrad
             squareNorm = np.dot(natgrad,grad) # used to monitor convergence
 
+            #view index
+            #self.printHessian()                                                                <-  Here
+
             #find search direction
             if (method=='steepest') or not iteration:
                 beta = 0
@@ -269,9 +272,10 @@ class col_vb2(GPy.core.model.Model):
 
             # track:
             self.track(np.hstack((bound, beta)))
-
+            '''
             print '\riteration '+str(iteration)+' bound='+str(bound) + ' grad='+str(squareNorm) + ', beta='+str(beta),
             sys.stdout.flush()
+            '''
 
             # converged yet? try the parameters if so
             if np.abs(bound-bound_old)<=ftol:

@@ -66,13 +66,13 @@ def digam1(v):
 
 def digam2(v):
 	"""digamma"""
-	z = T.scalar('z')
-	cost = T.psi(z)
+	z = T.vector('z')
+	cost = T.gammaln(z.sum())
 	input = [z]
 	H2 = theano.gradient.jacobian(cost, wrt = input)
 	f2 = theano.function(input, H2)
-	return f2(v)[0].item(0)
+	return f2(v)[0]
 
 
-print digam1(a)
-print digam2(3.14) # vaiheessa
+#print digam1(a)
+print digam2([1.0, 3.0]) # vaiheessa
