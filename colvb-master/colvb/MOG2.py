@@ -97,15 +97,19 @@ class MOG2(collapsed_mixture2):
         mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
         Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
         bound = 0
+        
         bound += -T.tensordot(T.log(phi), phi) #entropy H_L
+        
         bound += -self.D/2. * T.log(kappas).sum()
+
         bound += T.gammaln(alphas).sum()
         bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()
+        
         boundH = 0
         for k in range(self.K):
             boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
         bound -= boundH
-
+        
 
         input = [x]
         self.f1 = theano.function(input, bound)
@@ -120,7 +124,7 @@ class MOG2(collapsed_mixture2):
 
     def printHessian(self):
         hessian = self.f3(np.copy(self.phi).flatten())
-        k = 3
+        #print hessian
         help = lambda x: '  ' if (str(x)[0] == '0') else '* '
         for b in hessian:
             s = ''

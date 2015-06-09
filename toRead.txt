@@ -1,0 +1,23 @@
+Cholesky + index calculation
+
+	Fast sparse Choleky:
+		http://www.tau.ac.il/~stoledo/Support/chapter-direct.pdf
+
+	Sylvester law of inertia:
+		http://en.wikipedia.org/wiki/Sylvester%27s_law_of_inertia
+
+	Cholesky:
+		http://en.wikipedia.org/wiki/Cholesky_decomposition
+
+	Sturm sequences!:
+		http://www-math.mit.edu/~edelman/homepage/papers/sturm.pdf
+
+Saddle Point:
+	
+	main:
+		http://papers.nips.cc/paper/5486-identifying-and-attacking-the-saddle-point-problem-in-high-dimensional-non-convex-optimization.pdf
+
+Models:
+
+	main:
+		http://papers.nips.cc/paper/4766-fast-variational-inference-in-the-conjugate-exponential-family.pdf
