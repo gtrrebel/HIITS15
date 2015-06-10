@@ -15,6 +15,7 @@ import theano.tensor as T
 from theano import *
 from autodiff import function, gradient, hessian_vector, Function, Gradient, Symbolic, tag
 import time
+import random
 
 class MOG2(collapsed_mixture2):
     """
@@ -82,9 +83,16 @@ class MOG2(collapsed_mixture2):
         grad_phi =  (-0.5*self.D/self.kNs + 0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0) + self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.) + (self.Hgrad-0.5*dlndtS_dphi*self.vNs)
         natgrad = grad_phi - np.sum(self.phi*grad_phi, 1)[:,None] # corrects for softmax (over) parameterisation
         grad = natgrad*self.phi
-        return np.zeros(560)[:, None]- self.Sns_halflogdet-0.5*dlndtS_dphi*self.vNs
+        return   self.Hgrad + np.zeros(self.N)[:, None]
 
     def makeFunctions(self):
+        """Initializes the theano-functions for
+            f1 = regular theano evaluation of the bound
+            f2 = gradient of the bound wrt r_nk:s (phi:s)
+            f3 = hessian of the bound wrt r_nk:s flattened to (N * K) x (N * K) matrix
+        """
+
+        #Gather the bound
         x = T.dvector('x')
         phi = x.reshape((self.N, self.K))
         phi_hats = phi.sum(0)
@@ -97,20 +105,16 @@ class MOG2(collapsed_mixture2):
         mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
         Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
         bound = 0
-        
         bound += -T.tensordot(T.log(phi), phi) #entropy H_L
+        #bound += -self.D/2. * T.log(kappas).sum() #toimii
+        #bound += T.gammaln(alphas).sum()
+        #bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()
+        #boundH = 0
+        #for k in range(self.K):
+        #    boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
+        #bound -= boundH
         
-        bound += -self.D/2. * T.log(kappas).sum()
-
-        bound += T.gammaln(alphas).sum()
-        bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()
-        
-        boundH = 0
-        for k in range(self.K):
-            boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
-        bound -= boundH
-        
-
+        #Make the functions
         input = [x]
         self.f1 = theano.function(input, bound)
         grad = theano.gradient.jacobian(bound, wrt=input)[0].reshape((self.N, self.K))
@@ -118,14 +122,23 @@ class MOG2(collapsed_mixture2):
         hess = theano.gradient.hessian(bound, wrt=input)[0]
         self.f3 = theano.function(input, hess)
 
-    def hessianEigenvalues(self):
-        hessian = self.f3(np.copy(self.phi).flatten())
-        return np.linalg.eig(hessian)[0]
+    def newGradient(self):
+        return self.f1(np.copy(self.phi).flatten())
 
-    def printHessian(self):
+    def printHessian(self, opt = 3):
+        """Print the hessian of the function. 
+                opt > 0 for length of output strings for any number, 
+                opt = 0 for stars (*) for nonzero and spaces otherwise
+                opt < 0 for stars (*) for number of absolute value > -opt
+
+        """
         hessian = self.f3(np.copy(self.phi).flatten())
-        #print hessian
-        help = lambda x: '  ' if (str(x)[0] == '0') else '* '
+        if opt == 0:
+            help = lambda x: '  ' if (str(x)[0] == '0') else '* '
+        elif opt < 0:
+            help = lambda x: '  ' if (abs(x) < -opt) else '* '
+        else:
+            help = lambda x: (str(x) + opt*' ')[:opt] + '   '
         for b in hessian:
             s = ''
             for a in b:
@@ -133,9 +146,32 @@ class MOG2(collapsed_mixture2):
             print s
         print
 
-    def indexOfSpectrum(self):
-        eigvals = self.hessianEigenvalues()
-        return sum(1.0 for eigval in eigvals if eigval < 0)/(self.N*self.K)
+    def fullIndex(self):
+        """Index (alpha) of the spectrum of the Hessian"""
+        return self.gaussIndex(self.f3(np.copy(self.phi).flatten()))
+
+    def randIndex(self, k = None):
+        """Index (alpha) of the spectrum of a randomized minor (of size k) of the Hessian"""
+        if k == None:
+            k = int(sqrt(self.N*self.K)) #default k
+        col = np.array(random.sample(xrange(1, self.N*self.K), k))
+        return self.gaussIndex(self.f3(np.copy(self.phi).flatten()), col)
+
+    def gaussIndex(self, A, col = None):
+        """Determine the index (alpha) of the spectrum of the minor of matrix A
+            minor is specified by colums chosen (col), all by default (rows are chosen symmetrically)
+        """
+            
+        if (col != None):
+            A = A[col[:, np.newaxis], col]
+        n, neg= len(A), 0
+        for i in range(n):
+            if (A[i][i] < 0):
+                neg += 1
+            A[i] /= A[i][i]
+            for j in range(i + 1, n):
+                A[j] -= A[i]*A[j][i]
+        return neg*1./n
 
     def predict_components_ln(self, Xnew):
         """The predictive density under each component"""

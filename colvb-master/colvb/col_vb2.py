@@ -228,7 +228,12 @@ class col_vb2(GPy.core.model.Model):
             squareNorm = np.dot(natgrad,grad) # used to monitor convergence
 
             #view index
-            self.printHessian()  #                                                              <-  Here
+            #self.printHessian()  #                                                              <-  Here
+            #print 'fullIndex: ', self.fullIndex()
+            #print 'randIndex: ', self.randIndex()
+
+            #print "normal:\n", self.vb_grad_natgradTest()
+            print "new:\n", self.newGradient()
 
             #find search direction
             if (method=='steepest') or not iteration:

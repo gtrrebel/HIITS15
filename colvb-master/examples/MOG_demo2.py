@@ -13,17 +13,17 @@ pb.ion()
 np.random.seed(0)
 
 #make some Data which appears in clusters:
-Nclust = 3# orig = 15
+Nclust = 15# orig = 15
 dim = 2# orig = 2
-Nmin = 2# orig = 25
-Nmax = 4# orig = 50
+Nmin = 25# orig = 25
+Nmax = 50# orig = 50
 Ndata = np.random.randint(Nmin, Nmax, Nclust)
 means = np.random.randn(Nclust, dim)*2 #orig = *5
 aa = [np.random.randn(dim, dim+1) for i in range(Nclust)]
 Sigmas = [np.dot(a, a.T) for a in aa]
 X = np.vstack([np.random.multivariate_normal(mu, cov, (n,)) for mu, cov, n in zip(means, Sigmas, Ndata)])/100
-Nrestarts= 2# orig = 3
-Nclust = 2# orig = 15
+Nrestarts= 3# orig = 3
+Nclust = 15# orig = 15
 
 m = MOG2(X, Nclust, prior_Z='DP')
 print m.D, m.N, m.K
