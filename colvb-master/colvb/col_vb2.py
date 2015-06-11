@@ -190,7 +190,7 @@ class col_vb2(GPy.core.model.Model):
         self.set_vb_param(opt)
         print nf, 'iters'
 
-    def optimize(self,method=None, maxiter=500, ftol=1e-6, gtol=1e-6, step_length=1., line_search=False, callback=None):
+    def optimize(self,method=None, maxiter=500, ftol=1e-6, gtol=1e-6, step_length=1., line_search=False, callback=None, opt = None, index = None, tests = None):
         """
         Optimize the model
 
@@ -228,12 +228,16 @@ class col_vb2(GPy.core.model.Model):
             squareNorm = np.dot(natgrad,grad) # used to monitor convergence
 
             #view index
-            #self.printHessian()  #                                                              <-  Here
-            #print 'fullIndex: ', self.fullIndex()
-            #print 'randIndex: ', self.randIndex()
+            if (opt != None):
+                self.printHessian(opt)  #                                                            <-  Here
+            if (index != None):
+                if index == 'full':
+                    print self.fullIndex()
+                elif index == 'rand':
+                    print self.randIndex()
 
-            #print "normal:\n", self.vb_grad_natgradTest()
-            print "new:\n", self.newGradient()
+            if (tests != None):
+                self.tester()
 
             #find search direction
             if (method=='steepest') or not iteration:

@@ -83,7 +83,7 @@ class MOG2(collapsed_mixture2):
         grad_phi =  (-0.5*self.D/self.kNs + 0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0) + self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.) + (self.Hgrad-0.5*dlndtS_dphi*self.vNs)
         natgrad = grad_phi - np.sum(self.phi*grad_phi, 1)[:,None] # corrects for softmax (over) parameterisation
         grad = natgrad*self.phi
-        return   self.Hgrad + np.zeros(self.N)[:, None]
+        return self.Hgrad
 
     def makeFunctions(self):
         """Initializes the theano-functions for
@@ -94,7 +94,9 @@ class MOG2(collapsed_mixture2):
 
         #Gather the bound
         x = T.dvector('x')
-        phi = x.reshape((self.N, self.K))
+        phi_ = x.reshape((self.N, self.K))
+        phi = T.exp(phi_)
+        phi /= phi.sum(1)[:, None]
         phi_hats = phi.sum(0)
         alphas = self.alpha + phi_hats
         kappas = self.k0 + phi_hats
@@ -105,14 +107,14 @@ class MOG2(collapsed_mixture2):
         mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
         Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
         bound = 0
-        bound += -T.tensordot(T.log(phi), phi) #entropy H_L
-        #bound += -self.D/2. * T.log(kappas).sum() #toimii
-        #bound += T.gammaln(alphas).sum()
-        #bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()
-        #boundH = 0
-        #for k in range(self.K):
-        #    boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
-        #bound -= boundH
+        bound += -T.tensordot(T.log(phi + 1e-100), phi) #entropy H_L                                    #Ei ihan
+        bound += -self.D/2. * T.log(kappas).sum()                                                       #toimii
+        bound += T.gammaln(alphas).sum()
+        bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()                                     #toimii
+        boundH = 0
+        for k in range(self.K):
+            boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
+        bound -= boundH
         
         #Make the functions
         input = [x]
@@ -122,8 +124,20 @@ class MOG2(collapsed_mixture2):
         hess = theano.gradient.hessian(bound, wrt=input)[0]
         self.f3 = theano.function(input, hess)
 
+    def newBound(self):
+        return self.f1(np.copy(self.phi_).flatten())
+
     def newGradient(self):
-        return self.f1(np.copy(self.phi).flatten())
+        return self.f2(np.copy(self.phi_).flatten())
+
+    def newHessian(self):
+        return self.f3(np.copy(self.phi_).flatten())
+
+    def tester(self):
+        phi = np.exp(self.phi_)
+        phi /= phi.sum(1)[:, None]
+        print 'newphi:\n', phi
+        print 'oldphi:\n', self.phi
 
     def printHessian(self, opt = 3):
         """Print the hessian of the function. 
@@ -132,7 +146,7 @@ class MOG2(collapsed_mixture2):
                 opt < 0 for stars (*) for number of absolute value > -opt
 
         """
-        hessian = self.f3(np.copy(self.phi).flatten())
+        hessian = self.newHessian()
         if opt == 0:
             help = lambda x: '  ' if (str(x)[0] == '0') else '* '
         elif opt < 0:
@@ -148,14 +162,14 @@ class MOG2(collapsed_mixture2):
 
     def fullIndex(self):
         """Index (alpha) of the spectrum of the Hessian"""
-        return self.gaussIndex(self.f3(np.copy(self.phi).flatten()))
+        return self.gaussIndex(self.newHessian())
 
     def randIndex(self, k = None):
         """Index (alpha) of the spectrum of a randomized minor (of size k) of the Hessian"""
         if k == None:
             k = int(sqrt(self.N*self.K)) #default k
         col = np.array(random.sample(xrange(1, self.N*self.K), k))
-        return self.gaussIndex(self.f3(np.copy(self.phi).flatten()), col)
+        return self.gaussIndex(self.newHessian(), col)
 
     def gaussIndex(self, A, col = None):
         """Determine the index (alpha) of the spectrum of the minor of matrix A
