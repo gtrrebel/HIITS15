@@ -1,11 +1,13 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import time
 
 defaultMatrixSize = 20
-smalleMatrixSize = 10
+smalleMatrixSize = 19
 tests = 500
-alters = 50
+alters = 10
 opt = 0
 
 def index(A, opt = 0):
@@ -125,13 +127,15 @@ def test5():
 	plotPairs(trupairs)
 
 def plotPairs(pairs):
+        plt.figure(1)
+        plt.plot([0,1])
 	plt.plot(*zip(*pairs), marker='o', color='r', ls='')
-	plt.plot([0,1])
 	plt.axis([0,1,0,1])
 	plt.ylabel('test')
 	plt.show()
+	
 
 def prin(a, d = 3):
 	print "%.*f" % (d, a),
 
-test5()
+test4()
