@@ -232,10 +232,10 @@ class col_vb2(GPy.core.model.Model):
                 self.printHessian(opt)  #                                                            <-  Here
             if (index != None):
                 if index == 'full':
-                    print self.fullIndex()
+                    self.index = self.fullIndex()
                 elif index == 'rand':
-                    print self.randIndex()
-
+                    self.index = self.randIndex()
+                print self.index, self.bound()
             if (tests != None):
                 self.tester()
 

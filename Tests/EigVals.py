@@ -127,8 +127,8 @@ def test5():
 	plotPairs(trupairs)
 
 def plotPairs(pairs):
-        plt.figure(1)
-        plt.plot([0,1])
+    plt.figure(1)
+    plt.plot([0,1])
 	plt.plot(*zip(*pairs), marker='o', color='r', ls='')
 	plt.axis([0,1,0,1])
 	plt.ylabel('test')

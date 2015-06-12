@@ -16,6 +16,7 @@ from theano import *
 from autodiff import function, gradient, hessian_vector, Function, Gradient, Symbolic, tag
 import time
 import random
+import matplotlib.pyplot as plt
 
 class MOG2(collapsed_mixture2):
     """
@@ -139,6 +140,9 @@ class MOG2(collapsed_mixture2):
         print 'newphi:\n', phi
         print 'oldphi:\n', self.phi
 
+    def printIndeces(self):
+        raise NotImplementedError
+
     def printHessian(self, opt = 3):
         """Print the hessian of the function. 
                 opt > 0 for length of output strings for any number, 
@@ -171,11 +175,11 @@ class MOG2(collapsed_mixture2):
         col = np.array(random.sample(xrange(1, self.N*self.K), k))
         return self.gaussIndex(self.newHessian(), col)
 
-    def gaussIndex(self, A, col = None):
+    def gaussIndex(self, B, col = None):
         """Determine the index (alpha) of the spectrum of the minor of matrix A
             minor is specified by colums chosen (col), all by default (rows are chosen symmetrically)
         """
-            
+        A = np.copy(B)
         if (col != None):
             A = A[col[:, np.newaxis], col]
         n, neg= len(A), 0
