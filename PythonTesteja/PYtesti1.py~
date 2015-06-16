@@ -1,0 +1,10 @@
+import sys
+a = input()
+
+def f(x):
+    return x + 1
+
+for i in range(a):
+    print(f(i))
+
+    

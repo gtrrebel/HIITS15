@@ -1,0 +1,14 @@
+Metadata-Version: 1.1
+Name: ukko_runner
+Version: 0.1.5
+Summary: Utilities for running stuff on Ukko cluster
+Home-page: http://github.com/ahonkela/
+Author: Antti Honkela
+Author-email: antti.honkela@hiit.fi
+License: BSD
+Description: ukko_runner: Utilities for running stuff on Ukko cluster.
+        
+Platform: UNKNOWN
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
