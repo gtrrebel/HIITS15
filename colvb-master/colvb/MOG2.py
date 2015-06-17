@@ -1,7 +1,11 @@
 # Copyright (c) 2012 James Hensman
 # Licensed under the GPL v3 (see LICENSE.txt)
 import sys
+<<<<<<< HEAD
 sys.path.append('/home/othe/Desktop/HIIT/HIITS15/Moduleita/pyautodiff-python2-ast')
+=======
+sys.path.append('/home/fs/othe/Windows/Desktop/hiit/HIITS15/Moduleita/pyautodiff-python2-ast')
+>>>>>>> 985d70b41aef78e9db33d0e17ec91502d2d1d127
 import numpy as np
 import pylab as pb
 from scipy import optimize, linalg
