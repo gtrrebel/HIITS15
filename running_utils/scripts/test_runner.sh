@@ -4,6 +4,11 @@ INFILE=$1
 RUNFILE=`basename $1`
 MYHOST=`hostname`
 MYDATE=`date +%Y-%m-%d.%H:%M:%S`
-LOG="$HOME/Windows/Desktop/hiit/hiit_test_results/$RUNFILE.$MYHOST.$MYDATE.$$"
+
+if [ ! -d "$HOME/Windows/Desktop/hiit/hiit_test_results/$RUNFILE" ]; then
+	mkdir $HOME/Windows/Desktop/hiit/hiit_test_results/$RUNFILE
+fi
+
+LOG="$HOME/Windows/Desktop/hiit/hiit_test_results/$RUNFILE/$RUNFILE.$MYHOST.$MYDATE.$$"
 python $INFILE >> $LOG 2> /dev/null
 
