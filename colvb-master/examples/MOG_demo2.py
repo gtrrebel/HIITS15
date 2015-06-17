@@ -18,19 +18,22 @@ pb.ion()
 
 np.random.seed(0)
 
+#fetch input
+filename = sys.argv[1]
+inp = open(filename)
+input_list = []
+for line in inp:
+    input_list.append(int(line.split()[0]))
+
+inp.close()
+Nclust, dim, Nmin, Nmax, MeansCoeff, Nrestarts, Nclust = input_list
+
 #make some Data which appears in clusters:
-Nclust = 5# orig = 15
-dim = 2# orig = 2
-Nmin =3# orig = 25
-Nmax = 5# orig = 50
 Ndata = np.random.randint(Nmin, Nmax, Nclust)
-MeansCoeff = 2 #orig = 5
-means = np.random.randn(Nclust, dim)*MeansCoeff #orig = *5
+means = np.random.randn(Nclust, dim)*MeansCoeff
 aa = [np.random.randn(dim, dim+1) for i in range(Nclust)]
 Sigmas = [np.dot(a, a.T) for a in aa]
 X = np.vstack([np.random.multivariate_normal(mu, cov, (n,)) for mu, cov, n in zip(means, Sigmas, Ndata)])/100
-Nrestarts= 3# orig = 3
-Nclust = 5# orig = 15
 
 
 m = MOG2(X, Nclust, prior_Z='DP')
