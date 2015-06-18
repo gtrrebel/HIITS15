@@ -1,6 +1,7 @@
 #!/bin/bash
 
 INFILE=$1
+INPUTFILE=$2
 RUNFILE=`basename $1`
 MYHOST=`hostname`
 MYDATE=`date +%Y-%m-%d.%H:%M:%S`
@@ -10,5 +11,5 @@ if [ ! -d "$HOME/Windows/Desktop/hiit/hiit_test_results/$RUNFILE" ]; then
 fi
 
 LOG="$HOME/Windows/Desktop/hiit/hiit_test_results/$RUNFILE/$RUNFILE.$MYHOST.$MYDATE.$$"
-python $INFILE >> $LOG 2> /dev/null
+python $INFILE $INPUTFILE >> $LOG 2> /dev/null
 
