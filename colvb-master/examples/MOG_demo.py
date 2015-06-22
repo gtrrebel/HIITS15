@@ -11,17 +11,17 @@ pb.ion()
 np.random.seed(0)
 
 #make some Data which appears in clusters:
-Nclust = 15
+Nclust = 10 #15
 dim = 2
-Nmin = 25
-Nmax = 50
+Nmin = 10 #25
+Nmax = 30 #50
 Ndata = np.random.randint(Nmin, Nmax, Nclust)
 means = np.random.randn(Nclust, dim)*5
 aa = [np.random.randn(dim, dim+1) for i in range(Nclust)]
 Sigmas = [np.dot(a, a.T) for a in aa]
 X = np.vstack([np.random.multivariate_normal(mu, cov, (n,)) for mu, cov, n in zip(means, Sigmas, Ndata)])/100
-Nrestarts=3
-Nclust = 15
+Nrestarts=1
+Nclust = 5 #15
 
 m = MOG(X, Nclust, prior_Z='DP')
 
@@ -33,7 +33,7 @@ for i in range(Nrestarts):
     dists = np.square(X[:,:,None]-means.T[None,:,:]).sum(1)
     starts.append(dists)
 
-for method in ['steepest', 'PR', 'FR', 'HS']:
+for method in ['steepest',]:# 'PR', 'FR', 'HS']:
     for st in starts:
         m.set_vb_param(st)
         m.optimize(method=method, maxiter=1e4)
