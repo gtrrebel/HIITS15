@@ -40,6 +40,7 @@ m = MOG2(X, Nclust, prior_Z='DP')
 
 #Print Stats
 print 'MOG_demo2.py'
+print filename
 print 
 print'stats:'
 print 'N: ', m.N, ' K: ' , m.K, ' D: ', m.D
@@ -66,8 +67,9 @@ for i in range(Nrestarts):
     dists = np.square(X[:,:,None]-means.T[None,:,:]).sum(1)
     starts.append(dists)
 
+#mehtods: 'steepest', 'PR', 'FR', 'HS'
 main_time = time.time()
-for method in ['steepest', 'PR', 'FR', 'HS']:
+for method in ['steepest',]:
     for st in starts:
 	print 'Start\nMethod used: ', method
 	start_time = time.time()
