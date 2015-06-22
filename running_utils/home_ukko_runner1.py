@@ -7,9 +7,10 @@ runs = open(runfilename)
 
 runner = ukko_runner.runner()
 runner.MAXLOAD = 1
-runnerpath = '/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/running_utils/scripts/'
-coderunner= 'test_runner.sh'
-codepath = '/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/examples/'
+mainpath = '/cs/fs/home/othe/Windows/hiit'
+runnerpath = mainpath + '/HIITS15/running_utils/scripts/'
+coderunner = 'test_runner.sh'
+codepath = mainpath + '/HIITS15/colvb-master/examples/'
 
 for line in runs:
 	runner.add_jobs([(runnerpath + coderunner + ' ' + codepath + code + ' ' + line, 1)])

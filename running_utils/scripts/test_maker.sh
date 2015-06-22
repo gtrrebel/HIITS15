@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CODE=$1
-CODEPATH="/cs/fs/home/othe/Windows/Desktop/hiit/hiit_test_input"
+CODEPATH="/home/othe/Desktop/HIIT/hiit_test_input"
 FILENAME="${CODEPATH}/${CODE}.runfile"
 touch $FILENAME
 FILESTOLOOP="${CODEPATH}/${CODE}/in/*"
