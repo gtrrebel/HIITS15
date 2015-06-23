@@ -4,8 +4,8 @@
 import numpy as np
 import pylab as pb
 import sys
-sys.path.append('../colvb')
-from LDAtes import LDAtest
+sys.path.append('/home/othe/Desktop/HIIT/HIITS15/colvb-master/colvb')
+from LDA3 import LDA3
 
 #generate some documents
 WORDSIZE=3 # words are square matrices with a single nonzero entry
@@ -65,13 +65,14 @@ for d,dv in enumerate(docs_visual):
 pb.suptitle('the "documents"')
 '''
 
-m = LDAtest(docs,vocab,N_TOPICS)
+m = LDA3(docs,vocab,N_TOPICS)
 
 
 x = m.get_vb_param().copy()
 m.optimize(method='steepest',maxiter=5)
 m.set_vb_param(x)
 m.optimize(method='FR',maxiter=5)
+m.makeFunctions()
 
 
 '''Investigation of the bound

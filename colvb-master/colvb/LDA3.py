@@ -10,16 +10,15 @@ from scipy.special import gammaln, digamma
 from scipy import sparse
 from col_vb2 import col_vb2
 from weave_fns import LDA_mult
-from ad import adnumber
-from ad.admath import *
-from autodiff import function, gradient
-from autodiff import Function, Gradient
+import theano
+import theano.typed_list
+import theano.tensor as T
 
 def softmax(x):
     ex = np.exp(x-x.max(1)[:,None])
     return ex/ex.sum(1)[:,None]
 
-class LDAtest(col_vb2):
+class LDA3(col_vb2):
     """Collapsed Latent Dirichlet Allocation"""
 
     def __init__(self, documents,vocabulary, K,alpha_0=1.,beta_0=1.):
@@ -107,17 +106,40 @@ class LDAtest(col_vb2):
         grad = natgrad*np.hstack(map(np.ravel,self.phi))
         return grad,natgrad
 
+    def makeFunctions(self):
+        print type(np.array(self.word_mats[0].todense()))
+        x = T.dvector('x')
+        phi = theano.shared(np.zeros((self.D, 20, self.K)))
+        for Ndi,(start,stop), i in zip(self.Nd, self.document_index, xrange(self.D)):
+            help = x[start:stop].reshape((Ndi,self.K))
+            help = T.exp(help-help.max(1)[:,None])
+            help = help/help.sum(1)[:,None]
+            phi = T.set_subtensor(phi[i,:Ndi,:self.K], help)
+        print phi.type
+        alpha_p = theano.shared(np.zeros((self.D, self.K)))
+        for Ndi, i in zip(self.Nd, xrange(self.D)):
+            alpha_p = T.set_subtensor(alpha_p[i,:self.K], phi[i, : Ndi, :].sum(0))
+        beta_p = theano.shared(np.zeros((self.K, self.V)))
+        for Ndi, i in zip(self.Nd, xrange(self.D)):
+            beta_p += T.transpose(phi[i]).dot(np.array(self.word_mats[i].todense()))
+
+        bound = 0
+        bound += -T.gammaln(T.sum(alpha_p,1)).sum() - T.gammaln(alpha_p).sum()
+        bound += -T.gammaln(T.sum(beta_p,1)).sum() - T.gammaln(beta_p).sum()
+        bound += (phi.flatten()*T.log(phi.flatten()+1e-100)).sum()
+        input = [x]
+        self.f1 = theano.function(input, bound)
+        '''
+        grad = theano.gradient.jacobian(bound, wrt=input)[0]
+        self.f2 = theano.function(input, grad)
+        hess = theano.gradient.hessian(bound, wrt=input)[0]
+        self.f3 = theano.function(input, hess)
+        '''
+
     def invest(self):
         """Investigating the general behaviour"""
-        print(len(self.phi[0]))
-        print(self.boundEval())
         return 0
 
-    @gradient
-    def boundEval(self):
-        """theano-evaluation of ELBO"""
-        """TODO"""
-        return None
 
     def print_topics(self,wordlim=10):
         vocab_indexes = [np.argsort(b)[::-1] for b in self.beta_p]
