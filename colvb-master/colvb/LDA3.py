@@ -11,8 +11,8 @@ from scipy import sparse
 from col_vb2 import col_vb2
 from weave_fns import LDA_mult
 import theano
-import theano.typed_list
 import theano.tensor as T
+import itertools
 
 def softmax(x):
     ex = np.exp(x-x.max(1)[:,None])
@@ -107,34 +107,46 @@ class LDA3(col_vb2):
         return grad,natgrad
 
     def makeFunctions(self):
-        print type(np.array(self.word_mats[0].todense()))
-        x = T.dvector('x')
-        phi = theano.shared(np.zeros((self.D, 20, self.K)))
-        for Ndi,(start,stop), i in zip(self.Nd, self.document_index, xrange(self.D)):
-            help = x[start:stop].reshape((Ndi,self.K))
-            help = T.exp(help-help.max(1)[:,None])
-            help = help/help.sum(1)[:,None]
-            phi = T.set_subtensor(phi[i,:Ndi,:self.K], help)
-        print phi.type
-        alpha_p = theano.shared(np.zeros((self.D, self.K)))
-        for Ndi, i in zip(self.Nd, xrange(self.D)):
-            alpha_p = T.set_subtensor(alpha_p[i,:self.K], phi[i, : Ndi, :].sum(0))
-        beta_p = theano.shared(np.zeros((self.K, self.V)))
-        for Ndi, i in zip(self.Nd, xrange(self.D)):
-            beta_p += T.transpose(phi[i]).dot(np.array(self.word_mats[i].todense()))
+        #theanize words
+        words = [np.array(word.todense()) for word in self.word_mats]
+        words = np.array([np.concatenate((word, np.zeros((20 - word.shape[0],self.V))), axis=0) for word in words])
+        words = theano.shared(words)
 
+        x = T.dvector('x')
+
+        #make phis
+        def phis(Ndi, indeces):
+            sub = x[indeces[0] : indeces[1]].reshape((Ndi,self.K))
+            sub = T.exp(sub-sub.max(1)[:,None])
+            sub = sub/sub.sum(1)[:,None]
+            return T.set_subtensor(T.zeros((20,self.K))[:Ndi,:self.K], sub)
+        phi, updates = theano.scan(fn=phis, sequences=[theano.shared(np.array(self.Nd)), theano.shared(self.document_index)])
+        
+        #make alphas
+        alpha_p, updates = theano.scan(fn=lambda phirow: self.alpha_0+phirow.sum(0), sequences=[phi])
+        
+        #make betas
+        beta_p, updates = theano.scan(fn=lambda phirow, word: T.transpose(phirow).dot(word), sequences=[phi, words])
+        
+        #gather bound
         bound = 0
         bound += -T.gammaln(T.sum(alpha_p,1)).sum() - T.gammaln(alpha_p).sum()
         bound += -T.gammaln(T.sum(beta_p,1)).sum() - T.gammaln(beta_p).sum()
         bound += (phi.flatten()*T.log(phi.flatten()+1e-100)).sum()
-        input = [x]
-        self.f1 = theano.function(input, bound)
-        '''
-        grad = theano.gradient.jacobian(bound, wrt=input)[0]
-        self.f2 = theano.function(input, grad)
-        hess = theano.gradient.hessian(bound, wrt=input)[0]
-        self.f3 = theano.function(input, hess)
-        '''
+        self.f1 = theano.function([x], bound)
+        grad = theano.gradient.jacobian(bound, wrt=[x])[0]
+        self.f2 = theano.function([x], grad)
+        hess = theano.gradient.hessian(bound, wrt=[x])[0]
+        self.f3 = theano.function([x], hess)
+
+    def newBound(self):
+        return self.f1(np.vstack(self.phi_).flatten())
+
+    def newGradient(self):
+        return self.f2(np.vstack(self.phi_).flatten())
+
+    def newHessian(self):
+        return self.f3(np.vstack(self.phi_).flatten())
 
     def invest(self):
         """Investigating the general behaviour"""

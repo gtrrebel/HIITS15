@@ -9,7 +9,7 @@ from LDA3 import LDA3
 
 #generate some documents
 WORDSIZE=3 # words are square matrices with a single nonzero entry
-N_DOCS = 600
+N_DOCS = 6
 DOCUMENT_LENGTHS = [np.random.randint(15,20) for i in range(N_DOCS)]
 N_TOPICS = WORDSIZE*2 # topics are horizontal or vertical bars
 
@@ -69,10 +69,11 @@ m = LDA3(docs,vocab,N_TOPICS)
 
 
 x = m.get_vb_param().copy()
+m.makeFunctions()
 m.optimize(method='steepest',maxiter=5)
 m.set_vb_param(x)
 m.optimize(method='FR',maxiter=5)
-m.makeFunctions()
+print m.newHessian()
 
 
 '''Investigation of the bound
