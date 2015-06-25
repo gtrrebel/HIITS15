@@ -42,6 +42,7 @@ class LDA3(col_vb2):
         self.D = len(documents)
         self.Nd = map(np.size,documents)
         self.V = vocabulary.size
+        self.N = self.Nd[0]
 
         self.K = K
 
@@ -106,14 +107,35 @@ class LDA3(col_vb2):
         grad = natgrad*np.hstack(map(np.ravel,self.phi))
         return grad,natgrad
 
+    def testGrad(self):
+        """The gradient of the bound with respect to $r_{dnk}$"""
+        #first compute the gradient wrt r
+        alpha_part1 = [digamma(alpha.sum()) for alpha in self.alpha_p]
+        alpha_part2 = [digamma(alpha) for alpha in self.alpha_p]
+        beta_part1 =  digamma(self.beta_p.sum(1))
+        digamma_beta = digamma(self.beta_p)
+        #beta_part2 = [x.dot(digamma_beta.T) for x in self.word_mats] -ap1+ap2-beta_part1+ bp2-ep
+        beta_part2 = [LDA_mult(x,digamma_beta.T) for x in self.word_mats]
+        entropy_part = [log_phi+1. for log_phi in self.log_phi]
+        grad_phi = np.array([-ap1+ap2-beta_part1+ bp2-ep for ap1,ap2,bp2,ep in zip(alpha_part1,alpha_part2,beta_part2,entropy_part)])
+        natgrad = [grad_phi_d - np.sum(phi*grad_phi_d,1)[:,None] for grad_phi_d,phi in zip(grad_phi,self.phi)]
+        natgrad = np.hstack(map(np.ravel,natgrad))
+        grad = natgrad*np.hstack(map(np.ravel,self.phi))
+        return grad
+
+    '''
     def makeFunctions(self):
+
+
+        # Segfault on Hessian, fixes possible?
+
+
         #theanize words
         words = [np.array(word.todense()) for word in self.word_mats]
         words = np.array([np.concatenate((word, np.zeros((20 - word.shape[0],self.V))), axis=0) for word in words])
         words = theano.shared(words)
 
         x = T.dvector('x')
-
         #make phis
         def phis(Ndi, indeces):
             sub = x[indeces[0] : indeces[1]].reshape((Ndi,self.K))
@@ -133,6 +155,37 @@ class LDA3(col_vb2):
         bound += -T.gammaln(T.sum(alpha_p,1)).sum() - T.gammaln(alpha_p).sum()
         bound += -T.gammaln(T.sum(beta_p,1)).sum() - T.gammaln(beta_p).sum()
         bound += (phi.flatten()*T.log(phi.flatten()+1e-100)).sum()
+        
+        bound = x.sum()
+        self.f1 = theano.function([x], bound)
+        grad = theano.gradient.jacobian(bound, wrt=[x])[0]
+        self.f2 = theano.function([x], grad)
+        hess = theano.gradient.hessian(bound, wrt=[x])[0]
+        self.f3 = theano.function([x], hess)
+    '''
+
+    def makeFunctions(self):
+        
+        #theanize words
+        words = theano.shared(np.array([np.array(word.todense()) for word in self.word_mats]))
+
+        x = T.dvector('x')
+
+        #make phis
+        phi_ = x.reshape((self.D, self.N, self.K))
+        phi = T.exp(phi_-phi_.max(2)[:,:,None])
+        phi = phi/phi.sum(2)[:,:, None]
+        
+        alpha_p = self.alpha_0 + phi.sum(1)
+        beta_p = self.beta_0 + T.tensordot(phi,words, axes=[(1,0), (1,0)])
+        #gather bound
+        bound = 0
+        bound += -T.gammaln(T.sum(alpha_p,1)).sum() + T.gammaln(alpha_p).sum()
+        bound += -T.gammaln(T.sum(beta_p,1)).sum() + T.gammaln(beta_p).sum()
+        bound += -(phi.flatten()*T.log(phi.flatten()+1e-100)).sum()
+        
+        #self.f0 = theano.function([x], phi[3][3][3])
+
         self.f1 = theano.function([x], bound)
         grad = theano.gradient.jacobian(bound, wrt=[x])[0]
         self.f2 = theano.function([x], grad)
@@ -147,6 +200,70 @@ class LDA3(col_vb2):
 
     def newHessian(self):
         return self.f3(np.vstack(self.phi_).flatten())
+
+    def tester(self):
+        g1 = self.testGrad()
+        g2 = self.newGradient()
+        print 'eka'
+        print g1
+        print 'toka'
+        print g2
+        print '\n'
+
+    def fullIndex(self):
+        """Index (alpha) of the spectrum of the Hessian"""
+        return self.bruteIndex(self.newHessian())
+
+    def randIndex(self, k = None):
+        """Index (alpha) of the spectrum of a randomized minor (of size k) of the Hessian"""
+        if k == None:
+            k = int(sqrt(self.N*self.K)) #default k
+        col = np.array(random.sample(xrange(1, self.N*self.K), k))
+        return self.gaussIndex(self.newHessian(), col)
+
+    def bruteIndex(self, A):
+        eigvals = np.linalg.eig(A)[0]
+        #return sum(1 for eigval in eigvals if eigval < 0)*1./len(A)
+        return eigvals.min(), eigvals.max()
+
+
+    def gaussIndex(self, B, col = None):
+        """Determine the index (alpha) of the spectrum of the minor of matrix A
+            minor is specified by colums chosen (col), all by default (rows are chosen symmetrically)
+        """
+        A = np.copy(B)
+        if (col != None):
+            A = A[col[:, np.newaxis], col]
+        n, neg= len(A), 0
+        for i in range(n):
+            if (A[i][i] < 0):
+                neg += 1
+            A[i] /= A[i][i]
+            for j in range(i + 1, n):
+                A[j] -= A[i]*A[j][i]
+        return neg*1./n
+
+    def printHessian(self, opt = 3):
+        r = 5
+        """Print the hessian of the function. 
+                opt > 0 for length of output strings for any number, 
+                opt = 0 for stars (*) for nonzero and spaces otherwise
+                opt < 0 for stars (*) for number of absolute value > -opt
+
+        """
+        hessian = self.newHessian()
+        if opt == 0:
+            help = lambda x: '  ' if (str(x)[0] == '0') else '* '
+        elif opt < 0:
+            help = lambda x: '  ' if (abs(x) < -opt) else '* '
+        else:
+            help = lambda x: (str(x) + opt*' ')[:opt] + '   '
+        for b in hessian[:r]:
+            s = ''
+            for a in b[:r]:
+                s += help(a)
+            print s
+        print
 
     def invest(self):
         """Investigating the general behaviour"""
