@@ -70,7 +70,7 @@ m = LDA3(docs,vocab,N_TOPICS)
 
 x = m.get_vb_param().copy()
 m.makeFunctions()
-m.optimize(method='FR', maxiter=1e4, opt= 5, index='full', tests = None)
+m.optimize(method='FR', maxiter=1e4, opt= None, index='full', tests = None)
 #m.set_vb_param(x)
 #m.optimize(method='FR',maxiter=5)
 

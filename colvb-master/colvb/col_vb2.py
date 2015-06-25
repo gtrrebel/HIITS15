@@ -6,6 +6,8 @@ import pylab as pb
 import GPy
 import time
 import sys #for flushing
+from signlab import signlab
+from scipy import linalg
 
 class col_vb2(GPy.core.model.Model):
     """
@@ -27,6 +29,8 @@ class col_vb2(GPy.core.model.Model):
         #stuff for monitoring the different methods
         self.tracks = []
         self.tracktypes = []
+        self.signs = []
+        self.lab = signlab()
 
         self.hyperparam_interval=50
 
@@ -226,16 +230,20 @@ class col_vb2(GPy.core.model.Model):
             grad,natgrad = self.vb_grad_natgrad()
             grad,natgrad = -grad,-natgrad
             squareNorm = np.dot(natgrad,grad) # used to monitor convergence
+            hessian = self.newHessian()
 
             #view index
             if (opt != None):
-                self.printHessian(opt)  #                                                            <-  Here
+                self.lab.printHessian(hessian, opt)  #                                                            <-  Here
             if (index != None):
                 if index == 'full':
-                    self.index = self.fullIndex()
+                    #print self.lab.index(hessian)
+                    self.index = self.lab.index(hessian, 0)
                 elif index == 'rand':
-                    self.index = self.randIndex()
-                print self.index, self.bound()
+                    self.index = self.lab.index(hessian, 0, 0)
+                self.signs.append((self.index, self.bound))
+                print '\r', self.index, self.bound(),
+                sys.stdout.flush()
             if (tests != None):
                 self.tester()
 
@@ -314,6 +322,15 @@ class col_vb2(GPy.core.model.Model):
 
         # track:
         self.closetrack()
+
+    def newBound(self):
+        return self.f1(self.get_vb_param().copy())
+
+    def newGradient(self):
+        return self.f2(self.get_vb_param().copy())
+
+    def newHessian(self):
+        return self.f3(self.get_vb_param().copy())
 
     def optimize_parameters(self):
         """ optimises the model parameters (non variational parameters)

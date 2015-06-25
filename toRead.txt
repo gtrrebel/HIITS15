@@ -11,6 +11,15 @@ Cholesky + index calculation
 
 	Sturm sequences!:
 		http://www-math.mit.edu/~edelman/homepage/papers/sturm.pdf
+	
+	Stable inertia:
+		http://www.ams.org/journals/mcom/1977-31-137/S0025-5718-1977-0428694-0/S0025-5718-1977-0428694-0.pdf	
+	
+	Inertia calculations:
+		http://www.idosi.org/wasj/wasj13(7)/29.pdf
+
+	Inertia from sign patterns:
+		http://download.springer.com/static/pdf/554/art%253A10.1007%252Fs10107-006-0056-6.pdf?originUrl=http%3A%2F%2Flink.springer.com%2Farticle%2F10.1007%2Fs10107-006-0056-6&token2=exp=1435224368~acl=%2Fstatic%2Fpdf%2F554%2Fart%25253A10.1007%25252Fs10107-006-0056-6.pdf%3ForiginUrl%3Dhttp%253A%252F%252Flink.springer.com%252Farticle%252F10.1007%252Fs10107-006-0056-6*~hmac=d670e88058770b29e783f09ad9112d50b30c621aa5d17a7409c01de1b90cfe33
 
 Saddle Point:
 	
@@ -21,3 +30,4 @@ Models:
 
 	main:
 		http://papers.nips.cc/paper/4766-fast-variational-inference-in-the-conjugate-exponential-family.pdf
+

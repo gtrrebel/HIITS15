@@ -9,6 +9,7 @@ from scipy import optimize, linalg
 from utilities import softmax, multiple_pdinv, lngammad, ln_dirichlet_C
 from scipy.special import gammaln, digamma
 from scipy import stats
+from scipy import linalg
 from col_mix2 import collapsed_mixture2
 from ad import adnumber
 from ad.admath import *
@@ -126,71 +127,12 @@ class MOG2(collapsed_mixture2):
         hess = theano.gradient.hessian(bound, wrt=input)[0]
         self.f3 = theano.function(input, hess)
 
-    def newBound(self):
-        return self.f1(np.copy(self.phi_).flatten())
-
-    def newGradient(self):
-        return self.f2(np.copy(self.phi_).flatten())
-
-    def newHessian(self):
-        return self.f3(np.copy(self.phi_).flatten())
-
     def tester(self):
         phi = np.exp(self.phi_)
         phi /= phi.sum(1)[:, None]
         print 'newphi:\n', phi
         print 'oldphi:\n', self.phi
 
-    def printIndeces(self):
-        raise NotImplementedError
-
-    def printHessian(self, opt = 3):
-        """Print the hessian of the function. 
-                opt > 0 for length of output strings for any number, 
-                opt = 0 for stars (*) for nonzero and spaces otherwise
-                opt < 0 for stars (*) for number of absolute value > -opt
-
-        """
-        hessian = self.newHessian()
-        if opt == 0:
-            help = lambda x: '  ' if (str(x)[0] == '0') else '* '
-        elif opt < 0:
-            help = lambda x: '  ' if (abs(x) < -opt) else '* '
-        else:
-            help = lambda x: (str(x) + opt*' ')[:opt] + '   '
-        for b in hessian:
-            s = ''
-            for a in b:
-                s += help(a)
-            print s
-        print
-
-    def fullIndex(self):
-        """Index (alpha) of the spectrum of the Hessian"""
-        return self.gaussIndex(self.newHessian())
-
-    def randIndex(self, k = None):
-        """Index (alpha) of the spectrum of a randomized minor (of size k) of the Hessian"""
-        if k == None:
-            k = int(sqrt(self.N*self.K)) #default k
-        col = np.array(random.sample(xrange(1, self.N*self.K), k))
-        return self.gaussIndex(self.newHessian(), col)
-
-    def gaussIndex(self, B, col = None):
-        """Determine the index (alpha) of the spectrum of the minor of matrix A
-            minor is specified by colums chosen (col), all by default (rows are chosen symmetrically)
-        """
-        A = np.copy(B)
-        if (col != None):
-            A = A[col[:, np.newaxis], col]
-        n, neg= len(A), 0
-        for i in range(n):
-            if (A[i][i] < 0):
-                neg += 1
-            A[i] /= A[i][i]
-            for j in range(i + 1, n):
-                A[j] -= A[i]*A[j][i]
-        return neg*1./n
 
     def predict_components_ln(self, Xnew):
         """The predictive density under each component"""

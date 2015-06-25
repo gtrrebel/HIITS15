@@ -9,6 +9,7 @@ import sys
 sys.path.append('~/Windows/Desktop/hiit/HIITS15/colvb-master/colvb')
 sys.path.append('~/Windows/Desktop/hiit/HIITS15/colvb-master')
 sys.path.append('/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/colvb')
+sys.path.append('/home/othe/Desktop/HIIT/HIITS15/colvb-master/colvb')
 #sys.path.append('..')
 #sys.path.append('../colvb')
 

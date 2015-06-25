@@ -192,15 +192,6 @@ class LDA3(col_vb2):
         hess = theano.gradient.hessian(bound, wrt=[x])[0]
         self.f3 = theano.function([x], hess)
 
-    def newBound(self):
-        return self.f1(np.vstack(self.phi_).flatten())
-
-    def newGradient(self):
-        return self.f2(np.vstack(self.phi_).flatten())
-
-    def newHessian(self):
-        return self.f3(np.vstack(self.phi_).flatten())
-
     def tester(self):
         g1 = self.testGrad()
         g2 = self.newGradient()
@@ -210,76 +201,8 @@ class LDA3(col_vb2):
         print g2
         print '\n'
 
-    def fullIndex(self):
-        """Index (alpha) of the spectrum of the Hessian"""
-        return self.bruteIndex(self.newHessian())
-
-    def randIndex(self, k = None):
-        """Index (alpha) of the spectrum of a randomized minor (of size k) of the Hessian"""
-        if k == None:
-            k = int(sqrt(self.N*self.K)) #default k
-        col = np.array(random.sample(xrange(1, self.N*self.K), k))
-        return self.gaussIndex(self.newHessian(), col)
-
-    def bruteIndex(self, A):
-        eigvals = np.linalg.eig(A)[0]
-        #return sum(1 for eigval in eigvals if eigval < 0)*1./len(A)
-        return eigvals.min(), eigvals.max()
-
-
-    def gaussIndex(self, B, col = None):
-        """Determine the index (alpha) of the spectrum of the minor of matrix A
-            minor is specified by colums chosen (col), all by default (rows are chosen symmetrically)
-        """
-        A = np.copy(B)
-        if (col != None):
-            A = A[col[:, np.newaxis], col]
-        n, neg= len(A), 0
-        for i in range(n):
-            if (A[i][i] < 0):
-                neg += 1
-            A[i] /= A[i][i]
-            for j in range(i + 1, n):
-                A[j] -= A[i]*A[j][i]
-        return neg*1./n
-
-    def printHessian(self, opt = 3):
-        r = 5
-        """Print the hessian of the function. 
-                opt > 0 for length of output strings for any number, 
-                opt = 0 for stars (*) for nonzero and spaces otherwise
-                opt < 0 for stars (*) for number of absolute value > -opt
-
-        """
-        hessian = self.newHessian()
-        if opt == 0:
-            help = lambda x: '  ' if (str(x)[0] == '0') else '* '
-        elif opt < 0:
-            help = lambda x: '  ' if (abs(x) < -opt) else '* '
-        else:
-            help = lambda x: (str(x) + opt*' ')[:opt] + '   '
-        for b in hessian[:r]:
-            s = ''
-            for a in b[:r]:
-                s += help(a)
-            print s
-        print
-
-    def invest(self):
-        """Investigating the general behaviour"""
-        return 0
-
-
     def print_topics(self,wordlim=10):
         vocab_indexes = [np.argsort(b)[::-1] for b in self.beta_p]
         for i in np.argsort(sum(self.alpha_p))[::-1]:
             ii = vocab_indexes[i]
             print ' '.join(self.vocabulary[ii][:wordlim])
-
-
-
-
-
-
-
-
