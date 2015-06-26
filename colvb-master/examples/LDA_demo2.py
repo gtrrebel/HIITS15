@@ -6,10 +6,11 @@ import pylab as pb
 import sys
 sys.path.append('/home/othe/Desktop/HIIT/HIITS15/colvb-master/colvb')
 from LDA3 import LDA3
+from vis1 import vis1
 
 #generate some documents
 WORDSIZE= 3 # words are square matrices with a single nonzero entry
-N_DOCS = 30
+N_DOCS = 10
 DOCUMENT_LENGTHS = [np.random.randint(5,6) for i in range(N_DOCS)]
 N_TOPICS = WORDSIZE*2 # topics are horizontal or vertical bars
 
@@ -66,11 +67,21 @@ pb.suptitle('the "documents"')
 '''
 
 m = LDA3(docs,vocab,N_TOPICS)
-
-
 x = m.get_vb_param().copy()
+v = vis1()
 m.makeFunctions()
-m.optimize(method='FR', maxiter=1e4, opt= None, index='full', tests = None)
+
+x = 'iter'
+y = 'index'
+method='steepest'
+plotstart = 3
+
+for i in range(5):
+    m.optimize(method=method, maxiter=1e4, opt= None, index='full', tests = None)
+    v.plot(x, y, m.info[plotstart:])
+    m.new_param()
+#v.distvsind(m.signs)
+
 #m.set_vb_param(x)
 #m.optimize(method='FR',maxiter=5)
 

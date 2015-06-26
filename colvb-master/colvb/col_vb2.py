@@ -29,7 +29,7 @@ class col_vb2(GPy.core.model.Model):
         #stuff for monitoring the different methods
         self.tracks = []
         self.tracktypes = []
-        self.signs = []
+        self.info = []
         self.lab = signlab()
 
         self.hyperparam_interval=50
@@ -238,15 +238,13 @@ class col_vb2(GPy.core.model.Model):
             if (index != None):
                 if index == 'full':
                     #print self.lab.index(hessian)
-                    self.index = self.lab.index(hessian, 0)
+                    self.index = self.lab.greaterthann(hessian)
                 elif index == 'rand':
                     self.index = self.lab.index(hessian, 0, 0)
-                self.signs.append((self.index, self.bound))
-                print '\r', self.index, self.bound(),
-                sys.stdout.flush()
-            if (tests != None):
-                self.tester()
-
+                self.info.append((self.index, self.lab.largest(hessian), self.lab.smallest(hessian), self.bound()))
+                #print '\r', self.index, self.bound(),
+                #sys.stdout.flush()
+                
             #find search direction
             if (method=='steepest') or not iteration:
                 beta = 0

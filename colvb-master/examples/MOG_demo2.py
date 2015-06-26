@@ -14,6 +14,7 @@ sys.path.append('/home/othe/Desktop/HIIT/HIITS15/colvb-master/colvb')
 #sys.path.append('../colvb')
 
 from MOG2 import MOG2
+from vis1 import vis1
 
 pb.ion()
 
@@ -55,6 +56,7 @@ print
 #Make functions
 start_time = time.time()
 m.makeFunctions()
+v = vis1()
 print 'Theano-function compilation time: ', '%s seconds' % (time.time() - start_time)
 print
 
@@ -68,14 +70,17 @@ for i in range(Nrestarts):
     dists = np.square(X[:,:,None]-means.T[None,:,:]).sum(1)
     starts.append(dists)
 
+test = 'distvsind'
+
 #mehtods: 'steepest', 'PR', 'FR', 'HS'
 main_time = time.time()
 for method in ['steepest',]:
     for st in starts:
-	print 'Start\nMethod used: ', method
-	start_time = time.time()
+        print 'Start\nMethod used: ', method
+        start_time = time.time()
         m.set_vb_param(st)
         m.optimize(method=method, maxiter=1e4, opt=None, index='full', tests = None)
+        getattr(v, test)(m.info[1:])
         print 'End\nMethod used: ', method, '\nRuntime: ', '%s seconds' % (time.time() - start_time) 
 
 print

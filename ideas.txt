@@ -1,0 +1,14 @@
+IDEOITA:
+
+Hessianin tutkiminen
+	- Artikkeleita toRead.txt tiedostossa
+	- Indeksi:
+		-Gaussian: buginen?
+		-scipyn oma: toiminee?
+	- Suurin ja pienin ominaisarvo:
+		-samalla tavalla, parempia ideoita?
+	- Muita algoritmeja, tuntuvat olevan O(n^3), approksimointiin ei löytynyt mitään hyvää
+
+Eri maksimit
+	-lähdetään monesta eri alkuarvosta, mihin päädytään?
+

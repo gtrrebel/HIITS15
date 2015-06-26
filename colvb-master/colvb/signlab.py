@@ -12,6 +12,20 @@ class signlab():
 		elif opt == 1:
 			return self.gaussIndex(A)
 
+	def largest(self, A):
+		return linalg.eigh(A, eigvals_only=True, eigvals=(len(A) - 1, len(A) - 1))[0]
+
+	def smallest(self, A):
+		return linalg.eigh(A, eigvals_only=True, eigvals=(1, 1))[0]
+
+	def greaterthan(self, A, eps=1e-15):
+		eigvals = linalg.eigh(A, eigvals_only=True)
+		return sum(1 for eigval in eigvals if eigval > eps)*1./len(A)
+
+	def greaterthann(self, A, eps=1e-15):
+		eigvals = linalg.eigh(A, eigvals_only=True)
+		return sum(1 for eigval in eigvals if eigval > eps)
+
 	def col_minor(self, A, col):
 		return A[col[:, np.newaxis], col]
 

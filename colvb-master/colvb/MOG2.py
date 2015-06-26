@@ -76,18 +76,6 @@ class MOG2(collapsed_mixture2):
 
         return grad.flatten(), natgrad.flatten()
 
-    def vb_grad_natgradTest(self):
-        """Gradients of the bound"""
-        x_m = self.X[:,:,None]-self.mun[None,:,:]
-        dS = x_m[:,:,None,:]*x_m[:,None,:,:]
-        SnidS = self.Sns_inv[None,:,:,:]*dS
-        dlndtS_dphi = np.dot(np.ones(self.D), np.dot(np.ones(self.D), SnidS))
-
-        grad_phi =  (-0.5*self.D/self.kNs + 0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0) + self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.) + (self.Hgrad-0.5*dlndtS_dphi*self.vNs)
-        natgrad = grad_phi - np.sum(self.phi*grad_phi, 1)[:,None] # corrects for softmax (over) parameterisation
-        grad = natgrad*self.phi
-        return self.Hgrad
-
     def makeFunctions(self):
         """Initializes the theano-functions for
             f1 = regular theano evaluation of the bound
@@ -126,12 +114,6 @@ class MOG2(collapsed_mixture2):
         self.f2 = theano.function(input, grad)
         hess = theano.gradient.hessian(bound, wrt=input)[0]
         self.f3 = theano.function(input, hess)
-
-    def tester(self):
-        phi = np.exp(self.phi_)
-        phi /= phi.sum(1)[:, None]
-        print 'newphi:\n', phi
-        print 'oldphi:\n', self.phi
 
 
     def predict_components_ln(self, Xnew):
