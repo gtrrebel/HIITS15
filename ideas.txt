@@ -12,3 +12,10 @@ Hessianin tutkiminen
 Eri maksimit
 	-lähdetään monesta eri alkuarvosta, mihin päädytään?
 
+RANDOM:
+	-Stabiilisuus
+	-Finite differences
+	-Pullonkaula: index/joku muu kenties
+	-Mallien eroja
+	-Tasankoja monessa kerroksessa?
+	

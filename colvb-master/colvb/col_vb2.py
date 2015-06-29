@@ -236,12 +236,8 @@ class col_vb2(GPy.core.model.Model):
             if (opt != None):
                 self.lab.printHessian(hessian, opt)  #                                                            <-  Here
             if (index != None):
-                if index == 'full':
-                    #print self.lab.index(hessian)
-                    self.index = self.lab.greaterthann(hessian)
-                elif index == 'rand':
-                    self.index = self.lab.index(hessian, 0, 0)
-                self.info.append((self.index, self.lab.largest(hessian), self.lab.smallest(hessian), self.bound()))
+                self.index, largest, smallest, close = self.lab.pack(hessian)
+                self.info.append([self.index, largest, smallest, close, self.bound()])
                 #print '\r', self.index, self.bound(),
                 #sys.stdout.flush()
                 

@@ -10,8 +10,8 @@ from vis1 import vis1
 
 #generate some documents
 WORDSIZE= 3 # words are square matrices with a single nonzero entry
-N_DOCS = 10
-DOCUMENT_LENGTHS = [np.random.randint(5,6) for i in range(N_DOCS)]
+N_DOCS = 20
+DOCUMENT_LENGTHS = [np.random.randint(10,11) for i in range(N_DOCS)]
 N_TOPICS = WORDSIZE*2 # topics are horizontal or vertical bars
 
 #here's the vocabulary
@@ -71,32 +71,32 @@ x = m.get_vb_param().copy()
 v = vis1()
 m.makeFunctions()
 
-x = 'iter'
-y = 'index'
 method='steepest'
 plotstart = 3
 
 for i in range(5):
     m.optimize(method=method, maxiter=1e4, opt= None, index='full', tests = None)
-    v.plot(x, y, m.info[plotstart:])
+    v.stack(m.info[plotstart:])
     m.new_param()
+pb.figure()
+v.plot_stack('iter', 'index')
+pb.show()
+pb.figure()
+v.plot_stack('iter', 'bound')
+pb.show()
 #v.distvsind(m.signs)
 
 #m.set_vb_param(x)
 #m.optimize(method='FR',maxiter=5)
 
-
-'''Investigation of the bound
-print(m.invest())
-'''
-
 '''
 pb.figure()
 m.plot_tracks()
-'''
+
 
 #display learned topics
-'''
+
+
 def plot_inferred_topics():
     nrow=ncol= np.ceil(np.sqrt(N_TOPICS))
     pb.figure()
@@ -108,8 +108,7 @@ def plot_inferred_topics():
 plot_inferred_topics()
 pb.suptitle('inferred topics')
 pb.show()
-'''
-'''
+
 #plot true topics
 nrow=ncol= np.ceil(np.sqrt(N_TOPICS))
 pb.figure()
