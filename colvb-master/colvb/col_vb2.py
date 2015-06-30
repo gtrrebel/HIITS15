@@ -3,6 +3,7 @@
 
 import numpy as np
 import pylab as pb
+import copy
 import GPy
 import time
 import sys #for flushing
@@ -194,6 +195,32 @@ class col_vb2(GPy.core.model.Model):
         self.set_vb_param(opt)
         print nf, 'iters'
 
+    def finite_difference_check(self):
+        phi_orig = self.get_vb_param().copy()
+        M = len(phi_orig)
+        h = 1e-4
+        hr = 1e4
+        hij = np.zeros((M, M))
+        H = np.zeros((M,M))
+        G = np.zeros((M))
+        H2 = self.newHessian()
+        G2 = self.newGradient()
+        G3, G4 = self.vb_grad_natgrad()
+        for i in range(M):
+            hij[i][i] = h
+        for i in range(M):
+            G[i] = hr*(self.f1(phi_orig + hij[i]) - self.f1(phi_orig))
+        for i in range(M):
+            for j in range(M):
+                H[i][j] = hr*hr*(self.f1(phi_orig + hij[i] + hij[j]) - self.f1(phi_orig + hij[i]) - self.f1(phi_orig + hij[j]) + self.f1(phi_orig))
+        '''
+        for i in range(M):
+            print G[i], ' vs ', G2[i], ' ------------ ', G3[i], ' vs ', G4[i]
+        '''
+        for i in range(M):
+            for j in range(M):
+                print H[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H[i][j] - H2[i][j])/(H2[i][j])), '%'
+
     def optimize(self,method=None, maxiter=500, ftol=1e-6, gtol=1e-6, step_length=1., line_search=False, callback=None, opt = None, index = None, tests = None):
         """
         Optimize the model
@@ -213,6 +240,9 @@ class col_vb2(GPy.core.model.Model):
         vb optimisation. The parameter self.hyperparam_interval
         dictates how often.
         """
+        self.hessian_time = 0
+        self.pack_time = 0
+        t0 = time.time()
 
         if method is None:
             method = self.default_method
@@ -222,6 +252,10 @@ class col_vb2(GPy.core.model.Model):
 
         iteration = 0
         bound_old = self.bound()
+        hessian_freq = 10
+        self.orig_params = np.array(self.get_vb_param().copy())
+        self.distance_travelled = 0
+
         while True:
 
             if not callback is None:
@@ -230,16 +264,25 @@ class col_vb2(GPy.core.model.Model):
             grad,natgrad = self.vb_grad_natgrad()
             grad,natgrad = -grad,-natgrad
             squareNorm = np.dot(natgrad,grad) # used to monitor convergence
-            hessian = self.newHessian()
 
             #view index
-            if (opt != None):
-                self.lab.printHessian(hessian, opt)  #                                                            <-  Here
-            if (index != None):
-                self.index, largest, smallest, close = self.lab.pack(hessian)
-                self.info.append([self.index, largest, smallest, close, self.bound()])
-                #print '\r', self.index, self.bound(),
-                #sys.stdout.flush()
+            if ((iteration % hessian_freq) == 0):
+                t1 = time.time()
+                hessian = self.newHessian()
+                self.hessian_time += time.time() - t1
+                if (opt != None):
+                    self.lab.printHessian(hessian, opt)  #                                                            <-  Here
+                if (index != None):
+                    t2 = time.time()
+                    self.index, largest, smallest, close = self.lab.pack(hessian)
+                    self.pack_time += time.time() - t2
+                    self.info.append([self.index, largest, smallest, close, self.bound()])
+                    #print '\r', self.index, self.bound(),
+                    #sys.stdout.flush()
+            '''
+            if iteration == hessian_freq:
+                self.finite_difference_check()
+            '''
                 
             #find search direction
             if (method=='steepest') or not iteration:
@@ -257,6 +300,7 @@ class col_vb2(GPy.core.model.Model):
             else:
                 searchDir = -natgrad
 
+            phi_old = self.get_vb_param().copy()
             if line_search:
                 xk = self.get_vb_param().copy()
                 alpha = LS.line_search(self._ls_ffp,xk.copy(),searchDir)
@@ -281,13 +325,15 @@ class col_vb2(GPy.core.model.Model):
                     bound = self.bound()
                     iteration += 1
 
+            self.distance_travelled += linalg.norm(self.get_vb_param().copy() - phi_old)
+
             # track:
             self.track(np.hstack((bound, beta)))
             '''
             print '\riteration '+str(iteration)+' bound='+str(bound) + ' grad='+str(squareNorm) + ', beta='+str(beta),
             sys.stdout.flush()
             '''
-
+            self.optimize_time = time.time() - t0
             # converged yet? try the parameters if so
             if np.abs(bound-bound_old)<=ftol:
                 print 'vb converged (ftol)'
@@ -316,6 +362,12 @@ class col_vb2(GPy.core.model.Model):
 
         # track:
         self.closetrack()
+
+    def how_far(self):
+        return linalg.norm(np.array(self.get_vb_param()) - self.orig_params)
+
+    def eigenvalues(self):
+        return self.lab.eigenvalues(self.newHessian())
 
     def newBound(self):
         return self.f1(self.get_vb_param().copy())

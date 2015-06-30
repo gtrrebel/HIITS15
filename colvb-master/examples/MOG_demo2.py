@@ -59,6 +59,8 @@ print
 #Make functions
 start_time = time.time()
 m.makeFunctions()
+v = vis1()
+plotstart = 3
 
 print 'Theano-function compilation time: ', '%s seconds' % (time.time() - start_time)
 print
@@ -81,7 +83,15 @@ for method in ['steepest',]:
         start_time = time.time()
         m.set_vb_param(st)
         m.optimize(method=method, maxiter=1e4, opt=None, index='full', tests = None)
+        v.stack(m.info[plotstart:])
         print 'End\nMethod used: ', method, '\nRuntime: ', '%s seconds' % (time.time() - start_time) 
+
+pb.figure()
+v.plot_stack('iter', 'index')
+pb.show()
+pb.figure()
+v.plot_stack('iter', 'bound')
+pb.show()
 
 print
 print 'Main time: ', '%s seconds' % (time.time() - main_time)

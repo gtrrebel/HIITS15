@@ -4,7 +4,12 @@ from scipy import linalg
 
 class signlab():
 
-	def index(self, A, opt = 0, k = None):
+	def __init__(self, eps = 1e-14):
+		self.eps = eps
+
+	def index(self, A, opt = 0, k = None, eps = None):
+		if eps == None:
+			eps = self.eps
 		if k != None:
 			return self.index(self.rand_minor(A, None), opt)
 		if opt == 0:
@@ -12,7 +17,12 @@ class signlab():
 		elif opt == 1:
 			return self.gaussIndex(A)
 
-	def pack(self, A, eps=1e-15):
+	def eigenvalues(self, A):
+		return linalg.eigh(A, eigvals_only=True)
+
+	def pack(self, A, eps=None):
+		if eps == None:
+			eps = self.eps
 		eigvals = linalg.eigh(A, eigvals_only=True)
 		#print len(A), len(eigvals), sum(1 for eigval in eigvals if abs(eigval) < eps)
 		return sum(1 for eigval in eigvals if eigval > eps), max(eigvals), min(eigvals), sum(1 for eigval in eigvals if abs(eigval) < eps)
@@ -23,15 +33,21 @@ class signlab():
 	def smallest(self, A):
 		return linalg.eigh(A, eigvals_only=True, eigvals=(1, 1))[0]
 
-	def greaterthan(self, A, eps=1e-15):
+	def greaterthan(self, A, eps=None):
+		if eps == None:
+			eps = self.eps
 		eigvals = linalg.eigh(A, eigvals_only=True)
 		return sum(1 for eigval in eigvals if eigval > eps)*1./len(A)
 
-	def greaterthann(self, A, eps=1e-15):
+	def greaterthann(self, A, eps=None):
+		if eps == None:
+			eps = self.eps
 		eigvals = linalg.eigh(A, eigvals_only=True)
 		return sum(1 for eigval in eigvals if eigval > eps)
 
-	def close_to_zero(self, A, eps=1e-15):
+	def close_to_zero(self, A, eps=None):
+		if eps == None:
+			eps = self.eps
 		eigvals = linalg.eigh(A, eigvals_only=True)
 		return sum(1 for eigval in eigvals if abs(eigval) < eps)
 

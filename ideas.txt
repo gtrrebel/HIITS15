@@ -13,9 +13,11 @@ Eri maksimit
 	-lähdetään monesta eri alkuarvosta, mihin päädytään?
 
 RANDOM:
-	-Stabiilisuus
-	-Finite differences
-	-Pullonkaula: index/joku muu kenties
+	-Stabiilisuus - CHECK: Varsinkaan MOG ei ole kovin stabiili
+	-Finite differences - CHECK: ihan hyvin toimii (?), gradientti on siis eri
+	-Pullonkaula: index/joku muu kenties - CHECK: kun n \to \infty, indexin kasvamisen merkitys kasvaa; molemmat oleellisia
 	-Mallien eroja
-	-Tasankoja monessa kerroksessa?
+	-Tasankoja monessa kerroksessa? CHECK: Näyttää olevan...
+	-Kuinka pitkä matka kuljetaan?? (Euklidinen etäisyys)
+	-Spektri lokaalisti?
 	

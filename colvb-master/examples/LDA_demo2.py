@@ -7,12 +7,24 @@ import sys
 sys.path.append('/home/othe/Desktop/HIIT/HIITS15/colvb-master/colvb')
 from LDA3 import LDA3
 from vis1 import vis1
+from vis2 import vis2
+
+#fetch input
+if len(sys.argv) > 1:
+    filename = sys.argv[1]
+else:
+    filename = '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_input/LDA_demo2.py/1/first_test_input.txt'
+inp = open(filename)
+input_list = []
+for line in inp:
+    input_list.append(int(line.split()[0]))
+
+inp.close()
+WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF = input_list
 
 #generate some documents
-WORDSIZE= 3 # words are square matrices with a single nonzero entry
-N_DOCS = 20
-DOCUMENT_LENGTHS = [np.random.randint(10,11) for i in range(N_DOCS)]
-N_TOPICS = WORDSIZE*2 # topics are horizontal or vertical bars
+DOCUMENT_LENGTHS = [np.random.randint(DOCUMENT_LENGTH, DOCUMENT_LENGTH + 1) for i in range(N_DOCS)]
+N_TOPICS = WORDSIZE*N_TOPIC_COEFF # topics are horizontal or vertical bars
 
 #here's the vocabulary
 V = WORDSIZE**2
@@ -68,7 +80,8 @@ pb.suptitle('the "documents"')
 
 m = LDA3(docs,vocab,N_TOPICS)
 x = m.get_vb_param().copy()
-v = vis1()
+v1 = vis1()
+v2 = vis2()
 m.makeFunctions()
 
 method='steepest'
@@ -76,13 +89,25 @@ plotstart = 3
 
 for i in range(5):
     m.optimize(method=method, maxiter=1e4, opt= None, index='full', tests = None)
-    v.stack(m.info[plotstart:])
+    '''
+    print 'size: ', len(m.get_vb_param()), '\n', \
+        'optimize_time: ', m.optimize_time, '\n', \
+        'hessian_time: ', m.hessian_time, ' - ', (100*m.hessian_time/m.optimize_time), '%,\n', \
+        'pack_time: ', m.pack_time, ' - ', (100*m.pack_time/m.optimize_time), '%,\n', \
+        'others: ', (m.optimize_time - m.hessian_time - m.pack_time), ' - ', (100*(m.optimize_time - m.hessian_time - m.pack_time)/m.optimize_time), '%'
+    '''
+    pb.figure()
+    v2.eigenvalue_histogram(m.eigenvalues())
+    pb.xlabel(m.bound())
+    pb.show()
+    print 'distance_travelled: ', m.distance_travelled, ' distance_from_start: ', m.how_far()
+    v1.stack(m.info[plotstart:])
     m.new_param()
 pb.figure()
-v.plot_stack('iter', 'index')
+v1.plot_stack('iter', 'index')
 pb.show()
 pb.figure()
-v.plot_stack('iter', 'bound')
+v1.plot_stack('iter', 'bound')
 pb.show()
 #v.distvsind(m.signs)
 
