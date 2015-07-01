@@ -31,7 +31,7 @@ class col_vb2(GPy.core.model.Model):
         self.tracks = []
         self.tracktypes = []
         self.info = []
-        self.lab = signlab()
+        self.lab = signlab(self.eps)
 
         self.hyperparam_interval=50
 
@@ -221,7 +221,9 @@ class col_vb2(GPy.core.model.Model):
             for j in range(M):
                 print H[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H[i][j] - H2[i][j])/(H2[i][j])), '%'
 
-    def optimize(self,method=None, maxiter=500, ftol=1e-6, gtol=1e-6, step_length=1., line_search=False, callback=None, opt = None, index = None, tests = None):
+    def optimize(self,method=None, maxiter=500, ftol=1e-6, gtol=1e-6, step_length=1., line_search=False, \
+            callback=None, hessian_print = None, opt=None, index = 'pack', hessian_freq=1, orig_iteration_data=False, \
+            new_iteration_data=False, print_convergence=False):
         """
         Optimize the model
 
@@ -252,7 +254,6 @@ class col_vb2(GPy.core.model.Model):
 
         iteration = 0
         bound_old = self.bound()
-        hessian_freq = 10
         self.orig_params = np.array(self.get_vb_param().copy())
         self.distance_travelled = 0
 
@@ -270,19 +271,20 @@ class col_vb2(GPy.core.model.Model):
                 t1 = time.time()
                 hessian = self.newHessian()
                 self.hessian_time += time.time() - t1
-                if (opt != None):
+                if (hessian_print != None):
                     self.lab.printHessian(hessian, opt)  #                                                            <-  Here
                 if (index != None):
                     t2 = time.time()
-                    self.index, largest, smallest, close = self.lab.pack(hessian)
+                    if index == 'pack':
+                        self.index, largest, smallest, close = self.lab.pack(hessian)
+                        self.info.append([self.index, largest, smallest, close, self.bound()])
                     self.pack_time += time.time() - t2
-                    self.info.append([self.index, largest, smallest, close, self.bound()])
-                    #print '\r', self.index, self.bound(),
-                    #sys.stdout.flush()
-            '''
-            if iteration == hessian_freq:
-                self.finite_difference_check()
-            '''
+                    if new_iteration_data:
+                        print '\r', self.index, self.bound(),
+                        sys.stdout.flush()
+            if self.finite_difference_checks:
+                if iteration == 5:
+                    self.finite_difference_check()
                 
             #find search direction
             if (method=='steepest') or not iteration:
@@ -329,22 +331,25 @@ class col_vb2(GPy.core.model.Model):
 
             # track:
             self.track(np.hstack((bound, beta)))
-            '''
-            print '\riteration '+str(iteration)+' bound='+str(bound) + ' grad='+str(squareNorm) + ', beta='+str(beta),
-            sys.stdout.flush()
-            '''
+            if orig_iteration_data:
+                print '\riteration '+str(iteration)+' bound='+str(bound) + ' grad='+str(squareNorm) + ', beta='+str(beta),
+                sys.stdout.flush()
+            
             self.optimize_time = time.time() - t0
             # converged yet? try the parameters if so
             if np.abs(bound-bound_old)<=ftol:
-                print 'vb converged (ftol)'
+                if print_convergence:
+                    print 'vb converged (ftol)'
                 if self.optimize_parameters()<1e-1:
                     break
             if squareNorm<=gtol:
-                print 'vb converged (gtol)'
+                if print_convergence:
+                    print 'vb converged (gtol)'
                 if self.optimize_parameters()<1e-1:
                     break
             if iteration>=maxiter:
-                print 'maxiter exceeded'
+                if print_convergence:
+                    print 'maxiter exceeded'
                 break
 
             #store essentials of previous iteration

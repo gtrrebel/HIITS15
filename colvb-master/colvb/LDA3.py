@@ -21,7 +21,7 @@ def softmax(x):
 class LDA3(col_vb2):
     """Collapsed Latent Dirichlet Allocation"""
 
-    def __init__(self, documents,vocabulary, K,alpha_0=1.,beta_0=1.):
+    def __init__(self, documents,vocabulary, K,alpha_0=1.,beta_0=1.,eps=1e-14, finite_difference_checks=False):
         """
         Arguments
         ---------
@@ -30,7 +30,8 @@ class LDA3(col_vb2):
         :K: number of topics
 
         """
-
+        self.eps = eps
+        self.finite_difference_checks = finite_difference_checks
         col_vb2.__init__(self)
         assert len(vocabulary.shape)==1
         assert np.max(map(np.max,documents)) <= vocabulary.size
@@ -43,7 +44,6 @@ class LDA3(col_vb2):
         self.Nd = map(np.size,documents)
         self.V = vocabulary.size
         self.N = self.Nd[0]
-
         self.K = K
 
 

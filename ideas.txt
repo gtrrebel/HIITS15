@@ -1,23 +1,45 @@
 IDEOITA:
 
-Hessianin tutkiminen
+1. Hessianin tutkiminen
 	- Artikkeleita toRead.txt tiedostossa
-	- Indeksi:
-		-Gaussian: buginen?
-		-scipyn oma: toiminee?
-	- Suurin ja pienin ominaisarvo:
-		-samalla tavalla, parempia ideoita?
-	- Muita algoritmeja, tuntuvat olevan O(n^3), approksimointiin ei löytynyt mitään hyvää
+	- Indeksin tutkiminen:
+		-Gaussian: buginen - KESKEYTETTY
+		-Scipy: toiminee - TEHTY
+	- Muita algoritmeja, tuntuvat olevan O(n^3), approksimointiin ei löytynyt mitään hyvää - KESKEYTETTY
 
-Eri maksimit
-	-lähdetään monesta eri alkuarvosta, mihin päädytään?
+2. Eri maksimit
+	-lähdetään monesta eri alkuarvosta, mihin päädytään. Missä maksimit sijaitsevat? Voisiko maailman kartoittaa? - TULOSSA
 
-RANDOM:
-	-Stabiilisuus - CHECK: Varsinkaan MOG ei ole kovin stabiili
-	-Finite differences - CHECK: ihan hyvin toimii (?), gradientti on siis eri
-	-Pullonkaula: index/joku muu kenties - CHECK: kun n \to \infty, indexin kasvamisen merkitys kasvaa; molemmat oleellisia
-	-Mallien eroja
-	-Tasankoja monessa kerroksessa? CHECK: Näyttää olevan...
-	-Kuinka pitkä matka kuljetaan?? (Euklidinen etäisyys)
-	-Spektri lokaalisti?
-	
+3. Stabiilisuus
+	-MOG ei vaikuta kovin stabiililta... lisätutkimusta - KESKEYTETTY
+	-Finite difference: ihan hyvin toimii, gradientti on siis eri - TEHTY
+
+4. Pullonkaulat, optimointi
+	-Hessianin ja indeksin laskeminen vie käytännössä 100 %, indeksin laskun osuus kasvaa kohti 100 % - TEHTY
+	-Mahdollisia optimointeja: 
+		- lasketaan hessian/indeksi harvemmin - TEHTY
+		- Muutetaan theano-laskut suoraan numpyksi (vaatii matikkaa, virhealtis, mutta LDAssa matikka melko simppeliä) - EI ALOITETTA
+		- lasketaan indeksi paremmalla tavalla (nykyinen tyyli on laskea symmetrisen matriisin kaikki ominaisarvot scipy:n linalg.eigh:lla, stabiilisuus lienee ongelma...) - EI ALOITETTA
+
+5. Mallien eroja
+	-Ei kunnollista dataa vielä - TULOSSA
+
+6. Tasangot
+	-Miltä näyttää matka huipulle, tasankoja, monessa kerroksessa? Ensivaikutelma: monia kerroksia - KESKEYTETTY
+
+7. Spektri lokaalisti
+	- Miltä näyttää spektri maksimissa, miten parametrit vaikuttavat? - TULOSSA
+
+8. Oikeaa dataa
+	- nips11-datan käyttö - TULOSSA
+
+9. Ipythonin dokumentoiva käyttö
+	- lienee TULOSSA
+
+Mitä teen juuri nyt (päivitetty 1.7.2015 klo 16):
+- Refaktorointia, LDA-testauksen/plottauksen automatisointi/joustavuus
+
+Mitä teen seuraavaksi:
+	- nips11 (kohta 8)
+	- eri maksimit kartalle (kohta 2)
+

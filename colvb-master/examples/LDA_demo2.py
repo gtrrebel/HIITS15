@@ -11,16 +11,47 @@ from vis2 import vis2
 
 #fetch input
 if len(sys.argv) > 1:
-    filename = sys.argv[1]
+    if 'f' == sys.argv[1]:
+        filename = sys.argv[1]
+        inp = open(filename)
+        input_list = []
+        for line in inp:
+            input_list.append(int(line.split()[0]))
+        inp.close()
+    else:
+        input_list = [int(s) for s in sys.argv[1:]]
 else:
     filename = '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_input/LDA_demo2.py/1/first_test_input.txt'
-inp = open(filename)
-input_list = []
-for line in inp:
-    input_list.append(int(line.split()[0]))
+    inp = open(filename)
+    input_list = []
+    for line in inp:
+        input_list.append(int(line.split()[0]))
+    inp.close()
 
-inp.close()
+
 WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF = input_list
+
+restarts = 1
+plotstart = 3
+methods = ['steepest']
+plot_specs = [('iter', 'index'), ('iter', 'bound')]
+eps = 1e-14
+finite_difference_check = False
+hessian_freq = 1
+
+runtime_distribution = False
+distances_travelled = False
+eigenvalue_histograms = False
+basic_plots = False
+spectrum_length = True
+print_convergence = False
+
+orig_document_display = False
+orig_track_display = False
+orig_learned_topics = False
+orig_true_topics = False
+
+
 
 #generate some documents
 DOCUMENT_LENGTHS = [np.random.randint(DOCUMENT_LENGTH, DOCUMENT_LENGTH + 1) for i in range(N_DOCS)]
@@ -66,62 +97,61 @@ for d,dv in zip(docs, docs_visual):
         dv.ravel()[w] += 1
 
 #display the documents
-'''
-nrow=ncol= np.ceil(np.sqrt(N_DOCS))
-vmin = np.min(map(np.min,docs_visual))
-vmax = np.max(map(np.max,docs_visual))
-for d,dv in enumerate(docs_visual):
-    pb.subplot(nrow,ncol,d+1)
-    pb.imshow(dv,vmin=vmin,vmax=vmax,cmap=pb.cm.gray)
-    pb.xticks([])
-    pb.yticks([])
-pb.suptitle('the "documents"')
-'''
+if orig_document_display:
+    nrow=ncol= np.ceil(np.sqrt(N_DOCS))
+    vmin = np.min(map(np.min,docs_visual))
+    vmax = np.max(map(np.max,docs_visual))
+    for d,dv in enumerate(docs_visual):
+        pb.subplot(nrow,ncol,d+1)
+        pb.imshow(dv,vmin=vmin,vmax=vmax,cmap=pb.cm.gray)
+        pb.xticks([])
+        pb.yticks([])
+    pb.suptitle('the "documents"')
 
-m = LDA3(docs,vocab,N_TOPICS)
+m = LDA3(docs,vocab,N_TOPICS, eps=eps)
 x = m.get_vb_param().copy()
 v1 = vis1()
 v2 = vis2()
 m.makeFunctions()
 
-method='steepest'
-plotstart = 3
+def runprinter(m, v1, v2):
+    if runtime_distribution:
+        print 'size: ', len(m.get_vb_param()), '\n', \
+            'optimize_time: ', m.optimize_time, '\n', \
+            'hessian_time: ', m.hessian_time, ' - ', (100*m.hessian_time/m.optimize_time), '%,\n', \
+            'pack_time: ', m.pack_time, ' - ', (100*m.pack_time/m.optimize_time), '%,\n', \
+            'others: ', (m.optimize_time - m.hessian_time - m.pack_time), \
+            ' - ', (100*(m.optimize_time - m.hessian_time - m.pack_time)/m.optimize_time), '%'
+    if eigenvalue_histograms:
+        pb.figure()
+        v2.eigenvalue_histogram(m.eigenvalues())
+        pb.xlabel(m.bound())
+        pb.show()
+    if spectrum_length:
+        eigvals = m.eigenvalues()
+        print max(eigvals) - min(eigvals)
+    if distances_travelled:
+        print 'distance_travelled: ', m.distance_travelled, ' distance_from_start: ', m.how_far()
 
-for i in range(5):
-    m.optimize(method=method, maxiter=1e4, opt= None, index='full', tests = None)
-    '''
-    print 'size: ', len(m.get_vb_param()), '\n', \
-        'optimize_time: ', m.optimize_time, '\n', \
-        'hessian_time: ', m.hessian_time, ' - ', (100*m.hessian_time/m.optimize_time), '%,\n', \
-        'pack_time: ', m.pack_time, ' - ', (100*m.pack_time/m.optimize_time), '%,\n', \
-        'others: ', (m.optimize_time - m.hessian_time - m.pack_time), ' - ', (100*(m.optimize_time - m.hessian_time - m.pack_time)/m.optimize_time), '%'
-    '''
+for method in methods:
+    for i in range(restarts):
+        m.optimize(method=method, maxiter=1e4, opt= None, index='pack', hessian_freq=hessian_freq, \
+            print_convergence=print_convergence)
+        runprinter(m, v1, v2)
+        v1.stack(m.info[plotstart:])
+        m.new_param()
+
+if basic_plots:
+    for spec in plot_specs:
+        pb.figure()
+        v1.plot_stack(spec[0], spec[1])
+        pb.show()
+
+if orig_track_display:
     pb.figure()
-    v2.eigenvalue_histogram(m.eigenvalues())
-    pb.xlabel(m.bound())
-    pb.show()
-    print 'distance_travelled: ', m.distance_travelled, ' distance_from_start: ', m.how_far()
-    v1.stack(m.info[plotstart:])
-    m.new_param()
-pb.figure()
-v1.plot_stack('iter', 'index')
-pb.show()
-pb.figure()
-v1.plot_stack('iter', 'bound')
-pb.show()
-#v.distvsind(m.signs)
-
-#m.set_vb_param(x)
-#m.optimize(method='FR',maxiter=5)
-
-'''
-pb.figure()
-m.plot_tracks()
-
+    m.plot_tracks()
 
 #display learned topics
-
-
 def plot_inferred_topics():
     nrow=ncol= np.ceil(np.sqrt(N_TOPICS))
     pb.figure()
@@ -130,24 +160,19 @@ def plot_inferred_topics():
         pb.imshow(beta.reshape(WORDSIZE,WORDSIZE),cmap=pb.cm.gray)
         pb.xticks([])
         pb.yticks([])
-plot_inferred_topics()
-pb.suptitle('inferred topics')
-pb.show()
+
+if orig_learned_topics:
+    plot_inferred_topics()
+    pb.suptitle('inferred topics')
+    pb.show()
 
 #plot true topics
-nrow=ncol= np.ceil(np.sqrt(N_TOPICS))
-pb.figure()
-for i,topic in enumerate(topics):
-    pb.subplot(nrow,ncol,i+1)
-    pb.imshow(topic.reshape(WORDSIZE,WORDSIZE),cmap=pb.cm.gray)
-    pb.xticks([])
-    pb.yticks([])
-pb.suptitle('true topics')
-'''
-
-
-
-
-
-
-
+if orig_true_topics:
+    nrow=ncol= np.ceil(np.sqrt(N_TOPICS))
+    pb.figure()
+    for i,topic in enumerate(topics):
+        pb.subplot(nrow,ncol,i+1)
+        pb.imshow(topic.reshape(WORDSIZE,WORDSIZE),cmap=pb.cm.gray)
+        pb.xticks([])
+        pb.yticks([])
+    pb.suptitle('true topics')
