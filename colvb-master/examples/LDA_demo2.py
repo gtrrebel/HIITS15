@@ -19,8 +19,10 @@ if len(sys.argv) > 1:
         for line in inp:
             input_list.append(int(line.split()[0]))
         inp.close()
+        invest = None
     else:
-        input_list = [int(s) for s in sys.argv[1:]]
+        invest = sys.argv[1]
+        input_list = [int(s) for s in sys.argv[2:]]
 else:
     filename = '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_input/LDA_demo2.py/1/first_test_input.txt'
     inp = open(filename)
@@ -28,30 +30,37 @@ else:
     for line in inp:
         input_list.append(int(line.split()[0]))
     inp.close()
+    invest = None
 
 
 WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF = input_list
 
-restarts = 1
-plotstart = 3
-methods = ['steepest']
-plot_specs = [('iter', 'index'), ('iter', 'bound')]
-eps = 1e-14
-finite_difference_check = False
-hessian_freq = 1
+invest_map = ['spectrum_length']
 
-runtime_distribution = False
-distances_travelled = False
-eigenvalue_histograms = False
-basic_plots = False
-spectrum_length = True
-print_convergence = False
+runspecs = {}
 
-orig_document_display = False
-orig_track_display = False
-orig_learned_topics = False
-orig_true_topics = False
+runspecs['restarts'] = 1
+runspecs['plotstart'] = 3
+runspecs['methods'] = ['steepest']
+runspecs['plot_specs'] = [('iter', 'index'), ('iter', 'bound')]
+runspecs['eps'] = 1e-14
+runspecs['finite_difference_check'] = False
+runspecs['hessian_freq'] = 1
 
+runspecs['runtime_distribution'] = False
+runspecs['distances_travelled'] = False
+runspecs['eigenvalue_histograms'] = False
+runspecs['basic_plots'] = False
+runspecs['spectrum_length'] = False
+runspecs['print_convergence'] = False
+
+runspecs['orig_document_display'] = False
+runspecs['orig_track_display'] = False
+runspecs['orig_learned_topics'] = False
+runspecs['orig_true_topics'] = False
+
+if invest != None:
+    runspecs[invest_map[invest]] = True
 
 print WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF
 
@@ -110,46 +119,46 @@ if orig_document_display:
         pb.yticks([])
     pb.suptitle('the "documents"')
 
-m = LDA3(docs,vocab,N_TOPICS, eps=eps)
+m = LDA3(docs,vocab,N_TOPICS, eps=runspecs['eps'])
 x = m.get_vb_param().copy()
 v1 = vis1()
 v2 = vis2()
 m.makeFunctions()
 
 def runprinter(m, v1, v2):
-    if runtime_distribution:
+    if runspecs['runtime_distribution']:
         print 'size: ', len(m.get_vb_param()), '\n', \
             'optimize_time: ', m.optimize_time, '\n', \
             'hessian_time: ', m.hessian_time, ' - ', (100*m.hessian_time/m.optimize_time), '%,\n', \
             'pack_time: ', m.pack_time, ' - ', (100*m.pack_time/m.optimize_time), '%,\n', \
             'others: ', (m.optimize_time - m.hessian_time - m.pack_time), \
             ' - ', (100*(m.optimize_time - m.hessian_time - m.pack_time)/m.optimize_time), '%'
-    if eigenvalue_histograms:
+    if runspecs['eigenvalue_histograms']:
         pb.figure()
         v2.eigenvalue_histogram(m.eigenvalues())
         pb.xlabel(m.bound())
         pb.show()
-    if spectrum_length:
+    if runspecs['spectrum_length']:
         eigvals = m.eigenvalues()
         print max(eigvals) - min(eigvals)
-    if distances_travelled:
+    if runspecs['distances_travelled']:
         print 'distance_travelled: ', m.distance_travelled, ' distance_from_start: ', m.how_far()
 
-for method in methods:
+for method in runspecs['methods']:
     for i in range(restarts):
-        m.optimize(method=method, maxiter=1e4, opt= None, index='pack', hessian_freq=hessian_freq, \
-            print_convergence=print_convergence)
+        m.optimize(method=method, maxiter=1e4, opt= None, index='pack', hessian_freq=runspecs['hessian_freq'], \
+            print_convergence=runspecs['print_convergence'])
         runprinter(m, v1, v2)
-        v1.stack(m.info[plotstart:])
+        v1.stack(m.info[runspecs['plotstart']:])
         m.new_param()
 
-if basic_plots:
-    for spec in plot_specs:
+if runspecs['basic_plots']:
+    for spec in runspecs['plot_specs']:
         pb.figure()
         v1.plot_stack(spec[0], spec[1])
         pb.show()
 
-if orig_track_display:
+if runspecs['orig_track_display']:
     pb.figure()
     m.plot_tracks()
 
@@ -163,13 +172,13 @@ def plot_inferred_topics():
         pb.xticks([])
         pb.yticks([])
 
-if orig_learned_topics:
+if runspecs['orig_learned_topics']:
     plot_inferred_topics()
     pb.suptitle('inferred topics')
     pb.show()
 
 #plot true topics
-if orig_true_topics:
+if runspecs['orig_true_topics']:
     nrow=ncol= np.ceil(np.sqrt(N_TOPICS))
     pb.figure()
     for i,topic in enumerate(topics):
