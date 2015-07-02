@@ -5,6 +5,7 @@ import numpy as np
 import pylab as pb
 import sys
 sys.path.append('/home/othe/Desktop/HIIT/HIITS15/colvb-master/colvb')
+sys.path.append('/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/colvb')
 from LDA3 import LDA3
 from vis1 import vis1
 from vis2 import vis2
@@ -177,3 +178,5 @@ if orig_true_topics:
         pb.xticks([])
         pb.yticks([])
     pb.suptitle('true topics')
+
+print 'done'
