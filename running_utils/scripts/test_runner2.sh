@@ -1,7 +1,7 @@
 #!/bin/bash
 
 INFILE=$1
-INPUTFILE="$2 $3 $4 $5"
+INPUTFILE="$2 $3 $4 $5 $6"
 RUNFILE=`basename $1`
 MYHOST=`hostname`
 MYDATE=`date +%Y-%m-%d.%H:%M:%S`
