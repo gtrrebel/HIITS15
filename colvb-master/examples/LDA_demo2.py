@@ -21,7 +21,7 @@ if len(sys.argv) > 1:
         inp.close()
         invest = None
     else:
-        invest = sys.argv[1]
+        invest = int(sys.argv[1])
         input_list = [int(s) for s in sys.argv[2:]]
 else:
     filename = '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_input/LDA_demo2.py/1/first_test_input.txt'
@@ -108,7 +108,7 @@ for d,dv in zip(docs, docs_visual):
         dv.ravel()[w] += 1
 
 #display the documents
-if orig_document_display:
+if runspecs['orig_document_display']:
     nrow=ncol= np.ceil(np.sqrt(N_DOCS))
     vmin = np.min(map(np.min,docs_visual))
     vmax = np.max(map(np.max,docs_visual))
@@ -145,7 +145,7 @@ def runprinter(m, v1, v2):
         print 'distance_travelled: ', m.distance_travelled, ' distance_from_start: ', m.how_far()
 
 for method in runspecs['methods']:
-    for i in range(restarts):
+    for i in range(runspecs['restarts']):
         m.optimize(method=method, maxiter=1e4, opt= None, index='pack', hessian_freq=runspecs['hessian_freq'], \
             print_convergence=runspecs['print_convergence'])
         runprinter(m, v1, v2)

@@ -36,8 +36,8 @@ IDEOITA:
 9. Ipythonin dokumentoiva käyttö
 	- lienee TULOSSA
 
-Mitä teen juuri nyt (päivitetty 2.7.2015 klo 13):
-- Refaktorointia, LDA-testauksen/plottauksen automatisointi/joustavuus
+Mitä teen juuri nyt (päivitetty 2.7.2015 klo 16):
+- Refaktorointia, LDA-testauksen/plottauksen automatisointi/joustavuus - MELKO VALMIS
 
 Mitä teen seuraavaksi:
 	- nips11 (kohta 8)
