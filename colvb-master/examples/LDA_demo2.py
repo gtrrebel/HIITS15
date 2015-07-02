@@ -52,6 +52,7 @@ orig_learned_topics = False
 orig_true_topics = False
 
 
+print WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF
 
 #generate some documents
 DOCUMENT_LENGTHS = [np.random.randint(DOCUMENT_LENGTH, DOCUMENT_LENGTH + 1) for i in range(N_DOCS)]
