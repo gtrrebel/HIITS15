@@ -36,10 +36,16 @@ IDEOITA:
 9. Ipythonin dokumentoiva käyttö
 	- lienee TULOSSA
 
-Mitä teen juuri nyt (päivitetty 2.7.2015 klo 16):
-- Refaktorointia, LDA-testauksen/plottauksen automatisointi/joustavuus - MELKO VALMIS
+10. 0-ominaisarvot
+	- Mitäs niille? Mistä johtuvat: parametri ei vaikuta -> parametrin häivytys. Muita syitä? Epästabiilisuus? TULOSSA (TARVITTAESSA)
+
+11. Stochastic variational inference
+	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
+
+Mitä teen juuri nyt (päivitetty 3.7.2015 klo 20):
+- nips-testien sovittaminen, refaktorointi - MELKO VALMIS
 
 Mitä teen seuraavaksi:
-	- nips11 (kohta 8)
 	- eri maksimit kartalle (kohta 2)
+	- 0-ominaisarvojen hoitaminen
 
