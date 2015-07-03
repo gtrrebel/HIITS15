@@ -35,7 +35,7 @@ else:
 
 WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF = input_list
 
-invest_map = ['spectrum_length']
+invest_map = ['spectrum_length', 'final_bound', 'distance_travelled', 'distance_from_start']
 
 runspecs = {}
 
@@ -48,11 +48,14 @@ runspecs['finite_difference_check'] = False
 runspecs['hessian_freq'] = 1
 
 runspecs['runtime_distribution'] = False
-runspecs['distances_travelled'] = False
 runspecs['eigenvalue_histograms'] = False
 runspecs['basic_plots'] = False
-runspecs['spectrum_length'] = False
 runspecs['print_convergence'] = False
+
+runspecs['spectrum_length'] = False
+runspecs['final_bound'] = False
+runspecs['distance_travelled'] = False
+runspecs['distance_from_start'] = False
 
 runspecs['orig_document_display'] = False
 runspecs['orig_track_display'] = False
@@ -141,8 +144,12 @@ def runprinter(m, v1, v2):
     if runspecs['spectrum_length']:
         eigvals = m.eigenvalues()
         print max(eigvals) - min(eigvals)
-    if runspecs['distances_travelled']:
-        print 'distance_travelled: ', m.distance_travelled, ' distance_from_start: ', m.how_far()
+    if runspecs['final_bound']:
+        print m.bound()
+    if runspecs['distance_travelled']:
+        print m.distance_travelled
+    if runspecs['distance_from_start']:
+        print m.how_far()
 
 for method in runspecs['methods']:
     for i in range(runspecs['restarts']):
