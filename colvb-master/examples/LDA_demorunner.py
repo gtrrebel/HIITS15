@@ -5,33 +5,39 @@ import time
 from ukko_runner import ukko_runner
 
 runner = ukko_runner.runner()
+runner.remove_bad_hosts()
 runner.MAXLOAD = 10
-1
-mainpath = '/cs/fs/home/othe/Windows/Desktop/hiit'
-runnerpath = mainpath + '/HIITS15/running_utils/scripts/'
-coderunner = 'test_runner2.sh'
-codepath = mainpath + '/HIITS15/colvb-master/examples/'
-outputpath = '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/'
-code = 'LDA_demo2.py'
-
-trait = int(sys.argv[1])
-investnames = ["speclen", "index", "distance", "bound"]
-print_invest_names = ["spectrum length", "index", "distance", "bound"]
-trait_names = ['WORDSIZE', 'N_DOCS', 'DOCUMENT_LENGTH', 'N_TOPIC_COEFF']
-print_trait_names = ['wordsize', 'number of documents', 'document length', 'topic coefficient']
 
 bound1, bound2 = int(sys.argv[2]), int(sys.argv[3])
 invest = int(sys.argv[4])
 basic_inputs = [3,10,5,2]
 user = False
-max_wait_time = 1000
+max_wait_time = 12*3600
+
+trait = int(sys.argv[1])
+invest_names = ["spectrum_length", "final_bound", "distance_travelled", "distance_from_start"]
+print_invest_names = ["spectrum length", "final bound", "distance travelled", "distance from start"]
+trait_names = ['WORDSIZE', 'N_DOCS', 'DOCUMENT_LENGTH', 'N_TOPIC_COEFF']
+print_trait_names = ['wordsize', 'number of documents', 'document length', 'topic coefficient']
+
+mainpath = '/cs/fs/home/othe/Windows/Desktop/hiit'
+runnerpath = mainpath + '/HIITS15/running_utils/scripts/'
+coderunner = 'test_runner2.sh'
+codepath = mainpath + '/HIITS15/colvb-master/examples/'
+outputpath = '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_demo2.py/'
+tmp_outputpath = outputpath + 'tmp-output/'
+code = 'LDA_demo2.py'
+outputfilename = 'LDA_demo2.py.' + trait_names[trait] + '.to.' + invest_names[invest] + '.' + \
+				str(bound1) + '.' + str(bound2) + time.strftime("%H:%M:%S-%d.%m.%Y") + '.txt'
+
+
 
 outputstart = '"LDA_demo2.py\n' + \
 				print_trait_names[trait] + ' vs. ' + print_invest_names[invest] + '\n' + \
 				'basic inputs: ' + ' '.join([str(inp) for inp in basic_inputs]) + '\n' + \
 				'bounds: ' + str(bound1) + ', ' + str(bound2) + '\n"'
 
-os.system('printf ' +  outputstart +' > ' +  outputpath + 'tmp-output.txt')
+os.system('printf ' +  outputstart +' > ' +  outputpath + outputfilename)
 for stat in range(bound1, bound2 + 1):
 	inputstring = str(invest)
 	for i in range(len(basic_inputs)):
@@ -46,12 +52,12 @@ runner.start_batches()
 outputcount = bound2 + 1 - bound1
 count = 0
 
-def checkfull(path):
-	f = open(outputpath + 'LDA_demo2.py/' + path)
-	if os.path.getsize(outputpath + 'LDA_demo2.py/' + path) == 0:
+def checkfull(filename):
+	f = open(tmp_outputpath + filename)
+	if os.path.getsize(tmp_outputpath + filename) == 0:
 		return False
 	else:
-		f = open(outputpath + 'LDA_demo2.py/' + path)
+		f = open(tmp_outputpath + filename)
 		ans = (f.readlines()[-1] == 'done\n')
 		f.close()
 		return ans
@@ -59,10 +65,10 @@ def checkfull(path):
 
 while True:
 	time.sleep(1)
-	if sum(1 for name in os.listdir(outputpath + 'LDA_demo2.py/') if checkfull(name)) >= outputcount:
+	if sum(1 for name in os.listdir(tmp_outputpath) if checkfull(name)) >= outputcount:
 		break
 	count += 1
-	if count == max_wait_time:
+	if count >= max_wait_time:
 		break
 
 def cmp_outputs(pair1, pair2):
@@ -76,27 +82,27 @@ def cmp_outputs(pair1, pair2):
 
 def gatheroutput():
 	filepairs = []
-	for (dirpath, dirnames, filenames) in os.walk(outputpath + 'LDA_demo2.py/'):
+	for (dirpath, dirnames, filenames) in os.walk(tmp_outputpath):
 		outputfiles.extend(filenames)
 		break
 	for fil in outputfiles:
-		fi = open(outputpath + 'LDA_demo2.py/' + fil)
+		fi = open(tmp_outputpath + fil)
 		lines = fi.readlines()
 		filepairs.append((lines[0], lines))
 		fi.close()
-		os.system('rm ' + outputpath + 'LDA_demo2.py/' + fil)
+		os.system('rm ' + tmp_outputpath + fil)
 	filepairs = sorted(filepairs, cmp=cmp_outputs)
 	for filepair in filepairs:
 		for line in filepair[1][1:-1]:
-			os.system('printf "' +  line + '" >> ' +  outputpath + 'tmp-output.txt')
+			os.system('printf \'%s\' "' +  line + '" >> ' +  outputpath + outputfilename)
 
-if sum(1 for name in os.listdir(outputpath + 'LDA_demo2.py/') if checkfull(name)) == outputcount:
+if sum(1 for name in os.listdir(tmp_outputpath) if checkfull(name)) == outputcount:
 	outputfiles = []
 	gatheroutput()
-	inp = open(outputpath + 'tmp-output.txt')
+	inp = open(outputpath + outputfilename)
 	output = []
 	lines = inp.readlines()[4:]
-	os.system('cat ' + outputpath + 'tmp-output.txt')
+	#os.system('cat ' + outputpath + outputfilename)
 	for line in lines:
 		output.append(float(line))
 	inp.close()
@@ -106,6 +112,5 @@ if sum(1 for name in os.listdir(outputpath + 'LDA_demo2.py/') if checkfull(name)
 	pb.ylabel(print_invest_names[invest])
 	pb.plot(range(bound1, bound2 + 1), output)
 	pb.show()
-	os.system('rm ' + outputpath + 'tmp-output.txt')
 else:
 	print 'Time limit exceeded'
