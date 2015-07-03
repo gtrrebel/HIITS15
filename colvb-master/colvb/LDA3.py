@@ -1,18 +1,15 @@
 # Copyright (c) 2012 James Hensman
 # Licensed under the GPL v3 (see LICENSE.txt)
 import sys
-sys.path.append('/home/othe/Desktop/HIIT/Moduleita/pyautodiff-python2-ast')
+import time
 import numpy as np
-#import pylab as pb
 import matplotlib as mlp
-#mlp.use('cairo.pdf')
 from scipy.special import gammaln, digamma
 from scipy import sparse
 from col_vb2 import col_vb2
 from weave_fns import LDA_mult
 import theano
 import theano.tensor as T
-import itertools
 
 def softmax(x):
     ex = np.exp(x-x.max(1)[:,None])
@@ -22,14 +19,6 @@ class LDA3(col_vb2):
     """Collapsed Latent Dirichlet Allocation"""
 
     def __init__(self, documents,vocabulary, K,alpha_0=1.,beta_0=1.,eps=1e-14, finite_difference_checks=False):
-        """
-        Arguments
-        ---------
-        :documents: @todo
-        :vocabulary: @todo
-        :K: number of topics
-
-        """
         self.eps = eps
         self.finite_difference_checks = finite_difference_checks
         col_vb2.__init__(self)
@@ -65,10 +54,10 @@ class LDA3(col_vb2):
         self.beta_0 = np.ones(self.V)*beta_0
 
         self.set_vb_param(np.random.randn(sum(self.Nd)*self.K))
+        self.make_functions()
 
     def new_param(self):
         self.__init__(self.documents, self.vocabulary, self.K, self.alpha_0, self.beta_0)
-
 
     def get_vb_param(self):
         return np.vstack(self.phi_).flatten()
@@ -111,8 +100,8 @@ class LDA3(col_vb2):
         grad = natgrad*np.hstack(map(np.ravel,self.phi))
         return grad,natgrad
 
-    def makeFunctions(self):
-        
+    def make_functions(self):
+        theanotime = time.time()
         #theanize words
         words = theano.shared(np.array([np.array(word.todense()) for word in self.word_mats]))
 
@@ -123,8 +112,8 @@ class LDA3(col_vb2):
         phi = T.exp(phi_-phi_.max(2)[:,:,None])
         phi = phi/phi.sum(2)[:,:, None]
         
-        alpha_p = self.alpha_0 + phi.sum(1)
-        beta_p = self.beta_0 + T.tensordot(phi,words, axes=[(1,0), (1,0)])
+        alpha_p = theano.shared(self.alpha_0) + phi.sum(1)
+        beta_p = theano.shared(self.beta_0) + T.tensordot(phi,words, axes=[(1,0), (1,0)])
         
         #gather bound
         bound = 0
@@ -138,6 +127,7 @@ class LDA3(col_vb2):
         self.f2 = theano.function([x], grad)
         hess = theano.gradient.hessian(bound, wrt=[x])[0]
         self.f3 = theano.function([x], hess)
+        self.theanotime = time.time() -  theanotime
 
     def print_topics(self,wordlim=10):
         vocab_indexes = [np.argsort(b)[::-1] for b in self.beta_p]

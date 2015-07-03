@@ -9,6 +9,8 @@ sys.path.append('/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/colv
 from LDA3 import LDA3
 from vis1 import vis1
 from vis2 import vis2
+from data_creator import data_creator
+from runspecs import runspecs
 
 #fetch input
 if len(sys.argv) > 1:
@@ -32,101 +34,22 @@ else:
     inp.close()
     invest = None
 
-
 WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF = input_list
 
-invest_map = ['spectrum_length', 'final_bound', 'distance_travelled', 'distance_from_start']
-
-runspecs = {}
-
-runspecs['restarts'] = 1
-runspecs['plotstart'] = 3
-runspecs['methods'] = ['steepest']
-runspecs['plot_specs'] = [('iter', 'index'), ('iter', 'bound')]
-runspecs['eps'] = 1e-14
-runspecs['finite_difference_check'] = False
-runspecs['hessian_freq'] = 1
-
-runspecs['runtime_distribution'] = False
-runspecs['eigenvalue_histograms'] = False
-runspecs['basic_plots'] = False
-runspecs['print_convergence'] = False
-
-runspecs['spectrum_length'] = False
-runspecs['final_bound'] = False
-runspecs['distance_travelled'] = False
-runspecs['distance_from_start'] = False
-
-runspecs['orig_document_display'] = False
-runspecs['orig_track_display'] = False
-runspecs['orig_learned_topics'] = False
-runspecs['orig_true_topics'] = False
+runspecs = runspecs()
 
 if invest != None:
-    runspecs[invest_map[invest]] = True
+    runspecs.set_invest(invest)
 
 print WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF
 
-#generate some documents
-DOCUMENT_LENGTHS = [np.random.randint(DOCUMENT_LENGTH, DOCUMENT_LENGTH + 1) for i in range(N_DOCS)]
-N_TOPICS = WORDSIZE*N_TOPIC_COEFF # topics are horizontal or vertical bars
-
-#here's the vocabulary
-V = WORDSIZE**2
-if WORDSIZE==2:
-    vocab = np.array([u'\u25F0',u'\u25F3',u'\u25F1',u'\u25F2'],dtype="<U2")
-else:
-    vocab_ = [np.zeros((WORDSIZE,WORDSIZE)) for v in range(V)]
-    [np.put(v,i,1) for i,v in enumerate(vocab_)]
-    vocab = np.empty(len(vocab_),dtype=np.object)
-    for i,v in enumerate(vocab_):
-        vocab[i] = v
-
-#generate the topics
-topics = [np.zeros((WORDSIZE,WORDSIZE)) for i in range(N_TOPICS)]
-for i in range(WORDSIZE):
-    topics[i][:,i] = 1
-    topics[i+WORDSIZE][i,:] = 1
-topics = map(np.ravel,topics)
-topics = map(lambda x: x/x.sum(),topics)
-
-#if the docs are 2x2 square, you'll have as many topics as vocab, which won't work:
-if WORDSIZE==2:
-    topics = topics[:2]
-    N_TOPICS = 2
-
-#generate the documents
-docs = []
-doc_latents = []
-doc_topic_probs = []
-for d in range(N_DOCS):
-    topic_probs = np.random.dirichlet(np.ones(N_TOPICS)*0.8)
-    latents = np.random.multinomial(1,topic_probs,DOCUMENT_LENGTHS[d]).argmax(1)
-    doc_latents.append(latents)
-    doc_topic_probs.append(topic_probs)
-    docs.append(np.array([np.random.multinomial(1,topics[i]).argmax() for i in latents]))
-docs_visual = [np.zeros((WORDSIZE,WORDSIZE)) for d in range(N_DOCS)]
-for d,dv in zip(docs, docs_visual):
-    for w in d:
-        dv.ravel()[w] += 1
-
-#display the documents
-if runspecs['orig_document_display']:
-    nrow=ncol= np.ceil(np.sqrt(N_DOCS))
-    vmin = np.min(map(np.min,docs_visual))
-    vmax = np.max(map(np.max,docs_visual))
-    for d,dv in enumerate(docs_visual):
-        pb.subplot(nrow,ncol,d+1)
-        pb.imshow(dv,vmin=vmin,vmax=vmax,cmap=pb.cm.gray)
-        pb.xticks([])
-        pb.yticks([])
-    pb.suptitle('the "documents"')
+docs, vocab = data_creator.basic_data(WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF)
+N_TOPICS = WORDSIZE*N_TOPIC_COEFF
 
 m = LDA3(docs,vocab,N_TOPICS, eps=runspecs['eps'])
 x = m.get_vb_param().copy()
 v1 = vis1()
 v2 = vis2()
-m.makeFunctions()
 
 def runprinter(m, v1, v2):
     if runspecs['runtime_distribution']:

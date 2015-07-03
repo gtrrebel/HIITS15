@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib as mlp
 mlp.use('pdf')
 import sys
-sys.path.append('..')
-from colvb import LDA
+sys.path.append('../colvb')
+from LDA import LDA
 from IPython import parallel
 
 cluster_err =\
@@ -27,10 +27,10 @@ dv = c.direct_view()
 with dv.sync_imports():
     import sys
     import matplotlib
-dv.execute("sys.path.append('..')",block=True)
-dv.execute("matplotlib.use('cairo.pdf')",block=True)
+dv.execute("sys.path.append('../colvb')",block=True)
+dv.execute("matplotlib.use('pdf')",block=True)
 with dv.sync_imports():
-    from colvb import LDA
+    from LDA import LDA
 
 def three_opts(m):
     x = m.get_vb_param().copy()
@@ -65,8 +65,8 @@ docs_ = np.hstack(docs)
 print docs_.size
 
 #build the model and optimize in parallel
-m = LDA.LDA(docs,vocab,N_TOPICS,alpha_0 = 200.)
-mm = [m.copy() for i in range(16)]
+m = LDA(docs,vocab,N_TOPICS,alpha_0 = 200.)
+mm = [m.copy() for i in range(2)]
 [m.randomize() for m in mm]
 r = dv.map(three_opts,mm,block=True)
 

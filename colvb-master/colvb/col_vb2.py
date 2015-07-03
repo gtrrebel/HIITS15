@@ -267,7 +267,7 @@ class col_vb2(GPy.core.model.Model):
             squareNorm = np.dot(natgrad,grad) # used to monitor convergence
 
             #view index
-            if ((iteration % hessian_freq) == 0):
+            if (((iteration + 1) % hessian_freq) == 0):
                 t1 = time.time()
                 hessian = self.newHessian()
                 self.hessian_time += time.time() - t1

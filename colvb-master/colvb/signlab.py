@@ -6,92 +6,32 @@ class signlab():
 
 	def __init__(self, eps = 1e-14):
 		self.eps = eps
+		self.build_functions(eps)
 
-	def index(self, A, opt = 0, k = None, eps = None):
-		if eps == None:
-			eps = self.eps
-		if k != None:
-			return self.index(self.rand_minor(A, None), opt)
-		if opt == 0:
-			return self.bruteIndex(A)
-		elif opt == 1:
-			return self.gaussIndex(A)
+	def set_epsilon(self, *args):
+		self.__init__(*args)
+
+	def build_functions(self, eps):
+		self.functions = {}
+		self.functions['largest'] = lambda eigs: max(eigs)
+		self.functions['smallest'] = lambda eigs: min(eigs)
+		self.functions['positive'] = lambda eigs: sum(eig > 0 for eig in eigs)
+		self.functions['negative'] = lambda eigs: sum(eig < 0 for eig in eigs)
+		self.functions['zero'] = lambda eigs: sum(eig == 0 for eig in eigs)
+		self.functions['epsilon_positive'] = lambda eigs: sum(eig > eps for eig in eigs)
+		self.functions['epsilon_negative'] = lambda eigs: sum(eig < -eps for eig in eigs)
+		self.functions['epsilon_zero'] = lambda eigs: sum(abs(eig) < eps for eig in eigs)
+		self.functions['index'] = lambda eigs: self.functions['positive'](eigs)*1./len(eigs)
+		self.functions['epsilon_index'] = lambda eigs: self.functions['epsilon_positive'](eigs)*1./len(eigs)
 
 	def eigenvalues(self, A):
 		return linalg.eigh(A, eigvals_only=True)
 
-	def pack(self, A, eps=None):
-		if eps == None:
-			eps = self.eps
-		eigvals = linalg.eigh(A, eigvals_only=True)
-		#print len(A), len(eigvals), sum(1 for eigval in eigvals if abs(eigval) < eps)
-		return sum(1 for eigval in eigvals if eigval > eps), max(eigvals), min(eigvals), sum(1 for eigval in eigvals if abs(eigval) < eps)
+	def get_info(self, A, infos, eps=None):
+		if (eps != None) and (eps != self.eps):
+			self.set_epsilon(eps)
+		eigs = self.eigenvalues(A)
+		return [self.functions[info](eigs) for info in infos]
 
-	def largest(self, A):
-		return linalg.eigh(A, eigvals_only=True, eigvals=(len(A) - 1, len(A) - 1))[0]
-
-	def smallest(self, A):
-		return linalg.eigh(A, eigvals_only=True, eigvals=(1, 1))[0]
-
-	def greaterthan(self, A, eps=None):
-		if eps == None:
-			eps = self.eps
-		eigvals = linalg.eigh(A, eigvals_only=True)
-		return sum(1 for eigval in eigvals if eigval > eps)*1./len(A)
-
-	def greaterthann(self, A, eps=None):
-		if eps == None:
-			eps = self.eps
-		eigvals = linalg.eigh(A, eigvals_only=True)
-		return sum(1 for eigval in eigvals if eigval > eps)
-
-	def close_to_zero(self, A, eps=None):
-		if eps == None:
-			eps = self.eps
-		eigvals = linalg.eigh(A, eigvals_only=True)
-		return sum(1 for eigval in eigvals if abs(eigval) < eps)
-
-	def col_minor(self, A, col):
-		return A[col[:, np.newaxis], col]
-
-	def rand_minor(self, A, k):
-		if k == None:
-			k = int(sqrt(len(A))) #default k
-		col = np.array(random.choice(len(A), size=k))
-		return self.col_minor(A, col)
-
-	def bruteIndex(self, A):
-		eigvals = linalg.eigh(A, eigvals_only=True)
-		return sum(1 for eigval in eigvals if eigval < 0)*1./len(A)
-
-	def gaussIndex(self, B):
-		"""Determine the index (alpha) of the spectrum of the matrix A"""
-		A = np.copy(B)
-		n, neg= len(A), 0
-		for i in range(n):
-			if (A[i][i] < 0):
-				neg += 1
-			A[i] /= A[i][i]
-			for j in range(i + 1, n):
-				A[j] -= A[i]*A[j][i]
-		return neg*1./n
-
-	def printHessian(self, A, opt = 3):
-		"""Print the hessian of the function. 
-				opt > 0 for length of output strings for any number, 
-				opt = 0 for stars (*) for nonzero and spaces otherwise
-				opt < 0 for stars (*) for number of absolute value > -opt
-
-		"""
-		if opt == 0:
-			help = lambda x: '  ' if (str(x)[0] == '0') else '* '
-		elif opt < 0:
-			help = lambda x: '  ' if (abs(x) < -opt) else '* '
-		else:
-			help = lambda x: (str(x) + opt*' ')[:opt] + '   '
-		s = ''
-		for b in A:
-			for a in b:
-				s += help(a)
-			s += '\n'
-		print s
+	def pack(self, A):
+		return self.get_info(A, ['epsilon_positive', 'largest', 'smallest', 'epsilon_zero'])
