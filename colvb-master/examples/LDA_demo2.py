@@ -7,10 +7,7 @@ import sys
 sys.path.append('/home/othe/Desktop/HIIT/HIITS15/colvb-master/colvb')
 sys.path.append('/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/colvb')
 from LDA3 import LDA3
-from vis1 import vis1
-from vis2 import vis2
 from data_creator import data_creator
-from runspecs import runspecs
 
 #fetch input
 if len(sys.argv) > 1:
@@ -23,7 +20,7 @@ if len(sys.argv) > 1:
         inp.close()
         invest = None
     else:
-        invest = int(sys.argv[1])
+        invest = sys.argv[1]
         input_list = [int(s) for s in sys.argv[2:]]
 else:
     filename = '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_input/LDA_demo2.py/1/first_test_input.txt'
@@ -36,59 +33,28 @@ else:
 
 WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF = input_list
 
-runspecs = runspecs()
-
-if invest != None:
-    runspecs.set_invest(invest)
-
 print WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF
 
 docs, vocab = data_creator.basic_data(WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF)
 N_TOPICS = WORDSIZE*N_TOPIC_COEFF
 
-m = LDA3(docs,vocab,N_TOPICS, eps=runspecs['eps'])
-x = m.get_vb_param().copy()
-v1 = vis1()
-v2 = vis2()
+eps = 1e-14
 
-def runprinter(m, v1, v2):
-    if runspecs['runtime_distribution']:
-        print 'size: ', len(m.get_vb_param()), '\n', \
-            'optimize_time: ', m.optimize_time, '\n', \
-            'hessian_time: ', m.hessian_time, ' - ', (100*m.hessian_time/m.optimize_time), '%,\n', \
-            'pack_time: ', m.pack_time, ' - ', (100*m.pack_time/m.optimize_time), '%,\n', \
-            'others: ', (m.optimize_time - m.hessian_time - m.pack_time), \
-            ' - ', (100*(m.optimize_time - m.hessian_time - m.pack_time)/m.optimize_time), '%'
-    if runspecs['eigenvalue_histograms']:
-        pb.figure()
-        v2.eigenvalue_histogram(m.eigenvalues())
-        pb.xlabel(m.bound())
-        pb.show()
-    if runspecs['spectrum_length']:
-        eigvals = m.eigenvalues()
-        print max(eigvals) - min(eigvals)
-    if runspecs['final_bound']:
-        print m.bound()
-    if runspecs['distance_travelled']:
-        print m.distance_travelled
-    if runspecs['distance_from_start']:
-        print m.how_far()
+m = LDA3(docs,vocab,N_TOPICS)
+m.runspec_set('eps', eps)
+if invest != None:
+    m.set_invests(end_gather=[invest])
 
-for method in runspecs['methods']:
-    for i in range(runspecs['restarts']):
-        m.optimize(method=method, maxiter=1e4, opt= None, index='pack', hessian_freq=runspecs['hessian_freq'], \
-            print_convergence=runspecs['print_convergence'])
-        runprinter(m, v1, v2)
-        v1.stack(m.info[runspecs['plotstart']:])
+for method in m.runspec_get('methods'):
+    for i in range(m.runspec_get('restarts')):
+        m.optimize(method=method, maxiter=1e4)
+        m.end()
+        m.end_print()
         m.new_param()
 
-if runspecs['basic_plots']:
-    for spec in runspecs['plot_specs']:
-        pb.figure()
-        v1.plot_stack(spec[0], spec[1])
-        pb.show()
+m.end_basic_plots
 
-if runspecs['orig_track_display']:
+if m.runspec_get('orig_track_display'):
     pb.figure()
     m.plot_tracks()
 
@@ -102,13 +68,13 @@ def plot_inferred_topics():
         pb.xticks([])
         pb.yticks([])
 
-if runspecs['orig_learned_topics']:
+if m.runspec_get('orig_learned_topics'):
     plot_inferred_topics()
     pb.suptitle('inferred topics')
     pb.show()
 
 #plot true topics
-if runspecs['orig_true_topics']:
+if m.runspec_get('orig_true_topics'):
     nrow=ncol= np.ceil(np.sqrt(N_TOPICS))
     pb.figure()
     for i,topic in enumerate(topics):

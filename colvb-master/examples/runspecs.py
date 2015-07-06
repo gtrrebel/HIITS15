@@ -37,7 +37,7 @@ class runspecs():
 	def do(self, spec):
 		self.runspecs[spec] = True
 
-	def nodo(self, spec):
+	def undo(self, spec):
 		self.runspecs[spec] = False
 
 	def default(self):

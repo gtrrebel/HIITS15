@@ -8,9 +8,10 @@ import GPy
 import time
 import sys #for flushing
 from signlab import signlab
+from investigable import investigable
 from scipy import linalg
 
-class col_vb2(GPy.core.model.Model):
+class col_vb2(GPy.core.model.Model, investigable):
     """
     A base class for collapsed variational models, using the GPy framework for
     non-variational parameters.
@@ -26,12 +27,10 @@ class col_vb2(GPy.core.model.Model):
     def __init__(self):
         """"""
         GPy.core.model.Model.__init__(self, 'col_vb2')
-
+        investigable.__init__(self, self.eps)
         #stuff for monitoring the different methods
         self.tracks = []
         self.tracktypes = []
-        self.info = []
-        self.lab = signlab(self.eps)
 
         self.hyperparam_interval=50
 
@@ -45,6 +44,9 @@ class col_vb2(GPy.core.model.Model):
         GPy.core.model.Model.randomize(self)
         self.set_vb_param(np.random.randn(self.get_vb_param().size))
 
+    def get_get_param(self):
+        return self.get_vb_param()
+
     def get_vb_param(self):
         """Return a vector of variational parameters"""
         raise NotImplementedError
@@ -54,6 +56,11 @@ class col_vb2(GPy.core.model.Model):
     def bound(self):
         """Returns the lower bound on the marginal likelihood"""
         raise NotImplementedError
+
+    def get_bound(self):
+        """Returns the lower bound on the marginal likelihood"""
+        return self.bound()
+
     def vb_grad_natgrad(self):
         """Returns the gradient and natural gradient of the variational parameters"""
 
@@ -195,35 +202,8 @@ class col_vb2(GPy.core.model.Model):
         self.set_vb_param(opt)
         print nf, 'iters'
 
-    def finite_difference_check(self):
-        phi_orig = self.get_vb_param().copy()
-        M = len(phi_orig)
-        h = 1e-4
-        hr = 1e4
-        hij = np.zeros((M, M))
-        H = np.zeros((M,M))
-        G = np.zeros((M))
-        H2 = self.newHessian()
-        G2 = self.newGradient()
-        G3, G4 = self.vb_grad_natgrad()
-        for i in range(M):
-            hij[i][i] = h
-        for i in range(M):
-            G[i] = hr*(self.f1(phi_orig + hij[i]) - self.f1(phi_orig))
-        for i in range(M):
-            for j in range(M):
-                H[i][j] = hr*hr*(self.f1(phi_orig + hij[i] + hij[j]) - self.f1(phi_orig + hij[i]) - self.f1(phi_orig + hij[j]) + self.f1(phi_orig))
-        '''
-        for i in range(M):
-            print G[i], ' vs ', G2[i], ' ------------ ', G3[i], ' vs ', G4[i]
-        '''
-        for i in range(M):
-            for j in range(M):
-                print H[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H[i][j] - H2[i][j])/(H2[i][j])), '%'
-
     def optimize(self,method=None, maxiter=500, ftol=1e-6, gtol=1e-6, step_length=1., line_search=False, \
-            callback=None, hessian_print = None, opt=None, index = 'pack', hessian_freq=1, orig_iteration_data=False, \
-            new_iteration_data=False, print_convergence=False):
+            callback=None, orig_iteration_data=False, print_convergence=False):
         """
         Optimize the model
 
@@ -267,24 +247,7 @@ class col_vb2(GPy.core.model.Model):
             squareNorm = np.dot(natgrad,grad) # used to monitor convergence
 
             #view index
-            if (((iteration + 1) % hessian_freq) == 0):
-                t1 = time.time()
-                hessian = self.newHessian()
-                self.hessian_time += time.time() - t1
-                if (hessian_print != None):
-                    self.lab.printHessian(hessian, opt)  #                                                            <-  Here
-                if (index != None):
-                    t2 = time.time()
-                    if index == 'pack':
-                        self.index, largest, smallest, close = self.lab.pack(hessian)
-                        self.info.append([self.index, largest, smallest, close, self.bound()])
-                    self.pack_time += time.time() - t2
-                    if new_iteration_data:
-                        print '\r', self.index, self.bound(),
-                        sys.stdout.flush()
-            if self.finite_difference_checks:
-                if iteration == 5:
-                    self.finite_difference_check()
+            self.road()
                 
             #find search direction
             if (method=='steepest') or not iteration:
@@ -368,19 +331,10 @@ class col_vb2(GPy.core.model.Model):
         # track:
         self.closetrack()
 
-    def how_far(self):
-        return linalg.norm(np.array(self.get_vb_param()) - self.orig_params)
-
-    def eigenvalues(self):
-        return self.lab.eigenvalues(self.newHessian())
-
-    def newBound(self):
-        return self.f1(self.get_vb_param().copy())
-
-    def newGradient(self):
+    def get_gradient(self):
         return self.f2(self.get_vb_param().copy())
 
-    def newHessian(self):
+    def get_hessian(self):
         return self.f3(self.get_vb_param().copy())
 
     def optimize_parameters(self):
