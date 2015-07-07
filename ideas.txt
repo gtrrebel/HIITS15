@@ -42,10 +42,9 @@ IDEOITA:
 11. Stochastic variational inference
 	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
 
-Mitä teen juuri nyt (päivitetty 6.7.2015 klo 16):
-- LDA/MOG-yhteensovitus (eri metodit yhdistävä testisysteemi) refaktorointi - MELKO VALMIS
+Mitä teen juuri nyt (päivitetty 7.7.2015 klo 18):
+- Maksimien visualisointi MELKEIN VALMIS
 
 Mitä teen seuraavaksi:
-	- eri maksimit kartalle (kohta 2)
 	- 0-ominaisarvojen hoitaminen
 

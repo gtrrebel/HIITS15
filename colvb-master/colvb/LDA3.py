@@ -57,7 +57,10 @@ class LDA3(col_vb2):
         self.make_functions()
 
     def new_param(self):
-        self.__init__(self.documents, self.vocabulary, self.K, self.alpha_0, self.beta_0)
+        self.set_vb_param(np.random.randn(sum(self.Nd)*self.K))
+
+    def get_param(self):
+        return np.vstack(self.phi).flatten()
 
     def get_vb_param(self):
         return np.vstack(self.phi_).flatten()

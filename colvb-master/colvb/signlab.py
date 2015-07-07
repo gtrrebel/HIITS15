@@ -15,6 +15,7 @@ class signlab():
 		self.functions = {}
 		self.functions['largest'] = lambda eigs: max(eigs)
 		self.functions['smallest'] = lambda eigs: min(eigs)
+		self.functions['spectrum_length'] = lambda eigs: self.functions['largest'](eigs) - self.functions['smallest'](eigs)
 		self.functions['positive'] = lambda eigs: sum(eig > 0 for eig in eigs)
 		self.functions['negative'] = lambda eigs: sum(eig < 0 for eig in eigs)
 		self.functions['zero'] = lambda eigs: sum(eig == 0 for eig in eigs)

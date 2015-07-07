@@ -44,8 +44,8 @@ class col_vb2(GPy.core.model.Model, investigable):
         GPy.core.model.Model.randomize(self)
         self.set_vb_param(np.random.randn(self.get_vb_param().size))
 
-    def get_get_param(self):
-        return self.get_vb_param()
+    def get_param(self):
+        raise NotImplementedError
 
     def get_vb_param(self):
         """Return a vector of variational parameters"""

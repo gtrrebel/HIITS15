@@ -9,41 +9,54 @@ sys.path.append('/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/colv
 from LDA3 import LDA3
 from data_creator import data_creator
 
-#fetch input
-if len(sys.argv) > 1:
-    if 'f' == sys.argv[1]:
-        filename = sys.argv[1]
-        inp = open(filename)
-        input_list = []
-        for line in inp:
-            input_list.append(int(line.split()[0]))
-        inp.close()
-        invest = None
+road_gather = []
+end_gather = []
+basic_data = [3, 10, 5, 2]
+nips_data = [5, 10, 10, 10]
+data_type = 'basic'
+
+j = 1
+while j < len(sys.argv):
+    cmd = sys.argv[j]
+    j += 1
+    if cmd == 'r':
+        k = int(sys.argv[j])
+        while k > 0:
+            k, j = k - 1, j + 1
+            road_gather.append(sys.argv[j])
+    elif cmd == 'e':
+        k = int(sys.argv[j])
+        while k > 0:
+            k, j = k - 1, j + 1
+            end_gather.append(sys.argv[j])
+    elif cmd == 'b':
+        k = 0
+        data_type = 'basic'
+        while k < 4:
+            k, j = k + 1, j + 1
+            basic_data[k] = int(sys.argv[j])
+    elif cmd == 'n':
+        data_type = 'nips'
+        while k < 4:
+            k, j = k + 1, j + 1
+            nips_data[k] = int(sys.argv[j])
     else:
-        invest = sys.argv[1]
-        input_list = [int(s) for s in sys.argv[2:]]
-else:
-    filename = '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_input/LDA_demo2.py/1/first_test_input.txt'
-    inp = open(filename)
-    input_list = []
-    for line in inp:
-        input_list.append(int(line.split()[0]))
-    inp.close()
-    invest = None
+        print 'oh no', j
+        break
+    j += 1
 
-WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF = input_list
-
-print WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF
-
-docs, vocab = data_creator.basic_data(WORDSIZE, N_DOCS, DOCUMENT_LENGTH, N_TOPIC_COEFF)
-N_TOPICS = WORDSIZE*N_TOPIC_COEFF
+if data_type == 'basic':
+    docs, vocab = data_creator.basic_data(*basic_data)
+    N_TOPICS = basic_data[0]*basic_data[3]
+elif data_type == 'nips':
+    docs, vocab = data_creator.nips_data(*nips_data)
+    N_TOPICS = basic_data[0]
 
 eps = 1e-14
 
 m = LDA3(docs,vocab,N_TOPICS)
 m.runspec_set('eps', eps)
-if invest != None:
-    m.set_invests(end_gather=[invest])
+m.set_invests(road_gather= road_gather, end_gather=end_gather)
 
 for method in m.runspec_get('methods'):
     for i in range(m.runspec_get('restarts')):

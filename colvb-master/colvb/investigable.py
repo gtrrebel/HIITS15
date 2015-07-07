@@ -3,24 +3,42 @@ from runspecs import runspecs
 from vis1 import vis1
 from vis2 import vis2
 from scipy import linalg
+import numpy as np
 
 
 class investigable():
 
-	def __init__(self, eps=1e-14, road_gather=[], end_gather=[]):
+	def __init__(self, eps=1e-14):
 		self.lab = signlab(self.eps)
 		self.runspecs = runspecs()
+		self.road_data = {}
+		self.end_data = {}
+		self.road_gather = []
+		self.end_gather = []
 		v1 = vis1()
 		v2 = vis2()
 
 	def road(self):
+		index_gathers = []
 		for gather in self.road_gather:
-			self.road_data[gather].append(getattr(self, gather)())
+			if hasattr(self, gather):
+				self.road_data[gather].append(getattr(self, gather)())
+			else:
+				index_gathers.append(gather)
+		index_infos = self.lab.get_info(self.get_hessian(), index_gathers)
+		for gather, info in zip(index_gathers, index_infos):
+			self.road_data[gather] = info
 
 	def end(self):
-		self.end_data = {}
+		index_gathers = []
 		for gather in self.end_gather:
-			self.end_data[gather] = getattr(self, gather)()
+			if hasattr(self, gather):
+				self.end_data[gather] = getattr(self, gather)()
+			else:
+				index_gathers.append(gather)
+		index_infos = self.lab.get_info(self.get_hessian(), index_gathers)
+		for gather, info in zip(index_gathers, index_infos):
+			self.end_data[gather] = info
 
 	def get_bound(self):
 		raise NotImplementedError( "Implement bound calculating method \"get_bound\"")
@@ -73,6 +91,9 @@ class investigable():
 
 	def how_far(self):
 		return linalg.norm(np.array(self.get_param()) - self.orig_params)
+
+	def distance_travelled(self):
+		return self.distance_travelled
 
 	def set_invests(self, road_gather=[], end_gather=[]):
 		self.road_data = {}
