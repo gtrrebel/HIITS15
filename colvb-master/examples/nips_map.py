@@ -8,10 +8,10 @@ from LDA3 import LDA3
 from data_creator import data_creator
 from graph_vis import graph_vis
 
-basic_data = [3, 10, 5, 2]
-nips_data = [5, 10, 10, 10]
+basic_data = [3, 50, 30, 2]
+nips_data = [5, 50, 200, 300]
 data_type = 'nips'
-run_count = 5
+run_count = 100
 method = 'steepest'
 
 j = 1
@@ -44,6 +44,7 @@ elif data_type == 'nips':
     N_TOPICS = basic_data[0]
 
 eps = 1e-14
+close_eps = 1
 
 def dist(v1, v2):
     return linalg.norm(v1-v2)
@@ -58,6 +59,24 @@ for i in range(run_count):
     m.optimize(method=method, maxiter=1e4)
     maxs.append((m.bound(), m.get_param()))
 
+def merge(maxs):
+    real_maxs = []
+    for ma in maxs:
+        add = True
+        for real_ma in real_maxs:
+            if dist(ma[1], real_ma[1]) < close_eps:
+                real_ma[2] += 1
+                add = False
+                break
+        if add:
+            real_maxs.append([ma[0], ma[1], 1])
+    return real_maxs
+
+maxs = merge(maxs)
+
+def all_counts(maxs):
+    return [ma[2] for ma in maxs]
+
 def all_bounds(maxs):
     return [ma[0] for ma in maxs]
 
@@ -68,6 +87,13 @@ def all_dists(maxs):
         for ma2 in maxs:
             dists[-1].append(dist(ma1[1], ma2[1]))
     return dists
+
+def print_all_dists(maxs):
+    dists = all_dists(maxs)
+    for row in dists:
+        for dist in row:
+            print dist,
+        print
 
 def tuple_dists(maxs):
     dists = all_dists(maxs)
@@ -94,7 +120,9 @@ def sorted_dists(maxs):
             dists.append(dist(maxs[i][1], maxs[j][1]))
     return sorted(dists)       
 
-graph_vis.draw(tuple_dists(maxs), all_bounds(maxs))
+print_all_dists(maxs)
+
+graph_vis.draw(tuple_dists(maxs), all_bounds(maxs), all_counts(maxs))
 '''
 print min_max_dist(maxs)
 for f in sorted_dists(maxs):

@@ -5,7 +5,7 @@ IDEOITA:
 	- Indeksin tutkiminen:
 		-Gaussian: buginen - KESKEYTETTY
 		-Scipy: toiminee - TEHTY
-	- Muita algoritmeja, tuntuvat olevan O(n^3), approksimointiin ei löytynyt mitään hyvää - KESKEYTETTY
+	- Löytyi algoritmeja! kts. toRead.txt
 
 2. Eri maksimit
 	-lähdetään monesta eri alkuarvosta, mihin päädytään. Missä maksimit sijaitsevat? Voisiko maailman kartoittaa? - TULOSSA
@@ -42,8 +42,8 @@ IDEOITA:
 11. Stochastic variational inference
 	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
 
-Mitä teen juuri nyt (päivitetty 7.7.2015 klo 18):
-- Maksimien visualisointi MELKEIN VALMIS
+Mitä teen juuri nyt (päivitetty 8.7.2015 klo 17):
+- Ominaisarvojakaumien approksimointiin uudet algoritmit ALUSSA
 
 Mitä teen seuraavaksi:
 	- 0-ominaisarvojen hoitaminen

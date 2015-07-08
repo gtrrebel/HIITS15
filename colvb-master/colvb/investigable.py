@@ -21,13 +21,15 @@ class investigable():
 	def road(self):
 		index_gathers = []
 		for gather in self.road_gather:
+			print 'fail'
 			if hasattr(self, gather):
 				self.road_data[gather].append(getattr(self, gather)())
 			else:
 				index_gathers.append(gather)
-		index_infos = self.lab.get_info(self.get_hessian(), index_gathers)
-		for gather, info in zip(index_gathers, index_infos):
-			self.road_data[gather] = info
+		if index_gathers:
+			index_infos = self.lab.get_info(self.get_hessian(), index_gathers)
+			for gather, info in zip(index_gathers, index_infos):
+				self.road_data[gather] = info
 
 	def end(self):
 		index_gathers = []
@@ -36,9 +38,10 @@ class investigable():
 				self.end_data[gather] = getattr(self, gather)()
 			else:
 				index_gathers.append(gather)
-		index_infos = self.lab.get_info(self.get_hessian(), index_gathers)
-		for gather, info in zip(index_gathers, index_infos):
-			self.end_data[gather] = info
+		if index_gathers:
+			index_infos = self.lab.get_info(self.get_hessian(), index_gathers)
+			for gather, info in zip(index_gathers, index_infos):
+				self.end_data[gather] = info
 
 	def get_bound(self):
 		raise NotImplementedError( "Implement bound calculating method \"get_bound\"")
