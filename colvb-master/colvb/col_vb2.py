@@ -27,7 +27,7 @@ class col_vb2(GPy.core.model.Model, investigable):
     def __init__(self):
         """"""
         GPy.core.model.Model.__init__(self, 'col_vb2')
-        investigable.__init__(self, self.eps)
+        investigable.__init__(self)
         #stuff for monitoring the different methods
         self.tracks = []
         self.tracktypes = []

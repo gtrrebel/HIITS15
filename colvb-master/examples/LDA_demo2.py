@@ -33,13 +33,13 @@ while j < len(sys.argv):
         k = 0
         data_type = 'basic'
         while k < 4:
-            k, j = k + 1, j + 1
             basic_data[k] = int(sys.argv[j])
+            k, j = k + 1, j + 1
     elif cmd == 'n':
         data_type = 'nips'
         while k < 4:
-            k, j = k + 1, j + 1
             nips_data[k] = int(sys.argv[j])
+            k, j = k + 1, j + 1
     else:
         print 'oh no', j
         break

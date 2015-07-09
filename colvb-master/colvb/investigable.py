@@ -1,4 +1,5 @@
 from signlab import signlab
+from signlab2 import signlab2
 from runspecs import runspecs
 from vis1 import vis1
 from vis2 import vis2
@@ -8,8 +9,9 @@ import numpy as np
 
 class investigable():
 
-	def __init__(self, eps=1e-14):
+	def __init__(self):
 		self.lab = signlab(self.eps)
+		self.lab2 = signlab2()
 		self.runspecs = runspecs()
 		self.road_data = {}
 		self.end_data = {}
@@ -89,6 +91,9 @@ class investigable():
 			for pair in self.runspec_get('plot_specs'):
 				self.v1.plot_stack(pair[0], pair[1])
 
+	def cheb_index(self):
+		return self.lab2.chebyshev_index(self.get_hessian())
+
 	def eigenvalues(self):
 		return self.lab.eigenvalues(self.get_hessian())
 
@@ -107,6 +112,8 @@ class investigable():
 		self.end_gather = end_gather
 
 	def runspec_set(self, spec, value):
+		if spec=='eps':
+			self.lab.set_epsilon(value)
 		self.runspecs.set(spec, value)
 
 	def runspec_do(self, spec):

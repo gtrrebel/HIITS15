@@ -26,6 +26,10 @@ class signlab():
 		self.functions['epsilon_index'] = lambda eigs: self.functions['epsilon_positive'](eigs)*1./len(eigs)
 
 	def eigenvalues(self, A):
+		print linalg.det(A)
+		print self.eps
+		for i in np.linspace(-5, 5, 20):
+			print self.functions['epsilon_positive'](linalg.eigh(A + i*np.identity(len(A)), eigvals_only=True)-i*np.ones(len(A)))
 		return linalg.eigh(A, eigvals_only=True)
 
 	def get_info(self, A, infos, eps=None):

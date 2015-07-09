@@ -54,7 +54,7 @@ class LDA3(col_vb2):
         self.beta_0 = np.ones(self.V)*beta_0
 
         self.set_vb_param(np.random.randn(sum(self.Nd)*self.K))
-        #self.make_functions()
+        self.make_functions()
 
     def new_param(self):
         self.set_vb_param(np.random.randn(sum(self.Nd)*self.K))

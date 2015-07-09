@@ -42,9 +42,9 @@ IDEOITA:
 11. Stochastic variational inference
 	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
 
-Mitä teen juuri nyt (päivitetty 8.7.2015 klo 17):
-- Ominaisarvojakaumien approksimointiin uudet algoritmit ALUSSA
+Mitä teen juuri nyt (päivitetty 9.7.2015 klo 17):
+- 0-ominaisarvojen hoitaminen
 
 Mitä teen seuraavaksi:
-	- 0-ominaisarvojen hoitaminen
+	- Trust Region/ Stochastic ihmettelyä
 
