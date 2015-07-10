@@ -2,7 +2,7 @@ import numpy as np
 
 class signlab2():
 
-	def __init__(self, a=0.0, b=0.5, deg= 80, jack=False):
+	def __init__(self, a=0, b=0.5, deg= 120, jack=False):
 		self.a, self.b, self.deg, self.jack = a, b, deg, jack
 		self.chebyshev_coeff()
 
