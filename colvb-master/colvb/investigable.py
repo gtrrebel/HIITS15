@@ -97,11 +97,22 @@ class investigable():
 	def eigenvalues(self):
 		return self.lab.eigenvalues(self.get_hessian())
 
+	def inverse_eigenvalues(self):
+		inv = np.linalg.inv(self.get_hessian())
+		eigs = 1/self.lab.eigenvalues(inv)
+		return sum(1 for i in eigs if abs(i) < self.eps)
+
 	def how_far(self):
 		return linalg.norm(np.array(self.get_param()) - self.orig_params)
 
 	def distance_travelled(self):
 		return self.distance_travelled
+
+	def rank(self):
+		return np.linalg.matrix_rank(self.get_hessian())
+
+	def det(self):
+		return np.linalg.det(self.get_hessian())
 
 	def set_invests(self, road_gather=[], end_gather=[]):
 		self.road_data = {}

@@ -132,6 +132,9 @@ class LDA3(col_vb2):
         self.f3 = theano.function([x], hess)
         self.theanotime = time.time() -  theanotime
 
+    def get_sums(self, axis = 0):
+        return self.get_param().reshape((self.D, self.N, self.K)).sum(axis)
+
     def print_topics(self,wordlim=10):
         vocab_indexes = [np.argsort(b)[::-1] for b in self.beta_p]
         for i in np.argsort(sum(self.alpha_p))[::-1]:

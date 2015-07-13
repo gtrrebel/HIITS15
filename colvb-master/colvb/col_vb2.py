@@ -238,6 +238,7 @@ class col_vb2(GPy.core.model.Model, investigable):
         self.distance_travelled = 0
 
         while True:
+            self.hessian_calc = False
 
             if not callback is None:
                 callback()
@@ -335,7 +336,10 @@ class col_vb2(GPy.core.model.Model, investigable):
         return self.f2(self.get_vb_param().copy())
 
     def get_hessian(self):
-        return self.f3(self.get_vb_param().copy())
+        if self.hessian_calc == False:
+            self.hessian = self.f3(self.get_vb_param().copy())
+            self.hessian_calc = True
+        return self.hessian
 
     def optimize_parameters(self):
         """ optimises the model parameters (non variational parameters)
