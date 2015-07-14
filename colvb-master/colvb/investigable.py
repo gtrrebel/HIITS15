@@ -102,6 +102,9 @@ class investigable():
 		eigs = 1/self.lab.eigenvalues(inv)
 		return sum(1 for i in eigs if abs(i) < self.eps)
 
+	def eigenvectors(self):
+		return np.linalg.eig(self.get_hessian())
+
 	def how_far(self):
 		return linalg.norm(np.array(self.get_param()) - self.orig_params)
 

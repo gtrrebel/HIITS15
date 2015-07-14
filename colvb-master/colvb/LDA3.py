@@ -135,6 +135,14 @@ class LDA3(col_vb2):
     def get_sums(self, axis = 0):
         return self.get_param().reshape((self.D, self.N, self.K)).sum(axis)
 
+    def remove_topic(self, k):
+        phis = self.get_vb_param()
+        to_delete = np.arange(k, phis.size, self.K)
+        self.K -= 1
+        self.alpha_0 = self.alpha_0[0]*self.K
+        self.document_index = np.vstack((np.hstack((0,np.cumsum(self.Nd)[:-1])),np.cumsum(self.Nd))).T*self.K
+        self.set_vb_param(np.delete(phis, to_delete))
+
     def print_topics(self,wordlim=10):
         vocab_indexes = [np.argsort(b)[::-1] for b in self.beta_p]
         for i in np.argsort(sum(self.alpha_p))[::-1]:

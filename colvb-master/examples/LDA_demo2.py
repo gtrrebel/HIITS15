@@ -66,7 +66,7 @@ m.set_invests(road_gather= road_gather, end_gather=end_gather)
 for method in m.runspec_get('methods'):
     for i in range(m.runspec_get('restarts')):
         m.optimize(method=method, maxiter=1e4)
-        print m.get_sums(1)/m.N
+        #print m.get_sums(1)/m.N
         #print m.get_param().reshape((m.D, m.N, m.K))
         #m.print_topics()
         m.end()
