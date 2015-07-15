@@ -28,23 +28,23 @@ IDEOITA:
 	-Miltä näyttää matka huipulle, tasankoja, monessa kerroksessa? Ensivaikutelma: monia kerroksia - KESKEYTETTY
 
 7. Spektri lokaalisti
-	- Miltä näyttää spektri maksimissa, miten parametrit vaikuttavat? - TULOSSA
+	- Miltä näyttää spektri maksimissa, miten parametrit vaikuttavat? - KESKEN
 
 8. Oikeaa dataa
-	- nips11-datan käyttö - TULOSSA
+	- nips11-datan käyttö - TEHTY
 
 9. Ipythonin dokumentoiva käyttö
 	- lienee TULOSSA
 
 10. 0-ominaisarvot
-	- Mitäs niille? Mistä johtuvat: parametri ei vaikuta -> parametrin häivytys. Muita syitä? Epästabiilisuus? TULOSSA (TARVITTAESSA)
+	- Mitäs niille? Mistä johtuvat: parametri ei vaikuta -> parametrin häivytys. Muita syitä? Epästabiilisuus? TEHTY
 
 11. Stochastic variational inference
 	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
 
 Mitä teen juuri nyt (päivitetty 14.7.2015 klo 19):
-- 0-ominaisarvojen tutkimista
+- Trust Region /Stochastic ihmettelyä
 
 Mitä teen seuraavaksi:
-	- Trust Region/ Stochastic ihmettelyä
+	- Hmm
 
