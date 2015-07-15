@@ -9,9 +9,9 @@ from data_creator import data_creator
 from graph_vis import graph_vis
 
 basic_data = [3, 50, 30, 2]
-nips_data = [5, 50, 200, 300]
+nips_data = [5, 20, 80, 150]
 data_type = 'nips'
-run_count = 100
+run_count = 50
 method = 'steepest'
 
 j = 1
@@ -44,13 +44,13 @@ elif data_type == 'nips':
     N_TOPICS = basic_data[0]
 
 eps = 1e-14
-close_eps = 1
+close_eps = 10
 
 def dist(v1, v2):
     return linalg.norm(v1-v2)
 
 maxs = []
-m = LDA3(docs,vocab,N_TOPICS)
+m = LDA3(docs,vocab,N_TOPICS, alpha_0=200.0)
 m.runspec_set('eps', eps)
 
 for i in range(run_count):

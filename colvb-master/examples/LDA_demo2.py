@@ -49,6 +49,7 @@ while j < len(sys.argv):
 
 alpha_0 = 1
 eps = 1e-14
+rest = 10
 
 if data_type == 'basic':
     docs, vocab = data_creator.basic_data(*basic_data)
@@ -61,6 +62,7 @@ elif data_type == 'nips':
 
 m = LDA3(docs,vocab,N_TOPICS,alpha_0=alpha_0)
 m.runspec_set('eps', eps)
+m.runspec_set('restarts', rest)
 m.set_invests(road_gather= road_gather, end_gather=end_gather)
 
 for method in m.runspec_get('methods'):
