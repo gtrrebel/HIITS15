@@ -11,11 +11,8 @@ from scipy.special import gammaln, digamma
 from scipy import stats
 from scipy import linalg
 from col_mix2 import collapsed_mixture2
-from ad import adnumber
-from ad.admath import *
 import theano.tensor as T
 from theano import *
-from autodiff import function, gradient, hessian_vector, Function, Gradient, Symbolic, tag
 import time
 import random
 import matplotlib.pyplot as plt
@@ -24,7 +21,9 @@ class MOG2(collapsed_mixture2):
     """
     A Mixture of Gaussians
     """
-    def __init__(self, X, K=2, prior_Z='symmetric', alpha=10.):
+    def __init__(self, X, K=2, prior_Z='symmetric', alpha=10., eps=1e-14, finite_difference_checks=False):
+        self.eps = eps
+        self.finite_difference_checks = finite_difference_checks
         self.X = X
         self.N, self.D = X.shape
 
@@ -40,6 +39,7 @@ class MOG2(collapsed_mixture2):
         self.XXT = self.X[:,:,np.newaxis]*self.X[:,np.newaxis,:]
 
         collapsed_mixture2.__init__(self, self.N, K, prior_Z, alpha)
+        self.make_functions()
 
     def do_computations(self):
         #computations needed for bound, gradient and predictions
@@ -76,7 +76,7 @@ class MOG2(collapsed_mixture2):
 
         return grad.flatten(), natgrad.flatten()
 
-    def makeFunctions(self):
+    def make_functions(self):
         """Initializes the theano-functions for
             f1 = regular theano evaluation of the bound
             f2 = gradient of the bound wrt r_nk:s (phi:s)
@@ -110,7 +110,7 @@ class MOG2(collapsed_mixture2):
         #Make the functions
         input = [x]
         self.f1 = theano.function(input, bound)
-        grad = theano.gradient.jacobian(bound, wrt=input)[0].reshape((self.N, self.K))
+        grad = theano.gradient.jacobian(bound, wrt=input)[0]
         self.f2 = theano.function(input, grad)
         hess = theano.gradient.hessian(bound, wrt=input)[0]
         self.f3 = theano.function(input, hess)

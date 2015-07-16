@@ -247,7 +247,6 @@ class col_vb2(GPy.core.model.Model, investigable):
             grad,natgrad = -grad,-natgrad
             squareNorm = np.dot(natgrad,grad) # used to monitor convergence
 
-            #view index
             self.road()
                 
             #find search direction
@@ -336,8 +335,11 @@ class col_vb2(GPy.core.model.Model, investigable):
         return self.f2(self.get_vb_param().copy())
 
     def get_hessian(self):
+        collaps = False
         if self.hessian_calc == False:
             self.hessian = self.f3(self.get_vb_param().copy())
+            if collaps:
+                self.hessian = self.collapse(self.hessian)
             self.hessian_calc = True
         return self.hessian
 

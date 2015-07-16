@@ -77,8 +77,8 @@ for i in range(Nrestarts):
 
 #mehtods: 'steepest', 'PR', 'FR', 'HS'
 main_time = time.time()
-for method in ['steepest',]:
-    for st in starts:
+for method in m.runspec_get('methods'):
+    for i in range(m.runspec_get('restarts')):
         print 'Start\nMethod used: ', method
         start_time = time.time()
         m.set_vb_param(st)

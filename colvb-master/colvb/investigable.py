@@ -23,7 +23,6 @@ class investigable():
 	def road(self):
 		index_gathers = []
 		for gather in self.road_gather:
-			print 'fail'
 			if hasattr(self, gather):
 				self.road_data[gather].append(getattr(self, gather)())
 			else:
@@ -60,23 +59,29 @@ class investigable():
 	def finite_difference_check(self):
 		phi_orig = self.get_param().copy()
 		M = len(phi_orig)
+		print M
 		h = 1e-4
 		hr = 1e4
 		hij = np.zeros((M, M))
 		H = np.zeros((M,M))
 		G = np.zeros((M))
-		H2 = self.hessian()
-		G2 = self.gradient()
+		H2 = self.get_hessian()
+		G2 = self.get_gradient()
 		for i in range(M):
 			hij[i][i] = h
 		for i in range(M):
 			G[i] = hr*(self.f1(phi_orig + hij[i]) - self.f1(phi_orig))
 		for i in range(M):
+			print i
 			for j in range(M):
 				H[i][j] = hr*hr*(self.f1(phi_orig + hij[i] + hij[j]) - self.f1(phi_orig + hij[i]) - self.f1(phi_orig + hij[j]) + self.f1(phi_orig))
+		'''
 		for i in range(M):
 			for j in range(M):
 				print H[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H[i][j] - H2[i][j])/(H2[i][j])), '%'
+		'''
+		for i in range(M):
+			print G[i], ' vs ', G2[i], ' ------ rel. err. ', 100*abs((G[i] - G2[i])/(G2[i])), '%'
 
 	def end_print(self):
 		if self.runspec_get('runtime_distribution'):
@@ -97,6 +102,9 @@ class investigable():
 	def eigenvalues(self):
 		return self.lab.eigenvalues(self.get_hessian())
 
+	def dimension(self):
+		return len(self.get_param())
+
 	def inverse_eigenvalues(self):
 		inv = np.linalg.inv(self.get_hessian())
 		eigs = 1/self.lab.eigenvalues(inv)
@@ -116,6 +124,19 @@ class investigable():
 
 	def det(self):
 		return np.linalg.det(self.get_hessian())
+
+	def collapse(self, hessian):
+		collapsed = np.zeros((self.D*self.N*(self.K - 1), self.D*self.N*(self.K - 1)))
+		for i1 in xrange(self.K - 1):
+			for i2 in xrange(self.K - 1):
+				for j1 in xrange(self.D*self.N):
+					for j2 in xrange(self.D*self.N):
+						collapsed[j1*(self.K - 1)+i1][j2*(self.K - 1)+i2] = hessian[j1*self.K+i1][j2*self.K+i2] - \
+																			hessian[j1*self.K+i1][j2*self.K+self.K-1] - \
+																			hessian[j1*self.K+self.K-1][j2*self.K+i2] + \
+																			hessian[j1*self.K+self.K-1][j2*self.K+self.K-1]
+		self.collapsed = collapsed
+		return collapsed
 
 	def set_invests(self, road_gather=[], end_gather=[]):
 		self.road_data = {}

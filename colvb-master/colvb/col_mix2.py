@@ -50,6 +50,9 @@ class collapsed_mixture2(col_vb2):
     def get_vb_param(self):
         return self.phi_.flatten()
 
+    def get_param(self):
+        return self.phi.flatten()
+
     def mixing_prop_bound(self):
         """
         The portion of the bound which is provided by the mixing proportions

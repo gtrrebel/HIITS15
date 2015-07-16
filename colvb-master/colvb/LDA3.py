@@ -132,9 +132,6 @@ class LDA3(col_vb2):
         self.f3 = theano.function([x], hess)
         self.theanotime = time.time() -  theanotime
 
-    def get_sums(self, axis = 0):
-        return self.get_param().reshape((self.D, self.N, self.K)).sum(axis)
-
     def remove_topic(self, k):
         phis = self.get_vb_param()
         to_delete = np.arange(k, phis.size, self.K)

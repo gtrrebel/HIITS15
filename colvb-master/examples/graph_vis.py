@@ -12,7 +12,6 @@ class graph_vis():
 		bound_order = sorted(range(len(A)),key=lambda x:bound_order[x], reverse=True)
 		lab = [str(order) + ": " + str(count) for order, count in zip(bound_order, counts)]
 		dt = [('len', float)]
-		print A[0][1]
 		A = np.array(A)/10
 		A = A.view(dt)
 

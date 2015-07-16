@@ -63,3 +63,12 @@ class data_creator():
 		    doc_topic_probs.append(topic_probs)
 		    docs.append(np.array([np.random.multinomial(1,topics[i]).argmax() for i in latents]))
 		return docs, vocab
+
+	@staticmethod
+	def mog_basic_data(Nclust, dim, Nmin, Nmax, means_coeff):
+		Ndata = np.random.randint(Nmin, Nmax, Nclust)
+		means = np.random.randn(Nclust, dim)*means_coeff
+		aa = [np.random.randn(dim, dim+1) for i in range(Nclust)]
+		Sigmas = [np.dot(a, a.T) for a in aa]
+		X = np.vstack([np.random.multivariate_normal(mu, cov, (n,)) for mu, cov, n in zip(means, Sigmas, Ndata)])/100
+		return X, Nclust

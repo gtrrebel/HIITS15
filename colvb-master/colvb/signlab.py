@@ -24,6 +24,7 @@ class signlab():
 		self.functions['epsilon_zero'] = lambda eigs: sum(abs(eig) < eps for eig in eigs)
 		self.functions['index'] = lambda eigs: self.functions['positive'](eigs)*1./len(eigs)
 		self.functions['epsilon_index'] = lambda eigs: self.functions['epsilon_positive'](eigs)*1./len(eigs)
+		self.functions['eigenvalues'] = lambda eigs: eigs
 
 	def eigenvalues(self, A):
 		return linalg.eigh(A, eigvals_only=True)
