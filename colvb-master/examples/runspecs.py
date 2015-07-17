@@ -6,27 +6,32 @@ class runspecs():
 
 		self.runspecs = {}
 
-		self.runspecs['restarts'] = 1
-		self.runspecs['plotstart'] = 3
-		self.runspecs['methods'] = ['steepest']
-		self.runspecs['plot_specs'] = [('iter', 'index'), ('iter', 'bound')]
-		self.runspecs['eps'] = 1e-14
-		self.runspecs['finite_difference_check'] = False
-		self.runspecs['hessian_freq'] = 1
+		self.runspecs['basics'] = {}
+		self.runspecs['prints'] = {}
+		self.runspecs['display'] = {}
+		self.runspecs['tests'] = {}
 
-		self.runspecs['runtime_distribution'] = False
-		self.runspecs['eigenvalue_histograms'] = False
-		self.runspecs['basic_plots'] = False
-		self.runspecs['print_convergence'] = False
+		self.runspecs['basics']['restarts'] = 1
+		self.runspecs['basics']['hessian_freq'] = 1
+		self.runspecs['basics']['eps'] = 1e-14
+		self.runspecs['basics']['methods'] = ['steepest']
 
-		self.runspecs['spectrum_length'] = False
-		self.runspecs['final_bound'] = False
-		self.runspecs['distance_travelled'] = False
-		self.runspecs['distance_from_start'] = False
+		self.runspecs['prints']['plotstart'] = 3
+		self.runspecs['prints']['runtime_distribution'] = False
+		self.runspecs['prints']['print_convergence'] = False
+		self.runspecs['prints']['spectrum_length'] = False
+		self.runspecs['prints']['final_bound'] = False
+		self.runspecs['prints']['distance_travelled'] = False
+		self.runspecs['prints']['distance_from_start'] = False
 
-		self.runspecs['orig_track_display'] = False
-		self.runspecs['orig_learned_topics'] = False
-		self.runspecs['orig_true_topics'] = False
+		self.runspecs['display']['plot_specs'] = [('iter', 'index'), ('iter', 'bound')]
+		self.runspecs['display']['eigenvalue_histograms'] = False
+		self.runspecs['display']['basic_plots'] = False
+		self.runspecs['display']['orig_track_display'] = False
+		self.runspecs['display']['orig_learned_topics'] = False
+		self.runspecs['display']['orig_true_topics'] = False
+
+		self.runspecs['tests']['finite_difference_check'] = False
 
 	def __getitem__(self, spec):
 		return self.runspecs[spec]

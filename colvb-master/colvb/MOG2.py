@@ -76,11 +76,24 @@ class MOG2(collapsed_mixture2):
 
         return grad.flatten(), natgrad.flatten()
 
+    def vb_grad_natgrad_test(self):
+        """Gradients of the bound"""
+        x_m = self.X[:,:,None]-self.mun[None,:,:]
+        dS = x_m[:,:,None,:]*x_m[:,None,:,:]
+        SnidS = self.Sns_inv[None,:,:,:]*dS
+        dlndtS_dphi = np.dot(np.ones(self.D), np.dot(np.ones(self.D), SnidS))
+
+        grad_phi =  - self.Sns_halflogdet -0.5*dlndtS_dphi*self.vNs #+ self.Hgrad - 1
+        natgrad = grad_phi - np.sum(self.phi*grad_phi, 1)[:,None] # corrects for softmax (over) parameterisation
+        grad = natgrad*self.phi
+
+        return grad.flatten(), natgrad.flatten()
+
     def make_functions(self):
         """Initializes the theano-functions for
             f1 = regular theano evaluation of the bound
-            f2 = gradient of the bound wrt r_nk:s (phi:s)
-            f3 = hessian of the bound wrt r_nk:s flattened to (N * K) x (N * K) matrix
+            f2 = gradient of the bound wrt r_nk:s (phi_:s)
+            f3 = hessian of the bound wrt r_nk:s (phi_:s)
         """
 
         #Gather the bound
@@ -98,11 +111,11 @@ class MOG2(collapsed_mixture2):
         mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
         Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
         bound = 0
-        bound += -T.tensordot(T.log(phi + 1e-100), phi) #entropy H_L                                    #Ei ihan
-        bound += -self.D/2. * T.log(kappas).sum()                                                       #toimii
-        bound += T.gammaln(alphas).sum()
-        bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()                                     #toimii
-        boundH = 0
+        #bound += -T.tensordot(T.log(phi + 1e-10), phi) #entropy H_L                                 #Ei ihan
+        #bound += -self.D/2. * T.log(kappas).sum()                                                   #toimii
+        #bound += T.gammaln(alphas).sum()                                                            #toimii (ainakin symmetric)
+        #bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()                                 #toimii
+        boundH = 0                                                                                  #melko hyvin
         for k in range(self.K):
             boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
         bound -= boundH

@@ -1,6 +1,7 @@
 from signlab import signlab
 from signlab2 import signlab2
 from runspecs import runspecs
+from model_display import model_display
 from vis1 import vis1
 from vis2 import vis2
 from scipy import linalg
@@ -17,8 +18,10 @@ class investigable():
 		self.end_data = {}
 		self.road_gather = []
 		self.end_gather = []
-		v1 = vis1()
-		v2 = vis2()
+		self.v1 = vis1()
+		self.v2 = vis2()
+		self.md = model_display(self)
+		print 'jee'
 
 	def road(self):
 		index_gathers = []
@@ -56,43 +59,50 @@ class investigable():
 	def get_param(self):
 		raise NotImplementedError( "Implement parameter returning method \"get_param\"")
 
+	def get_vb_param(self):
+		raise NotImplementedError( "Implement vb parameter returning method \"get_vb_param\"")
+
 	def finite_difference_check(self):
-		phi_orig = self.get_param().copy()
+		phi_orig = self.get_vb_param().copy()
+		phi_orig2 = self.get_param().copy()
 		M = len(phi_orig)
-		print M
-		h = 1e-4
-		hr = 1e4
-		hij = np.zeros((M, M))
-		H = np.zeros((M,M))
-		G = np.zeros((M))
-		H2 = self.get_hessian()
-		G2 = self.get_gradient()
-		for i in range(M):
-			hij[i][i] = h
-		for i in range(M):
-			G[i] = hr*(self.f1(phi_orig + hij[i]) - self.f1(phi_orig))
-		for i in range(M):
-			print i
-			for j in range(M):
-				H[i][j] = hr*hr*(self.f1(phi_orig + hij[i] + hij[j]) - self.f1(phi_orig + hij[i]) - self.f1(phi_orig + hij[j]) + self.f1(phi_orig))
-		'''
-		for i in range(M):
-			for j in range(M):
-				print H[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H[i][j] - H2[i][j])/(H2[i][j])), '%'
-		'''
-		for i in range(M):
-			print G[i], ' vs ', G2[i], ' ------ rel. err. ', 100*abs((G[i] - G2[i])/(G2[i])), '%'
+		hessian_check, gradient_check = False, True
+		d = 4
+		h, hr = float('1e-' + str(d)), float('1e' + str(d))
+		hij = h*np.eye(M)
+		if hessian_check:
+			H = np.zeros((M,M))
+			H2 = self.get_hessian()
+			for i in xrange(M):
+				for j in xrange(M):
+					H[i][j] = hr*hr*(self.f1(phi_orig + hij[i] + hij[j]) - self.f1(phi_orig + hij[i]) - self.f1(phi_orig + hij[j]) + self.f1(phi_orig))
+			for i in xrange(M):
+				for j in xrange(M):
+					if abs(H[i][j]) > h:
+						print H[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H[i][j] - H2[i][j])/(H2[i][j])), '%'
+		if gradient_check:
+			G = np.zeros((M))
+			G2, G3 = self.vb_grad_natgrad_test()
+			for i in xrange(M):
+				G[i] = hr*(self.f1(phi_orig + hij[i]) - self.f1(phi_orig))
+			for i in xrange(M):
+				if abs(G[i]) + abs(G2[i]) > h:
+					print G[i], ' vs ', G2[i], ' ------ rel. err. ', 100*abs((G[i] - G2[i])/(G2[i])), '%'
+		
 
 	def end_print(self):
-		if self.runspec_get('runtime_distribution'):
+		if self.runspecs['prints']['runtime_distribution']:
 			self.print_runtime_distribution()
-		if self.runspec_get('eigenvalue_histograms'):
+		if self.runspecs['display']['eigenvalue_histograms']:
 			self.print_eigenvalue_histograms()
 		for gather in self.end_data:
 			print gather + ': ' + str(self.end_data[gather])
 
+	def end_display(self):
+		self.md.display()
+
 	def end_basic_plots(self):
-		if self.runspec_get('basic_plots'):
+		if self.runspecs['display']['basic_plots']:
 			for pair in self.runspec_get('plot_specs'):
 				self.v1.plot_stack(pair[0], pair[1])
 
@@ -145,20 +155,6 @@ class investigable():
 		for gather in self.road_gather:
 			self.road_data[gather] = []
 		self.end_gather = end_gather
-
-	def runspec_set(self, spec, value):
-		if spec=='eps':
-			self.lab.set_epsilon(value)
-		self.runspecs.set(spec, value)
-
-	def runspec_do(self, spec):
-		self.runspecs.do(spec)
-
-	def runspec_undo(self, spec):
-		self.runspecs.undo(spec)
-
-	def runspec_get(self, spec):
-		return self.runspecs.__getitem__(spec)
 
 	def print_runtime_distribution(self):
 		print 'size: ', len(m.get_vb_param()), '\n', \

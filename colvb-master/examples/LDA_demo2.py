@@ -61,47 +61,18 @@ elif data_type == 'nips':
 
 
 m = LDA3(docs,vocab,N_TOPICS,alpha_0=alpha_0)
-m.runspec_set('eps', eps)
-m.runspec_set('restarts', rest)
+m.runspecs.set('eps', eps)
+m.runspecs.set('restarts', rest)
 m.set_invests(road_gather= road_gather, end_gather=end_gather)
 
-for method in m.runspec_get('methods'):
-    for i in range(m.runspec_get('restarts')):
+for method in m.runspecs['basics']['methods']:
+    for i in range(m.runspecs['basics']['restarts']):
         m.optimize(method=method, maxiter=1e4)
         m.end()
         m.end_print()
         m.new_param()
 
-m.end_basic_plots
-
-if m.runspec_get('orig_track_display'):
-    pb.figure()
-    m.plot_tracks()
-
-#display learned topics
-def plot_inferred_topics():
-    nrow=ncol= np.ceil(np.sqrt(N_TOPICS))
-    pb.figure()
-    for i,beta in enumerate(m.beta_p):
-        pb.subplot(nrow,ncol,i+1)
-        pb.imshow(beta.reshape(WORDSIZE,WORDSIZE),cmap=pb.cm.gray)
-        pb.xticks([])
-        pb.yticks([])
-
-if m.runspec_get('orig_learned_topics'):
-    plot_inferred_topics()
-    pb.suptitle('inferred topics')
-    pb.show()
-
-#plot true topics
-if m.runspec_get('orig_true_topics'):
-    nrow=ncol= np.ceil(np.sqrt(N_TOPICS))
-    pb.figure()
-    for i,topic in enumerate(topics):
-        pb.subplot(nrow,ncol,i+1)
-        pb.imshow(topic.reshape(WORDSIZE,WORDSIZE),cmap=pb.cm.gray)
-        pb.xticks([])
-        pb.yticks([])
-    pb.suptitle('true topics')
+m.end_basic_plots()
+m.end_display()
 
 print 'done'

@@ -46,7 +46,7 @@ while j < len(sys.argv):
         break
 
 eps = 1e-14
-rest = 10
+rest = 1
 X, Nclust = data_creator.mog_basic_data(*basic_data)
 
 m = MOG2(X, Nclust, prior_Z='symmetric')
