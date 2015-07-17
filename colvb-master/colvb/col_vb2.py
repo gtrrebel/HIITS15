@@ -235,7 +235,7 @@ class col_vb2(GPy.core.model.Model, investigable):
         iteration = 0
         bound_old = self.bound()
         self.orig_params = np.array(self.get_vb_param().copy())
-        self.distance_travelled = 0
+        self.travelled_distance = 0
 
         while True:
             self.hessian_calc = False
@@ -290,7 +290,7 @@ class col_vb2(GPy.core.model.Model, investigable):
                     bound = self.bound()
                     iteration += 1
 
-            self.distance_travelled += linalg.norm(self.get_vb_param().copy() - phi_old)
+            self.travelled_distance += linalg.norm(self.get_vb_param().copy() - phi_old)
 
             # track:
             self.track(np.hstack((bound, beta)))
@@ -335,7 +335,7 @@ class col_vb2(GPy.core.model.Model, investigable):
         return self.f2(self.get_vb_param().copy())
 
     def get_hessian(self):
-        collaps = False
+        collaps = True
         if self.hessian_calc == False:
             self.hessian = self.f3(self.get_vb_param().copy())
             if collaps:

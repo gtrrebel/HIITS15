@@ -42,8 +42,8 @@ IDEOITA:
 11. Stochastic variational inference
 	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
 
-Mitä teen juuri nyt (päivitetty 15.7.2015 klo 17):
-- 0-ominaisarvojen huolehtiminen, Trust Region ihmettelyä
+Mitä teen juuri nyt (päivitetty 15.7.2015 klo 21):
+- Trust Region ihmettelyä, Refaktorointia
 
 Mitä teen seuraavaksi:
 	- Etäisyysjakaumat

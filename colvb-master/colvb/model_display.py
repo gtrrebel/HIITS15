@@ -1,10 +1,14 @@
 import pylab as pb
+from vis1 import vis1
+from vis2 import vis2
 
 class model_display():
 
 	def __init__(self, m, out = 'view'):
 		self.m = m
 		self.out = out
+		self.v1 = vis1()
+		self.v2 = vis2()
 
 	def output(self):
 		if self.out == 'view':
@@ -42,3 +46,8 @@ class model_display():
 			if self.m.runspecs['display'][disp]:
 				if hasattr(self,disp):
 					getattr(self, disp)()
+
+	def basic_plots(self):
+		if self.m.runspecs['display']['basic_plots']:
+			for pair in self.m.runspec_get('plot_specs'):
+				self.v1.plot_stack(pair[0], pair[1])

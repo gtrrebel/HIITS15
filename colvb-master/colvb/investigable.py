@@ -2,8 +2,6 @@ from signlab import signlab
 from signlab2 import signlab2
 from runspecs import runspecs
 from model_display import model_display
-from vis1 import vis1
-from vis2 import vis2
 from scipy import linalg
 import numpy as np
 
@@ -18,10 +16,7 @@ class investigable():
 		self.end_data = {}
 		self.road_gather = []
 		self.end_gather = []
-		self.v1 = vis1()
-		self.v2 = vis2()
 		self.md = model_display(self)
-		print 'jee'
 
 	def road(self):
 		index_gathers = []
@@ -102,9 +97,7 @@ class investigable():
 		self.md.display()
 
 	def end_basic_plots(self):
-		if self.runspecs['display']['basic_plots']:
-			for pair in self.runspec_get('plot_specs'):
-				self.v1.plot_stack(pair[0], pair[1])
+		self.md.display()
 
 	def cheb_index(self):
 		return self.lab2.chebyshev_index(self.get_hessian())
@@ -127,7 +120,7 @@ class investigable():
 		return linalg.norm(np.array(self.get_param()) - self.orig_params)
 
 	def distance_travelled(self):
-		return self.distance_travelled
+		return self.travelled_distance
 
 	def rank(self):
 		return np.linalg.matrix_rank(self.get_hessian())
