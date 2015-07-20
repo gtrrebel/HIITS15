@@ -7,11 +7,12 @@ sys.path.append('/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/colv
 from LDA3 import LDA3
 from data_creator import data_creator
 from graph_vis import graph_vis
+from label_switcher import label_switcher
 
-basic_data = [3, 50, 30, 2]
-nips_data = [5, 20, 80, 150]
+basic_data = [3, 10, 10, 2]
+nips_data = [5, 10, 20, 30]
 data_type = 'nips'
-run_count = 50
+run_count = 10
 method = 'steepest'
 
 j = 1
@@ -43,21 +44,23 @@ elif data_type == 'nips':
     docs, vocab = data_creator.nips_data(*nips_data)
     N_TOPICS = basic_data[0]
 
-eps = 1e-14
-close_eps = 10
+close_eps = 1e-5
 
 def dist(v1, v2):
     return linalg.norm(v1-v2)
 
 maxs = []
 m = LDA3(docs,vocab,N_TOPICS, alpha_0=200.0)
-m.runspec_set('eps', eps)
 
-for i in range(run_count):
+for i in xrange(run_count):
     print i
     m.new_param()
     m.optimize(method=method, maxiter=1e4)
     maxs.append((m.bound(), m.get_param()))
+
+switch = label_switcher([ma[1].reshape(m.D, m.N, m.K) for ma in maxs])
+for i in xrange(run_count):
+    maxs[i][1].flatten()
 
 def merge(maxs):
     real_maxs = []

@@ -46,3 +46,11 @@ class input_parser():
 		rest = 10
 
 		return eps, rest, road_gather, end_gather, basic_data, nips_data, data_type
+
+	@staticmethod
+	def LDA_parse2(arg):
+		ret = [10, 5, 10, 10, 10]
+		for i in xrange(5):
+			if arg[i] != '.':
+				ret[i] = int(arg[i])
+		return ret[0], ret[1:]
