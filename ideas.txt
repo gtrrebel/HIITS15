@@ -42,8 +42,8 @@ IDEOITA:
 11. Stochastic variational inference
 	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
 
-Mitä teen juuri nyt (päivitetty 20.7.2015 klo 17):
-- Refaktorointia, Label switching, Bound/index jakaumat
+Mitä teen juuri nyt (päivitetty 21.7.2015 klo 16):
+- Label switching, Bound/index jakaumat
 
 Mitä teen seuraavaksi:
 	- Etäisyysjakaumat

@@ -4,11 +4,11 @@ import random
 class label_switcher():
 
 	def __init__(self, ms):
-		self.T = 10
+		self.T = 100
 		self.ms = ms
 		self.M = len(ms)
 		self.D, self.N, self.K = list(ms[0].shape)
-		self.perms = [range(self.K) for _ in xrange(self.M)]
+		self.perms = np.array([range(self.K) for _ in xrange(self.M)])
 
 	def calc_average(self):
 		self.aver = np.zeros((self.D, self.N, self.K))
@@ -25,7 +25,7 @@ class label_switcher():
 		for i1 in xrange(self.D):
 			for i2 in xrange(self.N):
 				for i3 in xrange(self.K):
-					div += self.ms[i][i1][i2][self.perms[i][i3]] * np.log(self.ms[i1][i2][perm[i3]]/(self.aver[i1][i2][i3]))
+					div += self.ms[i][i1][i2][perm[i3]] * np.log(self.ms[i][i1][i2][perm[i3]]/(self.aver[i1][i2][i3]))
 		return div
 
 	def shuffle(self, i):
@@ -34,12 +34,13 @@ class label_switcher():
 		ran = random.sample(xrange(self.K), ss)
 		prev = perm[ran]
 		for j in xrange(ss):
-			perm[ran[j]] = prev[ran[(j + 1) % ss]]
+			perm[ran[j]] = prev[(j + 1) % ss]
+		return perm
 
 	def change(self, i):
 		for j in xrange(self.T):
 			shuf = self.shuffle(i)
-			if self.KL_div(i, shuf) < self.KL_divs(i):
+			if self.KL_div(i, shuf) < self.KL_divs[i]:
 				self.perms[i] = shuf
 
 	def change_all(self):

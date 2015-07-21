@@ -12,7 +12,7 @@ class graph_vis():
 		bound_order = sorted(range(len(A)),key=lambda x:bound_order[x], reverse=True)
 		lab = [str(order) + ": " + str(count) for order, count in zip(bound_order, counts)]
 		dt = [('len', float)]
-		A = np.array(A)/10
+		A = np.array(A)/2
 		A = A.view(dt)
 
 		G = nx.from_numpy_matrix(A)
