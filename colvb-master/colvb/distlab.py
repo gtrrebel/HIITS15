@@ -1,6 +1,7 @@
 from scipy import linalg
+from vis2 import vis2
 
-close_eps = 1e-3
+close_eps = 1e-10
 
 def dist(v1, v2):
     return linalg.norm(v1-v2)
@@ -62,4 +63,10 @@ def sorted_dists(maxs):
 	for i in xrange(n):
 		for j in xrange(i + 1, n):
 			dists.append(dist(maxs[i][1], maxs[j][1]))
-	return sorted(dists)   
+	return sorted(dists)
+
+def display_dists(maxs):
+	sort_dists = sorted_dists(maxs)
+	v2 = vis2()
+	if len(sort_dists) > 0:
+		v2.dist_histogram(sort_dists)

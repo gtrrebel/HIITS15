@@ -60,7 +60,7 @@ class input_parser():
 		basic_data = [3, 10, 10, 2]
 		nips_data = [5, 10, 20, 30]
 		data_type = 'nips'
-		run_count = 10
+		run_count = 50
 		method = 'steepest'
 
 		j = 1
@@ -71,17 +71,18 @@ class input_parser():
 				k = 0
 				data_type = 'basic'
 				while k < 4:
-					k, j = k + 1, j + 1
 					basic_data[k] = int(arg[j])
+					k, j = k + 1, j + 1
 			elif cmd == 'n':
+				k = 0
 				data_type = 'nips'
 				while k < 4:
-					k, j = k + 1, j + 1
 					nips_data[k] = int(arg[j])
+					k, j = k + 1, j + 1
 			elif cmd == 'r':
 				run_count = int(arg[j])
+				j += 1
 			else:
 				print 'oh no', j
 				break
-			j += 1
 		return method, run_count, basic_data, nips_data, data_type

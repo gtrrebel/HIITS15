@@ -30,14 +30,14 @@ for i in xrange(run_count):
     maxs.append((m.bound(), m.get_param()))
 
 switch = label_switcher([ma[1].reshape(m.D, m.N, m.K) for ma in maxs])
-#switch.switch_labels()
+switch.switch_labels()
 for i in xrange(run_count):
     maxs[i][1].flatten()  
 
 maxs = distlab.merge(maxs)
-distlab.print_all_dists(maxs)
+distlab.display_dists(maxs)
 
-graph_vis.draw(distlab.tuple_dists(maxs), distlab.all_bounds(maxs), distlab.all_counts(maxs))
+#graph_vis.draw(distlab.tuple_dists(maxs), distlab.all_bounds(maxs), distlab.all_counts(maxs))
 '''
 print min_max_dist(maxs)
 for f in sorted_dists(maxs):

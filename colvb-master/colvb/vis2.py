@@ -3,6 +3,13 @@ import pylab as pb
 
 class vis2():
 
-	def eigenvalue_histogram(self, eigs, bins = 20):
+	@staticmethod
+	def eigenvalue_histogram(eigs, bins = 20):
 		eigs = sorted(eigs)
 		pb.hist(eigs, bins=bins)
+
+	@staticmethod
+	def dist_histogram(dists, bins = 20):
+		print dists
+		print len(dists)
+		pb.hist(dists, bins=bins)
