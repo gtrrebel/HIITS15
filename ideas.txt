@@ -43,7 +43,7 @@ IDEOITA:
 	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
 
 Mitä teen juuri nyt (päivitetty 22.7.2015 klo 14):
-- Korjailuja
+- Tuloksia
 
 Mitä teen seuraavaksi:
 	- Trust Region ihmettelyä

@@ -1,5 +1,7 @@
 import numpy as np
-import pylab as pb
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import sys
 sys.path.append('/home/othe/Desktop/HIIT/HIITS15/colvb-master/colvb')
 sys.path.append('/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/colvb')
@@ -38,7 +40,17 @@ for run in end_returns:
 	for spec in run:
 		data[spec[0]].append(spec[1])
 
-pb.figure()
-pb.xlabel(end_gather[0])
-pb.ylabel(end_gather[1])
-pb.plot(data[end_gather[0]], data[end_gather[1]], '^r')
+#pb.ioff()
+fig = plt.figure()
+plt.title(nips_data)
+plt.xlabel(end_gather[0])
+plt.ylabel(end_gather[1])
+delta = 1e-2
+randomization = delta*np.random.randn((len(data[end_gather[1]])))
+plt.plot(data[end_gather[0]], data[end_gather[1]]+randomization, 'or')
+plt.ylim(-1, max(data[end_gather[1]]) + 1)
+name = 'testi2'
+plt.savefig('/home/othe/Desktop/' + name)
+plt.close(fig)
+
+print 'done'

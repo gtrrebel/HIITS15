@@ -10,6 +10,4 @@ class vis2():
 
 	@staticmethod
 	def dist_histogram(dists, bins = 20):
-		print dists
-		print len(dists)
 		pb.hist(dists, bins=bins)

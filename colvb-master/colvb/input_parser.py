@@ -50,6 +50,8 @@ class input_parser():
 	@staticmethod
 	def LDA_parse2(arg):
 		ret = [10, 5, 10, 10, 10]
+		if len(arg) != 5:
+			arg = ['.']*5
 		for i in xrange(5):
 			if arg[i] != '.':
 				ret[i] = int(arg[i])
