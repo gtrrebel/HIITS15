@@ -42,7 +42,7 @@ IDEOITA:
 11. Stochastic variational inference
 	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
 
-Mitä teen juuri nyt (päivitetty 22.7.2015 klo 14):
+Mitä teen juuri nyt (päivitetty 30.7.2015 klo 17):
 - Tuloksia
 
 Mitä teen seuraavaksi:
