@@ -48,7 +48,6 @@ for run in end_returns:
 	for spec in run:
 		data[spec[0]].append(spec[1])
 
-#pb.ioff()
 fig = plt.figure()
 plt.title(nips_data)
 plt.xlabel(end_gather[0])
