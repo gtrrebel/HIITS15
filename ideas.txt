@@ -43,7 +43,7 @@ IDEOITA:
 	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
 
 Mitä teen juuri nyt (päivitetty 31.7.2015 klo 21):
-- testi-ui
+	- IPython
 
 Mitä teen seuraavaksi:
 	- Trust Region ihmettelyä

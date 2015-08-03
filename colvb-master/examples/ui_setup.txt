@@ -1,0 +1,4 @@
+quit q-qu =quits the program
+help h =manuals for commands
+alias a =aliases for commands
+new n =new LDA

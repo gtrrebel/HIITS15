@@ -4,17 +4,21 @@ class Aliases():
 	def __init__(self):
 		self.alias_to_cmd = {}
 		self.cmd_to_alias = {}
+		self.cmds = []
 		self.make_basic_aliases()
 
 	def make_basic_aliases(self):
-		alias_setup = [('quit', ['q', 'quit']),
-					('help', ['h', 'help']),
-					('alias', ['a', 'alias'])
-					]
-		for cmd in alias_setup:
-			self.cmd_to_alias[cmd[0]] = cmd[1]
-			for alias in cmd[1]:
-				self.alias_to_cmd[alias] = cmd[0]
+		setup = open('ui_setup.txt', 'r')
+		for line in setup.readlines():
+			cmd = line.split()[0]
+			self.cmds.append(cmd)
+			alia = [cmd]
+			self.alias_to_cmd[cmd] = cmd
+			for ali in line.split()[1].split('-'):
+				alia.append(ali)
+				self.alias_to_cmd[ali] = cmd
+			self.cmd_to_alias[cmd] = alia
+		setup.close()
 
 	def aliases_str(self, cmd):
 		return ', '.join(self.cmd_to_alias[cmd])
@@ -103,26 +107,29 @@ class Aliases():
 		else:
 			return True
 
-class Commands(Aliases):
-
-	def __init__(self):
-		self.commands = ['quit', 'help', 'alias', 'lol']
-		Aliases.__init__(self)
-
 	def get_commands(self):
-		return self.commands
+		return self.cmds
 
-class Help(Commands):
+
+class Help(Aliases):
 
 	def __init__(self):
-		Commands.__init__(self)
+		Aliases.__init__(self)
 		self.default_help_string = '== {name} == \n' + \
 					'{custom}' + \
 					'available aliases: ' + \
 					'{aliases}'
-		self.help_strings = {'quit': 'quits the program\n', 
-				'help': 'manuals for commands\n',
-				'alias': 'aliases for commands\n'}
+		self.make_basic_help_strings()
+
+	def make_basic_help_strings(self):
+		self.help_strings = {}
+		setup = open('ui_setup.txt', 'r')
+		for line in setup.readlines():
+			cmd = line.split()[0]
+			help_string = '\n'.join(line.split('=')[1].split('\\'))
+			self.help_strings[cmd] = help_string
+		setup.close()
+
 
 	def default_help(self):
 		return '\n== LDA3 - user interface ==\n\n' + \
@@ -139,7 +146,7 @@ class Help(Commands):
 				custom = 'no additional information for \'{0}\'\n'.format(arg[0])
 			else:
 				custom = self.help_strings[cmd]
-			return self.default_help_string.format(name=cmd, custom=custom, aliases=self.aliases(cmd))
+			return self.default_help_string.format(name=cmd, custom=custom, aliases=self.aliases_str(cmd))
 		else:
 			return 'no command called \'{0}\''.format(arg[0])
 

@@ -1,7 +1,4 @@
-import numpy as np
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+import numpy as np 
 import sys
 import time
 sys.path.append('/home/othe/Desktop/HIIT/HIITS15/colvb-master/colvb')
@@ -11,8 +8,10 @@ from LDA3 import LDA3
 from data_creator import data_creator
 from input_parser import input_parser
 from label_switcher import label_switcher
+from LDA_plotter import plot, save
 
 ukko = False
+out = 'print'
 
 if ukko:
 	results = "/cs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_demo3.py/"
@@ -48,16 +47,15 @@ for run in end_returns:
 	for spec in run:
 		data[spec[0]].append(spec[1])
 
-fig = plt.figure()
-plt.title(nips_data)
-plt.xlabel(end_gather[0])
-plt.ylabel(end_gather[1])
 delta = 1e-2
 randomization = delta*np.random.randn((len(data[end_gather[1]])))
-plt.plot(data[end_gather[0]], data[end_gather[1]]+randomization, 'or')
-plt.ylim(-1, max(data[end_gather[1]]) + 1)
-name = "LDA_demo3." + time.strftime("%H:%M:%S-%d.%m.%Y") + ".png"
-plt.savefig(results + name)
-plt.close(fig)
+xs, ys = data[end_gather[0]], data[end_gather[1]]+randomization
+
+if out == 'plot':
+	plot(xs, ys, end_gather)
+elif out == 'save':
+	save(xs, ys, end_gather)
+elif out == 'print':
+	print end_gather[0], end_gather[1], xs, ys
 
 print 'done'

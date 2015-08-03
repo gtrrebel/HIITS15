@@ -6,6 +6,8 @@ from data_creator import data_creator
 from input_parser import input_parser
 from uitils import Help
 
+nips_default = [10, 5, 10, 10, 10]
+
 database = database()
 help = Help()
 
@@ -14,6 +16,9 @@ def interpret(cmd, arg = None):
 		help.help(arg)
 	if cmd == 'alias':
 		help.alias(arg)
+	if cmd == 'new':
+		new(arg)
+
 
 while True:
 	cmd = help.interpret(raw_input('(h for help, q to quit): ').split())
