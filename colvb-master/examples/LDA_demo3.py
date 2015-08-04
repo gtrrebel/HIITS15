@@ -8,7 +8,7 @@ from LDA3 import LDA3
 from data_creator import data_creator
 from input_parser import input_parser
 from label_switcher import label_switcher
-from LDA_plotter import plot, save
+from LDA_plotter import *
 
 ukko = False
 out = 'print'
@@ -54,7 +54,7 @@ xs, ys = data[end_gather[0]], data[end_gather[1]]+randomization
 if out == 'plot':
 	plot(xs, ys, end_gather)
 elif out == 'save':
-	save(xs, ys, end_gather)
+	save_plot(xs, ys, end_gather)
 elif out == 'print':
 	print end_gather[0], end_gather[1], xs, ys
 
