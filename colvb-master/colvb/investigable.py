@@ -94,9 +94,9 @@ class investigable():
 			print gather + ': ' + str(self.end_data[gather])
 
 	def end_return(self):
-		end_return = []
+		end_return = {}
 		for gather in self.end_data:
-			end_return.append([gather, self.end_data[gather]])
+			end_return[gather] = self.end_data[gather]
 		return end_return
 
 	def end_display(self):

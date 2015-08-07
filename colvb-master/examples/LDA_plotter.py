@@ -19,33 +19,64 @@ def result_dir(ukko=False, form='txt'):
 def result_filename(form='txt'):
 	return "LDA_demo3." + time.strftime("%H:%M:%S-%d.%m.%Y") + "." + form
 
-def get_data(end_gather, end_returns):
+def get_data(arg):
+	end_gather, save_specs, end_returns = arg
 	data = {}
 	for spec in end_gather:
 		data[spec] = []
 	for run in end_returns:
 		for spec in run:
-			data[spec[0]].append(spec[1])
+			data[spec].append(run[spec])
 	delta = 0e-2
 	randomization = delta*np.random.randn((len(data[end_gather[1]])))
 	xs, ys = data[end_gather[0]], data[end_gather[1]]+randomization
-	return xs, ys, end_gather
+	return xs, ys, end_gather, save_specs
 
-def plot(end_gather, end_returns):
-	xs, ys, end_gather = get_data(end_gather, end_returns)
-	fig = plt.figure()
-	plt.title('testi')
-	plt.xlabel(end_gather[0])
-	plt.ylabel(end_gather[1])
-	plt.plot(xs, ys, 'or')
-	plt.ylim(-1, max(ys) + 1)
-	plt.show()
+def plot(args):
+	for arg in args:
+		xs, ys, end_gather, save_specs = get_data(arg)
+		fig = plt.figure()
+		plt.title(save_specs[0])
+		plt.xlabel(end_gather[0])
+		plt.ylabel(end_gather[1])
+		plt.plot(xs, ys, 'or')
+		plt.ylim(-1, max(ys) + 1)
+		plt.show()
 
-def save_plot(end_gather, end_returns, ukko=False):
-	plot(end_gather, end_returns)
-	plt.savefig(result_filepath(ukko, 'png'))
+def save(args, form = 'txt', ukko=False):
+	if form == 'txt':
+		save_data(args, ukko)
+	elif form == 'png':
+		save_plot(args, ukko)
 
-def save_data(end_gather, end_returns, ukko=False):
-	f = open(result_filepath(ukko, 'txt'), 'w')
-	print >> f, 'Testi:', end_gather, end_returns
-	f.close()
+def save_plot(args, ukko=False):
+	for arg in args:
+		plot([arg])
+		plt.savefig(result_filepath(ukko, 'png'))
+
+def save_data(args, ukko=False):
+	for arg in args:
+		end_gather, save_specs, end_returns = arg
+		savestring = save_specs[0] + '\n' + ' '.join(end_gather) + '\n' + \
+					'\n'.join([' '.join([str(run[gather]) for gather in end_gather]) for run in end_returns]) + '\n'
+		with open(result_filepath(ukko, 'txt'), 'w') as f:
+			f.write(savestring)
+
+def plot_data(filenames):
+	args = []
+	for filename in filenames:
+		with open(interpret_filename(filename), 'r') as f:
+			lines = f.readlines()
+			save_specs = [lines[0]]
+			end_gather = lines[1].split()
+			end_returns = [dict(zip(end_gather, [float(i) for i in line.split()])) for line in lines[2:]]
+			args.append((end_gather, save_specs, end_returns))
+	plot(args)
+
+def interpret_filename(filename, ukko=False):
+	if filename[0] == '/':
+		return filename
+	elif ukko:
+		return '/cs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_demo3.py/textdata/' + filename
+	else:
+		return '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_demo3.py/textdata/' + filename

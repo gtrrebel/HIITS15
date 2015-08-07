@@ -18,7 +18,7 @@ def softmax(x):
 class LDA3(col_vb2):
     """Collapsed Latent Dirichlet Allocation"""
 
-    def __init__(self, documents,vocabulary, K,alpha_0=1.,beta_0=1.,eps=1e-14, finite_difference_checks=False):
+    def __init__(self, documents,vocabulary, K, save_specs = [''], alpha_0=1.,beta_0=1.,eps=1e-14, finite_difference_checks=False):
         self.eps = eps
         self.finite_difference_checks = finite_difference_checks
         col_vb2.__init__(self)
@@ -34,6 +34,7 @@ class LDA3(col_vb2):
         self.V = vocabulary.size
         self.N = self.Nd[0]
         self.K = K
+        self.save_specs = save_specs
 
 
         #this is used when packing/unpacking  the model, to reshape a vector into our document shapes
