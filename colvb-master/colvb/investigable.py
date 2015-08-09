@@ -114,6 +114,13 @@ class investigable():
 	def dimension(self):
 		return len(self.get_param())
 
+	def negative_definite(self):
+		try:
+			np.linalg.cholesky(-self.get_hessian())
+			return 0
+		except np.linalg.linalg.LinAlgError:
+			return 1
+
 	def inverse_eigenvalues(self):
 		inv = np.linalg.inv(self.get_hessian())
 		eigs = 1/self.lab.eigenvalues(inv)

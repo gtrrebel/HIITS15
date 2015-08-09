@@ -14,10 +14,10 @@ def init(args=['']):
 		docs, vocab = data_creator.nips_data(*nips_data)
 		N_TOPICS = nips_data[0]
 		alpha_0 = 200
-		end_gather = ['bound', 'epsilon_positive']
+		end_gather = ['bound', 'negative_definite']
 		m = LDA3(docs,vocab,N_TOPICS,save_specs = [arg], alpha_0=alpha_0)
 		m.runspecs['basics']['restarts'] = restarts
-		m.runspecs['basics']['methods'] = ['steepest']
+		m.runspecs['basics']['methods'] = ['FR']
 		m.set_invests(road_gather= [], end_gather=end_gather)
 		ms.append(m)
 	return ms
