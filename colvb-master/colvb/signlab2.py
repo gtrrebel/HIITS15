@@ -2,7 +2,7 @@ import numpy as np
 
 class signlab2():
 
-	def __init__(self, a=0, b=0.5, deg= 120, jack=False):
+	def __init__(self, a=0, b=0.5, deg= 120, jack=True):
 		self.a, self.b, self.deg, self.jack = a, b, deg, jack
 		self.chebyshev_coeff()
 
@@ -17,6 +17,17 @@ class signlab2():
 				(1-np.arange(1, self.deg + 2)/(self.deg + 2))*np.cos(alpha*np.arange(self.deg + 1))
 			gammas *= jackcoeff
 		self.gammas = gammas
+
+	def positive_definite(self, A):
+		n = len(A)
+		m = 1000
+		for i in xrange(m):
+			v = np.random.randn(n)
+			y = np.dot(v, np.dot(A, v))
+			if y < 0:
+				return False
+		return True
+
 
 	def calc(self, coeff, A, v):
 		deg = len(coeff) - 1

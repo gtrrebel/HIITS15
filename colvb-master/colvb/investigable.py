@@ -121,6 +121,13 @@ class investigable():
 		except np.linalg.linalg.LinAlgError:
 			return 1
 
+	def positive_definite(self):
+		A = -self.get_hessian()
+		if self.lab2.positive_definite(A):
+			return 0
+		else:
+			return 1
+
 	def inverse_eigenvalues(self):
 		inv = np.linalg.inv(self.get_hessian())
 		eigs = 1/self.lab.eigenvalues(inv)

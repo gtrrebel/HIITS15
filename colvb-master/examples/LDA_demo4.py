@@ -7,14 +7,13 @@ from data_creator import data_creator
 from input_parser import input_parser
 from LDA_plotter import *
 
-def init(args=['']):
+def init(args=[''], end_gather = ['bound', 'positive_epsilon'], methods=['FR']):
 	ms = []
 	for arg in args:
 		restarts, nips_data = input_parser.LDA_parse2(arg.split())
 		docs, vocab = data_creator.nips_data(*nips_data)
 		N_TOPICS = nips_data[0]
 		alpha_0 = 200
-		end_gather = ['bound', 'negative_definite']
 		m = LDA3(docs,vocab,N_TOPICS,save_specs = [arg], alpha_0=alpha_0)
 		m.runspecs['basics']['restarts'] = restarts
 		m.runspecs['basics']['methods'] = ['FR']
