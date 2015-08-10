@@ -18,7 +18,7 @@ def softmax(x):
 class LDA3(col_vb2):
     """Collapsed Latent Dirichlet Allocation"""
 
-    def __init__(self, documents,vocabulary, K, save_specs = [''], alpha_0=1.,beta_0=1.,eps=1e-14, finite_difference_checks=False):
+    def __init__(self, documents,vocabulary, K, save_specs = [''], alpha_0=1.,beta_0=1.,eps=1e-14, finite_difference_checks=False, make_fns = True):
         self.eps = eps
         self.finite_difference_checks = finite_difference_checks
         col_vb2.__init__(self)
@@ -55,7 +55,8 @@ class LDA3(col_vb2):
         self.beta_0 = np.ones(self.V)*beta_0
 
         self.set_vb_param(np.random.randn(sum(self.Nd)*self.K))
-        self.make_functions()
+        if make_fns:
+            self.make_functions()
 
     def new_param(self):
         self.set_vb_param(np.random.randn(sum(self.Nd)*self.K))

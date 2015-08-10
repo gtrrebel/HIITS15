@@ -80,3 +80,11 @@ def interpret_filename(filename, ukko=False):
 		return '/cs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_demo3.py/textdata/' + filename
 	else:
 		return '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_demo3.py/textdata/' + filename
+
+def bound_plot(bounds, dims):
+	plt.figure()
+	plt.xlabel('dimension')
+	plt.ylabel('bounds')
+	for arg in zip(bounds, dims):
+		plt.plot([arg[1]]*len(arg[0]), [a - min(arg[0]) for a in arg[0]],'ro')
+	plt.show()

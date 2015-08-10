@@ -28,7 +28,6 @@ class signlab2():
 				return False
 		return True
 
-
 	def calc(self, coeff, A, v):
 		deg = len(coeff) - 1
 		vs = [v, A.dot(v)]

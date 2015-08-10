@@ -3,6 +3,7 @@ from signlab2 import signlab2
 from runspecs import runspecs
 from model_display import model_display
 from scipy import linalg
+import scipy
 import numpy as np
 
 
@@ -127,6 +128,14 @@ class investigable():
 			return 0
 		else:
 			return 1
+
+	def power_largest(self):
+		try:
+			return scipy.sparse.linalg.eigsh(self.get_hessian(), 1, return_eigenvectors = False, which='LM', tol=1E-4, maxiter=5000, sigma=1)[0] > 0
+		except:
+			return False 
+	def power_smallest(self):
+		return scipy.sparse.linalg.eigsh(self.get_hessian(), 1, return_eigenvectors = False, which='SA', tol=1E-2, maxiter=5000)[0] > 0
 
 	def inverse_eigenvalues(self):
 		inv = np.linalg.inv(self.get_hessian())

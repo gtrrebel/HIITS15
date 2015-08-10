@@ -37,7 +37,7 @@ for i in xrange(run_count):
 maxs = distlab.merge(maxs)
 distlab.display_dists(maxs)
 
-#graph_vis.draw(distlab.tuple_dists(maxs), distlab.all_bounds(maxs), distlab.all_counts(maxs))
+graph_vis.draw(distlab.tuple_dists(maxs), distlab.all_bounds(maxs), distlab.all_counts(maxs))
 '''
 print min_max_dist(maxs)
 for f in sorted_dists(maxs):
