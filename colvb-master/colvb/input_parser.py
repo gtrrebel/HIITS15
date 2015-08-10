@@ -58,6 +58,16 @@ class input_parser():
 		return ret[0], ret[1:]
 
 	@staticmethod
+	def LDA_parse3(arg):
+		ret = [5, 10, 10, 10]
+		if len(arg) != 2:
+			arg = ['.']*4
+		for i in xrange(4):
+			if arg[i] != '.':
+				ret[i] = int(arg[i])
+		return ret
+
+	@staticmethod
 	def LDA_map_parse(arg):
 		basic_data = [3, 10, 10, 2]
 		nips_data = [5, 10, 20, 30]

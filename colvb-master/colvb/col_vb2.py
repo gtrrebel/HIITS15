@@ -202,6 +202,120 @@ class col_vb2(GPy.core.model.Model, investigable):
         self.set_vb_param(opt)
         print nf, 'iters'
 
+    def trust_region_optimize(self,method=None, maxiter=500, ftol=1e-6, gtol=1e-6, step_length=1., line_search=False, \
+            callback=None, orig_iteration_data=False, print_convergence=False, trust_count=10):
+        """
+        Optimize the model
+
+        Arguments
+        ---------
+        :method: ['FR', 'PR','HS','steepest'] -- conjugate gradient method
+        :maxiter: int
+        :ftol: float
+        :gtol: float
+        :step_length: float (ignored if line-search is used)
+        :line_search: bool -- whether to perform line searches
+
+        Notes
+        -----
+        OPtimisation of the hyperparameters is interleaved with
+        vb optimisation. The parameter self.hyperparam_interval
+        dictates how often.
+        """
+        self.hessian_time = 0
+        self.pack_time = 0
+        t0 = time.time()
+
+        if method is None:
+            method = self.default_method
+        assert method in ['FR', 'PR','HS','steepest']
+        # track:
+        self.newtrack(method)
+
+        iteration = 0
+        bound_old = self.bound()
+        self.orig_params = np.array(self.get_vb_param().copy())
+        self.travelled_distance = 0
+
+        while True:
+            self.hessian_calc = False
+
+            if not callback is None:
+                callback()
+
+            self.road()
+            phi_old = self.get_vb_param().copy()
+
+            for trustcount in xrange(trust_count):
+                grad,natgrad = self.vb_grad_natgrad()
+                grad,natgrad = -grad,-natgrad
+                squareNorm = np.dot(natgrad,grad) # used to monitor convergence
+                #find search direction
+                if (method=='steepest') or not iteration:
+                    beta = 0
+                elif (method=='PR'):
+                    beta = np.dot((natgrad-natgrad_old),grad)/squareNorm_old
+                elif (method=='FR'):
+                    beta = squareNorm/squareNorm_old
+                elif (method=='HS'):
+                    beta = np.dot((natgrad-natgrad_old),grad)/np.dot((natgrad-natgrad_old),grad_old)
+                if np.isnan(beta):
+                    beta = 0.
+                if beta > 0:
+                    searchDir = -natgrad + beta*searchDir_old
+                else:
+                    searchDir = -natgrad
+
+                self.set_vb_param(phi_old + step_length*searchDir)
+                bound = self.bound()
+
+                #make sure there's an increase in L, else revert to steepest
+                if bound<bound_old:
+                    searchDir = -natgrad
+                    self.set_vb_param(phi_old + step_length*searchDir)
+                    bound = self.bound()
+
+            self.travelled_distance += linalg.norm(self.get_vb_param().copy() - phi_old)
+            iteration += 1
+            # track:
+            self.track(np.hstack((bound, beta)))
+            if orig_iteration_data:
+                print '\riteration '+str(iteration)+' bound='+str(bound) + ' grad='+str(squareNorm) + ', beta='+str(beta),
+                sys.stdout.flush()
+            
+            self.optimize_time = time.time() - t0
+            # converged yet? try the parameters if so
+            if np.abs(bound-bound_old)<=ftol:
+                if print_convergence:
+                    print 'vb converged (ftol)'
+                if self.optimize_parameters()<1e-1:
+                    break
+            if squareNorm<=gtol:
+                if print_convergence:
+                    print 'vb converged (gtol)'
+                if self.optimize_parameters()<1e-1:
+                    break
+            if iteration>=maxiter:
+                if print_convergence:
+                    print 'maxiter exceeded'
+                break
+
+            #store essentials of previous iteration
+            natgrad_old = natgrad.copy() # copy: better safe than sorry.
+            grad_old = grad.copy()
+            searchDir_old = searchDir.copy()
+            squareNorm_old = squareNorm
+
+            # hyper param_optimisation
+            if (iteration >1) and not (iteration%self.hyperparam_interval):
+                self.optimize_parameters()
+
+            bound_old = bound
+
+
+        # track:
+        self.closetrack()
+
     def optimize(self,method=None, maxiter=500, ftol=1e-6, gtol=1e-6, step_length=1., line_search=False, \
             callback=None, orig_iteration_data=False, print_convergence=False):
         """
