@@ -88,3 +88,24 @@ def bound_plot(bounds, dims):
 	for arg in zip(bounds, dims):
 		plt.plot([arg[1]]*len(arg[0]), [a - min(arg[0]) for a in arg[0]],'ro')
 	plt.show()
+
+def hessian_bound_plot(good, bad, neutral):
+	plt.figure()
+	plt.xlabel('dimension')
+	plt.ylabel('bounds')
+	hessian_bound_plot_helper('neutral', neutral)
+	hessian_bound_plot_helper('good', good)
+	hessian_bound_plot_helper('bad', bad)
+	plt.show()
+
+def hessian_bound_plot_helper(al, data):
+	ys = [bou[0] for bou in data]
+	xs = [bou[1] for bou in data]
+	if al == 'good':
+		plt.plot(xs, ys, 'go')
+	elif al == 'bad':
+		plt.plot(xs, ys, 'ro')
+	elif al == 'neutral':
+		plt.plot(xs, ys, 'yo')
+
+

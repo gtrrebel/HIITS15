@@ -1,5 +1,6 @@
 from signlab import signlab
 from signlab2 import signlab2
+from signlab3 import *
 from runspecs import runspecs
 from model_display import model_display
 from scipy import linalg
@@ -85,7 +86,6 @@ class investigable():
 				if abs(G[i]) + abs(G2[i]) > h:
 					print G[i], ' vs ', G2[i], ' ------ rel. err. ', 100*abs((G[i] - G2[i])/(G2[i])), '%'
 		
-
 	def end_print(self):
 		if self.runspecs['prints']['runtime_distribution']:
 			self.print_runtime_distribution()
@@ -129,13 +129,14 @@ class investigable():
 		else:
 			return 1
 
-	def power_largest(self):
-		try:
-			return scipy.sparse.linalg.eigsh(self.get_hessian(), 1, return_eigenvectors = False, which='LM', tol=1E-4, maxiter=5000, sigma=1)[0] > 0
-		except:
-			return False 
+	def return_hessian(self):
+		return self.get_hessian()
+
+	def power_largest(self, tol=1E-6, maxiter=5000, sigma=0.1):
+		return largest_eigenvalue(self.get_hessian(), tol, maxiter, sigma)
+
 	def power_smallest(self):
-		return scipy.sparse.linalg.eigsh(self.get_hessian(), 1, return_eigenvectors = False, which='SA', tol=1E-2, maxiter=5000)[0] > 0
+		return largest_eigenvalue(self.get_hessian(), tol, maxiter, sigma)
 
 	def inverse_eigenvalues(self):
 		inv = np.linalg.inv(self.get_hessian())

@@ -35,6 +35,7 @@ class LDA3(col_vb2):
         self.N = self.Nd[0]
         self.K = K
         self.save_specs = save_specs
+        self.make_fns = make_fns
 
 
         #this is used when packing/unpacking  the model, to reshape a vector into our document shapes
@@ -55,7 +56,7 @@ class LDA3(col_vb2):
         self.beta_0 = np.ones(self.V)*beta_0
 
         self.set_vb_param(np.random.randn(sum(self.Nd)*self.K))
-        if make_fns:
+        if self.make_fns:
             self.make_functions()
 
     def new_param(self):

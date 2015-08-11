@@ -449,6 +449,9 @@ class col_vb2(GPy.core.model.Model, investigable):
         return self.f2(self.get_vb_param().copy())
 
     def get_hessian(self):
+        if not self.make_fns:
+            self.make_functions()
+            self.make_fns = True
         collaps = True
         if self.hessian_calc == False:
             self.hessian = self.f3(self.get_vb_param().copy())
