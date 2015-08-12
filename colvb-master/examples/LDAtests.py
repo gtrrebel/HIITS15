@@ -64,3 +64,6 @@ def index_check(args = [''], restarts = 10):
 	for dat in outs:
 		for d in dat[2]:
 			print d['power_largest'], d['epsilon_positive']
+
+def index_checks(n, restarts = 1, other='5 10 10'):
+	index_check(args = [(other + ' {0}').format(i) for i in xrange(5, n)], restarts = restarts)
