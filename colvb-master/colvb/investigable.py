@@ -115,6 +115,9 @@ class investigable():
 	def dimension(self):
 		return len(self.get_param())
 
+	def reduced_dimension(self):
+		return (self.K -1)*self.N*self.D
+
 	def negative_definite(self):
 		try:
 			np.linalg.cholesky(-self.get_hessian())
@@ -186,6 +189,9 @@ class investigable():
 			'pack_time: ', m.pack_time, ' - ', (100*m.pack_time/m.optimize_time), '%,\n', \
 			'others: ', (m.optimize_time - m.hessian_time - m.pack_time), \
 			' - ', (100*(m.optimize_time - m.hessian_time - m.pack_time)/m.optimize_time), '%'
+
+	def optimizetime(self):
+		return self.optimize_time
 
 	def print_eigenvalue_histograms(self):
 		pb.figure()

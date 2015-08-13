@@ -10,11 +10,21 @@ def bounds(args = [''], restarts = 10):
 	dimensions = [(m.K -1)*m.N*m.D for m in ms]
 	return bounts, dimensions
 
+def bound_runtimes(args = [''], restarts = 10):
+	ms = init(args, make_fns = False)
+	return run(ms, restarts = restarts, end_gather=['bound', 'reduced_dimension', 'optimizetime'])
+
 def plot_bounds(args = [''], restarts = 10):
 	bound_plot(*bounds(args, restarts))
 
+def plot_bound_runtimes(args =  [''], restarts = 10):
+	bound_optimizetime_plot(bound_runtimes(args, restarts))
+
 def doclenboundplot(n, restarts = 10, other= '5 10 10'):
 	plot_bounds([(other + ' {0}').format(5*i) for i in xrange(2, n)], restarts=restarts)
+
+def doclenboundruntimeplot(n, restarts = 10, other= '5 10 10'):
+	plot_bound_runtimes([(other + ' {0}').format(5*i) for i in xrange(2, n)], restarts=restarts)
 
 def boundshessians(args= [''], restarts = 10):
 	ms = init(args, make_fns = False)
