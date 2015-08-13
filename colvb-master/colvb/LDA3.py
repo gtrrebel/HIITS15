@@ -58,6 +58,7 @@ class LDA3(col_vb2):
         self.set_vb_param(np.random.randn(sum(self.Nd)*self.K))
         if self.make_fns:
             self.make_functions()
+        self.pickle_data = [self.get_vb_param(), self.documents, self.vocabulary, self.K, alpha_0, beta_0, eps]
 
     def new_param(self):
         self.set_vb_param(np.random.randn(sum(self.Nd)*self.K))

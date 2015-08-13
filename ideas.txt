@@ -42,8 +42,8 @@ IDEOITA:
 11. Stochastic variational inference
 	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
 
-Mitä teen juuri nyt (päivitetty 31.7.2015 klo 21):
-	- IPython
+Mitä teen juuri nyt (päivitetty 13.8.2015 klo 12):
+	- pickle
 
 Mitä teen seuraavaksi:
-	- Trust Region ihmettelyä
+	- dim vs bound/eigenvalue distribution
