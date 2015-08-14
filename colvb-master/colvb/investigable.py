@@ -132,6 +132,9 @@ class investigable():
 		else:
 			return 1
 
+	def return_m(self):
+		return self
+
 	def return_hessian(self):
 		return self.get_hessian()
 

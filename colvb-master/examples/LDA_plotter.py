@@ -118,21 +118,31 @@ def bound_optimizetime_plot(outs):
 	for out in outs:
 		minbound = min(dic['bound'] for dic in out[2])
 		for dic in out[2]:
-			plt.plot([dic['reduced_dimension']+c*np.random.randn(1)[0]], [dic['bound']-minbound+d*np.random.randn(1)[0]], 'o', color=color_point2(dic['optimizetime'], maxoptimizetime))
+			plt.plot([dic['reduced_dimension']+c*np.random.randn(1)[0]], [dic['bound']-minbound+d*np.random.randn(1)[0]], 'o', color=color_point(dic['optimizetime'], maxoptimizetime))
 
 
-def color_point2(runtime = None, maxruntime= None):
+def color_point(runtime = None, maxruntime= None):
 	cmap = plt.get_cmap('RdYlGn')
 	if runtime == None:
 		return cmap(0)
 	else:
 		return cmap(np.sqrt(1- runtime/maxruntime))
 
-def color_point(runtime = None, maxruntime=None):
-	if runtime == None:
-		return '1 0 0'
+def plot_bhr_lib(outs):
+	maxoptimizetime = max(max(dic['optimizetime'] for dic in out[2]) for out in outs)
+	plt.figure()
+	plt.xlabel('dimension')
+	plt.ylabel('bounds')
+	c, d = 50, 0.05
+	for out in outs:
+		minbound = min(dic['bound'] for dic in out[2])
+		for dic in out[2]:
+			plt.plot([dic['reduced_dimension']+c*np.random.randn(1)[0]], [dic['bound']-minbound+d*np.random.randn(1)[0]], mark_point(dic['index']), color=color_point(dic['optimizetime'], maxoptimizetime))
+
+def mark_point(index):
+	if index == 0:
+		return 'o'
+	elif index:
+		return '*'
 	else:
-		return '{0} 0 0'.format(str(runtime/maxruntime))
-
-
-
+		return '^'

@@ -77,3 +77,45 @@ def index_check(args = [''], restarts = 10):
 
 def index_checks(n, restarts = 1, other='5 10 10'):
 	index_check(args = [(other + ' {0}').format(i) for i in xrange(5, n)], restarts = restarts)
+
+def bhr_lib(args = [''], restarts = 10):
+	ms = init(args, make_fns = False)
+	outs = run(ms, restarts = restarts, end_gather=['bound', 'return_m', 'get_vb_param', 'reduced_dimension', 'return_hessian' ,'optimizetime', 'power_largest'])
+	for out in outs:
+		for dic in out[2]:
+			dic['index'] = 0
+	return outs
+
+def calc_dic(dic):
+	m = dic['return_m']
+	m.set_vb_param(dic['get_vb_param'])
+	hes1 = m.get_hessian()
+	hes2 = dic['return_hessian']
+	e1, e2 = largest_eigenvalue(hes1), largest_eigenvalue(hes2)
+	print e1, e2
+	dic['index'] = e1
+
+def calc_max(dics):
+	i = 0
+	for j in xrange(len(dics)):
+		if dics[j]['bound'] > dics[i]['bound']:
+			i = j
+	calc_dic(dics[i])
+
+def calc_min(dics):
+	i = 0
+	for j in xrange(len(dics)):
+		if dics[j]['bound'] < dics[i]['bound']:
+			i = j
+	calc_dic(dics[i])
+
+def calc_all(dics):
+	for dic in dics:
+		calc_dic(dic)
+
+def print_bhr_lib(outs):
+	for out in outs:
+		minbound = min(dic['bound'] for dic in out[2])
+		print out[2][0]['reduced_dimension']
+		for i in xrange(len(out[2])):
+			print i, ': ', '{0:10}'.format('%.2e' % (out[2][i]['bound'] - minbound)), out[2][i]['index'], out[2][i]['power_largest']
