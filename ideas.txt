@@ -42,8 +42,8 @@ IDEOITA:
 11. Stochastic variational inference
 	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
 
-Mitä teen juuri nyt (päivitetty 13.8.2015 klo 12):
-	- pickle
+Mitä teen juuri nyt (päivitetty 17.8.2015 klo 18):
+	- dim vs bound/eigenvalue dist
 
 Mitä teen seuraavaksi:
-	- dim vs bound/eigenvalue distribution
+	- ...
