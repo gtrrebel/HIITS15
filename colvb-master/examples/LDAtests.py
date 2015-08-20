@@ -115,4 +115,13 @@ def print_bhr_lib(outs):
 		minbound = min(dic['bound'] for dic in out[2])
 		print out[2][0]['reduced_dimension']
 		for i in xrange(len(out[2])):
-			print i, ': ', '{0:10}'.format('%.2e' % (out[2][i]['bound'] - minbound)), out[2][i]['index']
+			print i, ': ', out[2][i]['method'] ,'{0:10}'.format('%.2e' % (out[2][i]['bound'] - minbound)), out[2][i]['index']
+
+def index_tests(args = [''], restarts = 10):
+	ms = init(args, make_fns = False)
+	outs =  run(ms, restarts = restarts, end_gather = ['bound', 'return_m', 'get_vb_param', 'reduced_dimension', 'optimizetime'], methods=['steepest', 'FR'])
+	for out in outs:
+		for dic in out[2]:
+			dic['index'] = 0
+	return outs
+

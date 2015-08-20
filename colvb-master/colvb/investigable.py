@@ -96,6 +96,7 @@ class investigable():
 
 	def end_return(self):
 		end_return = {}
+		end_return['method'] = self.method
 		for gather in self.end_data:
 			end_return[gather] = self.end_data[gather]
 		return end_return

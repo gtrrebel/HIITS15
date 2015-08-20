@@ -345,6 +345,7 @@ class col_vb2(GPy.core.model.Model, investigable):
         assert method in ['FR', 'PR','HS','steepest']
         # track:
         self.newtrack(method)
+        self.method = method
 
         iteration = 0
         bound_old = self.bound()
