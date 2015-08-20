@@ -1,9 +1,10 @@
 import numpy as np
+import random
 
 class data_creator():
 
 	@staticmethod
-	def nips_data(N_TOPICS, NDOCS, NWORDS, DOCUMENT_LENGTH, randomized = False):
+	def nips_data(N_TOPICS, NDOCS, NWORDS, DOCUMENT_LENGTH, randomized = True):
 		f = file('../data/nips11data/nips11_corpus')
 		s = f.read().split('\n')
 		f.close()
