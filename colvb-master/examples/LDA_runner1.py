@@ -2,12 +2,13 @@ import sys
 import random
 sys.path.append('/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/examples')
 sys.path.append('/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/colvb')
-from LDAdemo4 import *
+from LDA_demo4 import *
 from LDA_pickler import *
+from LDAtests import *
 
 #Collect Specs
 code = sys.argv[1]
-arg = [int(i) for i in sys.argv[2:6]]
+arg = ' '.join(sys.argv[2:6])
 restarts = int(sys.argv[6])
 to_calc = int(sys.argv[7])
 methods = sys.argv[9:9+int(sys.argv[8])]
@@ -15,7 +16,7 @@ result_directory = '/cs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_
 personal_code = '_'.join([str(a) for a in arg])
 
 #Make lib
-ms = init(args = [arg])
+ms = init(args = [arg], ukko = True)
 lib = run(ms, restarts=restarts, end_gather=['bound', 'return_m', 'get_vb_param', 'reduced_dimension', 'optimizetime'], methods=methods)
 for out in lib:
 	for dic in out[2]:
@@ -33,7 +34,8 @@ bhr_lib_pickle(lib, result_directory + '/pickled_libs/')
 
 #Save data
 with open(result_directory + '/data/' + personal_code, 'w+') as f:
-	f.write(str_bhr_lib(lib))
+	s = str_bhr_lib(lib)
+	f.write(s)
 
 #Make done-file
 with open(result_directory + '/situations/' + personal_code, 'w+') as f:

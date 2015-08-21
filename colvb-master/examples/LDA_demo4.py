@@ -7,11 +7,11 @@ from data_creator import data_creator
 from input_parser import input_parser
 from LDA_plotter import *
 
-def init(args=[''], make_fns = True):
+def init(args=[''], make_fns = True, ukko = False):
 	ms = []
 	for arg in args:
 		nips_data = input_parser.LDA_parse3(arg.split())
-		docs, vocab = data_creator.nips_data(*nips_data)
+		docs, vocab = data_creator.nips_data(*nips_data, ukko = ukko)
 		N_TOPICS = nips_data[0]
 		alpha_0 = 200
 		m = LDA3(docs,vocab,N_TOPICS,save_specs = [arg], alpha_0=alpha_0, make_fns = make_fns)

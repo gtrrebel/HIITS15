@@ -4,8 +4,11 @@ import random
 class data_creator():
 
 	@staticmethod
-	def nips_data(N_TOPICS, NDOCS, NWORDS, DOCUMENT_LENGTH, randomized = True):
-		f = file('../data/nips11data/nips11_corpus')
+	def nips_data(N_TOPICS, NDOCS, NWORDS, DOCUMENT_LENGTH, randomized = True, ukko = False):
+		if ukko:
+			f = file('/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/data/nips11data/nips11_corpus')
+		else:
+			f = file('../data/nips11data/nips11_corpus')
 		s = f.read().split('\n')
 		f.close()
 		vocab = np.array(s[0].split())

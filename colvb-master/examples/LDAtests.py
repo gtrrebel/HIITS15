@@ -117,11 +117,12 @@ def str_bhr_lib(outs):
 	bhr_lib_str = ''
 	for out in outs:
 		minbound = min(dic['bound'] for dic in out[2])
-		bhr_lib_str += out[2][0]['reduced_dimension'] + '\n'
+		bhr_lib_str += str(out[2][0]['reduced_dimension']) + '\n'
 		for i in xrange(len(out[2])):
 			bhr_lib_str += str(i) + ': ' +out[2][i]['method']  + ' ' + \
 			'{0:10}'.format('%.2e' % (out[2][i]['bound'] - minbound)) + ' ' + \
-			out[2][i]['index'] + '\n'
+			str(out[2][i]['index']) + '\n'
+	return bhr_lib_str
 
 def index_tests(args = [''], restarts = 10):
 	ms = init(args, make_fns = False)
