@@ -37,12 +37,12 @@ def run_string(arg, restarts, to_calc, methods, code):
 
 def start_index_tests(args = [''], restarts = 10, to_calc = 3, methods = ['steepest', 'FR']):
 	code = 'LDA_ukko_test_' + time.strftime('%H_%M_%S_%d_%m_%Y')
-	print code
 	init_index_test_dir(args, restarts, to_calc, methods, code)
 	runner = init_runner()
 	for arg in args:
 		runner.add_jobs([(run_string(arg, restarts, to_calc, methods, code), 1)])
 	runner.start_batches()
+	return code
 
 def situation(code):
 	with open(ukko_test_out_path + code + '/test_specs', 'r') as f:
