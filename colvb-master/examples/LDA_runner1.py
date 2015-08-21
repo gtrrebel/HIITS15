@@ -26,10 +26,14 @@ for out in lib:
 	calc_min(out[2])
 	calc_max(out[2])
 	for i in xrange(to_calc - 2):
-		calc_dic(out[2][random.randint(0, len(methods)*restarts - 1))
+		calc_dic(out[2][random.randint(0, len(methods)*restarts - 1)])
 
 #Save lib
 bhr_lib_pickle(lib, result_directory + '/pickled_libs/')
+
+#Save data
+with open(result_directory + '/data/' + personal_code, 'w+') as f:
+	f.write(str_bhr_lib(lib))
 
 #Make done-file
 with open(result_directory + '/situations/' + personal_code, 'w+') as f:
