@@ -111,11 +111,17 @@ def calc_all(dics):
 		calc_dic(dic)
 
 def print_bhr_lib(outs):
+	print str_bhr_lib(outs)
+
+def str_bhr_lib(outs):
+	bhr_lib_str = ''
 	for out in outs:
 		minbound = min(dic['bound'] for dic in out[2])
-		print out[2][0]['reduced_dimension']
+		bhr_lib_str += out[2][0]['reduced_dimension'] + '\n'
 		for i in xrange(len(out[2])):
-			print i, ': ', out[2][i]['method'] ,'{0:10}'.format('%.2e' % (out[2][i]['bound'] - minbound)), out[2][i]['index']
+			bhr_lib_str += str(i) + ': ' +out[2][i]['method']  + ' ' + \
+			'{0:10}'.format('%.2e' % (out[2][i]['bound'] - minbound)) + ' ' + \
+			out[2][i]['index'] + '\n'
 
 def index_tests(args = [''], restarts = 10):
 	ms = init(args, make_fns = False)
