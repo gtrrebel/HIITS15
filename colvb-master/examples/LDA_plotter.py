@@ -139,10 +139,44 @@ def plot_bhr_lib(outs):
 		for dic in out[2]:
 			plt.plot([dic['reduced_dimension']+c*np.random.randn(1)[0]], [dic['bound']-minbound+d*np.random.randn(1)[0]], mark_point(dic['index']), color=color_point(dic['optimizetime'], maxoptimizetime))
 
+def plot_bhr_lib_plain(outs):
+	maxoptimizetime = max(max(dic['optimizetime'] for dic in out[2]) for out in outs)
+	plt.figure()
+	plt.xlabel('dimension')
+	plt.ylabel('bounds')
+	c, d = 50, 0.05
+	for out in outs:
+		minbound = min(dic['bound'] for dic in out[2])
+		for dic in out[2]:
+			plt.plot([dic['reduced_dimension']+c*np.random.randn(1)[0]], [dic['bound']-minbound+d*np.random.randn(1)[0]], 'ro')
+
+def plot_bhr_lib_custom(outs):
+	maxoptimizetime = max(max(dic['optimizetime'] for dic in out[2]) for out in outs)
+	plt.figure()
+	plt.xlabel('dimension')
+	plt.ylabel('bounds')
+	c, d = 50, 0.05
+	for out in outs:
+		minbound = min(dic['bound'] for dic in out[2])
+		for dic in out[2]:
+			plt.plot([dic['reduced_dimension']+c*np.random.randn(1)[0]], [dic['bound']-minbound+d*np.random.randn(1)[0]], 'o', color=colour_point(dic['index']))
+
 def mark_point(index):
 	if index == 0:
 		return 'o'
-	elif index:
-		return '*'
+	elif index == -1:
+		return 'o'
+	elif not index:
+		return 'o'
 	else:
-		return '^'
+		return '*'
+
+def colour_point(index):
+	if index == 0:
+		return 'red'
+	elif index == -1:
+		return 'red'
+	elif not index:
+		return 'red'
+	else:
+		return 'blue'
