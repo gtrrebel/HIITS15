@@ -26,6 +26,7 @@ def dics_compress(d):
 	ld = []
 	for dic in d[2]:
 		ld.append({})
+		ld[-1]['index'] = dic['index']
 		for g in gather:
 			if g != 'return_m':
 				ld[-1][g] = dic[g]
@@ -40,6 +41,7 @@ def dics_uncompress(d):
 	for dic in d[2]:
 		ld.append({})
 		for g in gather:
+			ld[-1]['index'] = dic['index']
 			if g != 'return_m':
 				ld[-1][g] = dic[g]
 			else:
