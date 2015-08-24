@@ -161,6 +161,28 @@ def plot_bhr_lib_custom(outs):
 		for dic in out[2]:
 			plt.plot([dic['reduced_dimension']+c*np.random.randn(1)[0]], [dic['bound']-minbound+d*np.random.randn(1)[0]], 'o', color=colour_point(dic['index']))
 
+def plot_bhr_lib_reverse_plain(outs):
+	maxoptimizetime = max(max(dic['optimizetime'] for dic in out[2]) for out in outs)
+	plt.figure()
+	plt.xlabel('dimension')
+	plt.ylabel('bounds')
+	c, d = 50, 0.05
+	for out in outs:
+		maxbound = max(dic['bound'] for dic in out[2])
+		for dic in out[2]:
+			plt.plot([dic['reduced_dimension']+c*np.random.randn(1)[0]], maxbound - [dic['bound']+d*np.random.randn(1)[0]], 'ro')
+
+def plot_bhr_lib_custom(outs):
+	maxoptimizetime = max(max(dic['optimizetime'] for dic in out[2]) for out in outs)
+	plt.figure()
+	plt.xlabel('dimension')
+	plt.ylabel('bounds')
+	c, d = 50, 0.05
+	for out in outs:
+		maxbound = max(dic['bound'] for dic in out[2])
+		for dic in out[2]:
+			plt.plot([dic['reduced_dimension']+c*np.random.randn(1)[0]], maxbound - [dic['bound']+d*np.random.randn(1)[0]], 'o', color=colour_point(dic['index']))
+
 def mark_point(index):
 	if index == 0:
 		return 'o'
