@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.10.6)  24 AUG 2015 00:04
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.10.6)  25 AUG 2015 18:17
 entering extended mode
  \write18 enabled.
  file:line:error style messages enabled.
@@ -841,6 +841,10 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `\\' on input line 24.
 
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\\' on input line 24.
+
 (./HIIT15slidesOtte.aux)
 \openout1 = `HIIT15slidesOtte.aux'.
 
@@ -1082,16 +1086,16 @@ Overfull \hbox (0.6362pt too wide) in paragraph at lines 113--113
 
  <../presentation_pics/twodimensionalf.png> <../presentation_pics/Gradient_desc
 ent.png (PNG copy)>]
-<../presentation_pics/FR_data_plain.png, id=184, 586.8324pt x 442.2924pt>
-File: ../presentation_pics/FR_data_plain.png Graphic file (type png)
+<../presentation_pics/FR_data_plain_rev.png, id=184, 586.8324pt x 442.2924pt>
+File: ../presentation_pics/FR_data_plain_rev.png Graphic file (type png)
 
-<use ../presentation_pics/FR_data_plain.png>
-Package pdftex.def Info: ../presentation_pics/FR_data_plain.png used on input l
-ine 118.
+<use ../presentation_pics/FR_data_plain_rev.png>
+Package pdftex.def Info: ../presentation_pics/FR_data_plain_rev.png used on inp
+ut line 118.
 (pdftex.def)             Requested size: 293.41548pt x 221.14566pt.
  [7
 
- <../presentation_pics/FR_data_plain.png>]
+ <../presentation_pics/FR_data_plain_rev.png>]
 <../presentation_pics/saddle_max_2.png, id=212, 578.16pt x 433.62pt>
 File: ../presentation_pics/saddle_max_2.png Graphic file (type png)
 
@@ -1102,16 +1106,16 @@ ne 130.
  [8
 
  <../presentation_pics/saddle_max_2.png>]
-<../presentation_pics/FR_data_color.png, id=240, 586.8324pt x 442.2924pt>
-File: ../presentation_pics/FR_data_color.png Graphic file (type png)
+<../presentation_pics/FR_data_color_rev.png, id=240, 586.8324pt x 442.2924pt>
+File: ../presentation_pics/FR_data_color_rev.png Graphic file (type png)
 
-<use ../presentation_pics/FR_data_color.png>
-Package pdftex.def Info: ../presentation_pics/FR_data_color.png used on input l
-ine 135.
+<use ../presentation_pics/FR_data_color_rev.png>
+Package pdftex.def Info: ../presentation_pics/FR_data_color_rev.png used on inp
+ut line 135.
 (pdftex.def)             Requested size: 293.41548pt x 221.14566pt.
  [9
 
- <../presentation_pics/FR_data_color.png>] [10
+ <../presentation_pics/FR_data_color_rev.png>] [10
 
 ] [11
 
@@ -1140,33 +1144,30 @@ LaTeX Font Warning: Size substitutions with differences
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 159.
  ) 
 Here is how much of TeX's memory you used:
- 20010 strings out of 493107
- 381623 string characters out of 6134840
- 444651 words of memory out of 5000000
- 22976 multiletter control sequences out of 15000+600000
+ 20007 strings out of 493107
+ 381635 string characters out of 6134840
+ 444873 words of memory out of 5000000
+ 22974 multiletter control sequences out of 15000+600000
  17568 words of font info for 65 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  56i,14n,75p,935b,602s stack positions out of 5000i,500n,10000p,200000b,80000s
-pdfTeX warning (dest): name{Navigation12} has been referenced but does not ex
-ist, replaced by a fixed one
-
-</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex8.p
-fb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pf
-b></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb
-></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmss12.pfb>
-</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></
-usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb><
-/usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi10.pfb><
-/usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi8.pfb></
-usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></u
-sr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr
-/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb><
-/usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/symbols/msam7.pf
-b></usr/local/texlive/2014/texmf-dist/fonts/type1/public/wasy/wasy10.pfb>
-Output written on HIIT15slidesOtte.pdf (11 pages, 600630 bytes).
+</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex8
+.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.
+pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.p
+fb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmss12.pf
+b></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb>
+</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb
+></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi10.pfb
+></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi8.pfb>
+</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><
+/usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></u
+sr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb
+></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/symbols/msam7.
+pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/public/wasy/wasy10.pfb>
+Output written on HIIT15slidesOtte.pdf (11 pages, 599143 bytes).
 PDF statistics:
- 368 PDF objects out of 1000 (max. 8388607)
- 322 compressed objects within 4 object streams
- 24 named destinations out of 1000 (max. 500000)
+ 367 PDF objects out of 1000 (max. 8388607)
+ 321 compressed objects within 4 object streams
+ 23 named destinations out of 1000 (max. 500000)
  73 words of extra memory for PDF output out of 10000 (max. 10000000)
 
