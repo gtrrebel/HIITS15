@@ -42,8 +42,11 @@ IDEOITA:
 11. Stochastic variational inference
 	- Frameworkin soveltaminen toiseen menetelmään - TULOSSA (?) 
 
-Mitä teen juuri nyt (päivitetty 17.8.2015 klo 18):
+12. Oma Datageneraattori
+	- LDA-pohja, Dirichlet/Gaussian satunnaisluvut - TEHTY
+
+Mitä teen juuri nyt (päivitetty 27.8.2015 klo 18):
 	- dim vs bound/eigenvalue dist
 
 Mitä teen seuraavaksi:
-	- ...
+	- Gaussian params playing 'round
