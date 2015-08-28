@@ -39,17 +39,17 @@ def test3(topic_params, word_params, K0, V, Ns = [100 for i in xrange(20)], K = 
 	docs = np.array(create_gaussian_data(topic_params, word_params, K0, V, Ns = [200 for i in xrange(30)]))
 	voc = np.arange(V)
 	m = LDA3(docs, voc, K, make_fns = False)
-	res = run([m], end_gather=['bound', 'reduced_dimension', 'optimizetime', 'get_vb_param'])
+	res = run([m], end_gather=['bound', 'reduced_dimension', 'optimizetime', 'get_vb_param', 'voc_size'])
 	for docs in res:
 		for dic in docs[2]:
 			dic['index'] = 0
-	return res
+	return res[0]
 
-def test4(alpha, Ko, beta, V, DN, DL, K, method, restarts = 10):
-	return test3([alpha for _ in xrange(Ko)], [beta for _ in xrange(V)], [DL for _ in xrange(DN)], K, method, restarts)
+def test4(topic_params, word_params, KVs):
+	return [test3(topic_params, word_params, KV[0], KV[1]) for KV in KVs]
 
-def test4_p(alpha, Ko, beta, V, DN, DL, K, method, restarts = 10):
-	res = test4(alpha, Ko, beta, V, DN, DL, K, method, restarts)
+def test4_p(topic_params, word_params, KVs):
+	res = test4(topic_params, word_params, KVs)
 	plot_bhr_lib(res)
 
 def test4s(alpha, Ko, beta, V, DN, DLs, K, method, restarts = 10):
@@ -58,7 +58,7 @@ def test4s(alpha, Ko, beta, V, DN, DLs, K, method, restarts = 10):
 def test4s_p(alpha, Ko, beta, V, DN, DLs, K, method, restarts = 10):
 	ress = test4s(alpha, Ko, beta, V, DN, DLs, K, method, restarts = 10)
 	print_bhr_lib(ress)
-	plot_bhr_lib(ress)
+	plot_bhr_lib_voc(ress)
 
 def plot_d_test(alpha, n):
 	plot_d(create_distribution([alpha for _ in xrange(n)]))

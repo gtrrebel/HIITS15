@@ -52,3 +52,37 @@ def plot_d(d):
 	ax = pb.subplot(111)
 	ax.bar(range(len(d[0])), d[0])
 	pb.show()
+
+def covtest(params, v, n):
+	alpha, beta, gamma = params
+	A = np.linalg.cholesky(alpha*np.identity(v) + beta*np.ones((v,v)))
+	if gamma == 0:
+		b = np.zeros(v)
+	else:
+		b = np.random.normal(scale=gamma, size=v)
+	d = [b + np.dot(A, np.random.normal(size=v)) for _ in xrange(n)]
+	return np.cov(d, rowvar=0)
+
+def covtest_both(params, v, n):
+	alpha, beta, gamma = params
+	A = np.linalg.cholesky(alpha*np.identity(v) + beta*np.ones((v,v)))
+	if gamma == 0:
+		b = np.zeros(v)
+	else:
+		b = np.random.normal(scale=gamma, size=v)
+	d = [b + np.dot(A, np.random.normal(size=v)) for _ in xrange(n)]
+	d2 = [softmax(dd) for dd in d]
+	return np.cov(d, rowvar=0), np.cov(d2, rowvar=0)
+
+def covtest2_both(params, v, n):
+	alpha, beta, gamma = params
+	b = beta*np.random.normal(size=(v,v))
+	b = b + b.transpose()
+	A = np.linalg.cholesky(alpha*np.identity(v) + b)
+	if gamma == 0:
+		b = np.zeros(v)
+	else:
+		b = np.random.normal(scale=gamma, size=v)
+	d = [b + np.dot(A, np.random.normal(size=v)) for _ in xrange(n)]
+	d2 = [softmax(dd) for dd in d]
+	return np.cov(d, rowvar=0), np.cov(d2, rowvar=0)

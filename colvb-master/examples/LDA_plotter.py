@@ -183,6 +183,17 @@ def plot_bhr_lib_reverse_custom(outs):
 		for dic in out[2]:
 			plt.plot([dic['reduced_dimension']+c*np.random.randn(1)[0]], [dic['bound']+d*np.random.randn(1)[0]]-maxbound, 'o', color=colour_point(dic['index']))
 
+def plot_bhr_lib_voc(outs):
+	vmax = max(max(dic['voc_size'] for dic in out[2]) for out in outs)
+	plt.figure()
+	plt.xlabel('dimension')
+	plt.ylabel('bounds')
+	c, d = 50, 0.05
+	for out in outs:
+		minbound = min(dic['bound'] for dic in out[2])
+		for dic in out[2]:
+			plt.plot([dic['reduced_dimension']+c*np.random.randn(1)[0]], [dic['bound']-minbound+d*np.random.randn(1)[0]], mark_point(dic['index']), color=color_point_voc(dic['voc_size'], vmax))
+
 def mark_point(index):
 	if index == 0:
 		return 'o'
@@ -193,6 +204,13 @@ def mark_point(index):
 	else:
 		return '*'
 
+def color_point(runtime = None, maxruntime= None):
+	cmap = plt.get_cmap('RdYlGn')
+	if runtime == None:
+		return cmap(0)
+	else:
+		return cmap(np.sqrt(1- runtime/maxruntime))
+
 def colour_point(index):
 	if index == 0:
 		return 'red'
@@ -202,3 +220,10 @@ def colour_point(index):
 		return 'red'
 	else:
 		return 'blue'
+
+def color_point_voc(v, maxv):
+	cmap = plt.get_cmap('RdYlGn')
+	if v == None:
+		return cmap(0)
+	else:
+		return cmap(np.sqrt(1- v/vmax))

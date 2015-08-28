@@ -101,6 +101,9 @@ class investigable():
 			end_return[gather] = self.end_data[gather]
 		return end_return
 
+	def voc_size(self):
+		return self.V
+
 	def end_display(self):
 		self.md.display()
 
