@@ -86,3 +86,6 @@ def covtest2_both(params, v, n):
 	d = [b + np.dot(A, np.random.normal(size=v)) for _ in xrange(n)]
 	d2 = [softmax(dd) for dd in d]
 	return np.cov(d, rowvar=0), np.cov(d2, rowvar=0)
+
+def new_create_gaussian_distributions():
+	pass

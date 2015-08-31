@@ -35,11 +35,13 @@ def test2s_p(alpha, Ko, beta, V, DN, DLs, K, method, restarts = 10):
 def plot_d_test(alpha, n):
 	plot_d(create_distribution([alpha for _ in xrange(n)]))
 
-def test3(topic_params, word_params, K0, V, Ns = [100 for i in xrange(20)], K = 5, method = 'steepest', restarts = 10):
-	docs = np.array(create_gaussian_data(topic_params, word_params, K0, V, Ns = [200 for i in xrange(30)]))
+def test3(topic_params, word_params, K0, V, Ns = [100 for i in xrange(20)], K = None, method = 'steepest', restarts = 10):
+	if K == None:
+		K = K0
+	docs = np.array(create_gaussian_data(topic_params, word_params, K0, V, Ns = [100 for i in xrange(100)]))
 	voc = np.arange(V)
 	m = LDA3(docs, voc, K, make_fns = False)
-	res = run([m], end_gather=['bound', 'reduced_dimension', 'optimizetime', 'get_vb_param', 'voc_size'])
+	res = run([m], end_gather=['bound', 'reduced_dimension', 'optimizetime', 'get_vb_param', 'voc_size'], methods=[method])
 	for docs in res:
 		for dic in docs[2]:
 			dic['index'] = 0
@@ -51,6 +53,7 @@ def test4(topic_params, word_params, KVs):
 def test4_p(topic_params, word_params, KVs):
 	res = test4(topic_params, word_params, KVs)
 	plot_bhr_lib(res)
+	return res
 
 def test4s(alpha, Ko, beta, V, DN, DLs, K, method, restarts = 10):
 	return [test4(alpha, Ko, beta, V, DN, DL, K, method, restarts)[0] for DL in DLs]
