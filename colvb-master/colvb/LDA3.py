@@ -18,7 +18,7 @@ def softmax(x):
 class LDA3(col_vb2):
     """Collapsed Latent Dirichlet Allocation"""
 
-    def __init__(self, documents,vocabulary, K, save_specs = [''], alpha_0=1.,beta_0=1.,eps=1e-14, finite_difference_checks=False, make_fns = True):
+    def __init__(self, documents,vocabulary, K, save_specs = [''], alpha_0=1.,beta_0=1.,eps=1e-14, finite_difference_checks=False, make_fns = True, seed=None):
         self.eps = eps
         self.finite_difference_checks = finite_difference_checks
         col_vb2.__init__(self)
@@ -55,12 +55,22 @@ class LDA3(col_vb2):
         self.alpha_0 = np.ones(self.K)*alpha_0
         self.beta_0 = np.ones(self.V)*beta_0
 
+        if seed == None:
+            self.seed = np.random.randint(0, sys.maxint)
+        else:
+            self.seed = seed
+        np.random.seed(self.seed)
         self.set_vb_param(np.random.randn(sum(self.Nd)*self.K))
         if self.make_fns:
             self.make_functions()
         self.pickle_data = [self.get_vb_param(), self.documents, self.vocabulary, self.K, alpha_0, beta_0, eps]
 
-    def new_param(self):
+    def new_param(self, seed=None):
+        if seed == None:
+            self.seed = np.random.randint(0, sys.maxint)
+        else:
+            self.seed = seed
+        np.random.seed(self.seed)
         self.set_vb_param(np.random.randn(sum(self.Nd)*self.K))
 
     def get_param(self):

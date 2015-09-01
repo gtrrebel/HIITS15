@@ -119,6 +119,9 @@ class investigable():
 	def dimension(self):
 		return len(self.get_param())
 
+	def get_seed(self):
+		return self.seed
+
 	def reduced_dimension(self):
 		return (self.K -1)*self.N*self.D
 

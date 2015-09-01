@@ -1,5 +1,6 @@
 import numpy as np
 import pylab as pb
+import sys
 
 def softmax(x):
     ex = np.exp(x-x.max())
@@ -47,6 +48,11 @@ def create_gaussian_data(topic_params, word_params, K, V, Ns):
 	tds, wds = create_gaussian_distributions(topic_params, K, len(Ns)), create_gaussian_distributions(word_params, V, K)
 	return [[get(wds[get(tds[i])]) for _ in xrange(Ns[i])] for i in xrange(len(Ns))]
 
+def new_create_gaussian_data(topic_params, word_params, K, V, Ns, topic_seed=None, word_seed=None):
+	tds, topic_seed = new_create_gaussian_distributions(topic_params, K, len(Ns), seed=topic_seed)
+	wds, word_seed = new_create_gaussian_distributions(word_params, V, K, seed=word_seed)
+	return [[get(wds[get(tds[i])]) for _ in xrange(Ns[i])] for i in xrange(len(Ns))], [topic_seed, word_seed]
+
 def plot_d(d):
 	fig = pb.figure()
 	ax = pb.subplot(111)
@@ -87,5 +93,44 @@ def covtest2_both(params, v, n):
 	d2 = [softmax(dd) for dd in d]
 	return np.cov(d, rowvar=0), np.cov(d2, rowvar=0)
 
-def new_create_gaussian_distributions():
-	pass
+def new_create_gaussian_distributions(params, v, n, seed=None):
+	if seed == None:
+		seed = np.random.randint(0, sys.maxint)
+	np.random.seed(seed)
+	alpha, beta, gamma = params
+	A = np.linalg.cholesky(alpha*np.identity(n) + beta*np.ones((n,n)))
+	if gamma == 0:
+		b = np.zeros(n)
+	else:
+		b = np.random.normal(scale=gamma, size=n)
+	ds = np.array([b + np.dot(A, np.random.normal(size=n)) for _ in xrange(v)])
+	ds = np.array([[ds[i][j] for i in xrange(v)] for j in xrange(n)])
+	ds = [softmax(d) for d in ds]
+	return [(d, np.cumsum(d)) for d in ds], seed
+
+def covtest4_both(params, v, n):
+	alpha, beta, gamma = params
+	A = np.linalg.cholesky(alpha*np.identity(n) + beta*np.ones((n,n)))
+	if gamma == 0:
+		b = np.zeros(n)
+	else:
+		b = np.random.normal(scale=gamma, size=n)
+	ds = np.array([b + np.dot(A, np.random.normal(size=n)) for _ in xrange(v)])
+	ds = np.array([[ds[i][j] for i in xrange(v)] for j in xrange(n)])
+	d2 = [softmax(d) for d in ds]
+	return np.cov(ds, rowvar=1), np.cov(d2, rowvar=1)
+
+def covtest3(A, b, v, n):
+	alpha, beta, gamma = params
+	A = np.linalg.cholesky(alpha*np.identity(n) + beta*np.ones((n,n)))
+	if gamma == 0:
+		b = np.zeros(n)
+	else:
+		b = np.random.normal(scale=gamma, size=n)
+	ds = np.array([b + np.dot(A, np.random.normal(size=n)) for _ in xrange(v)])
+	ds = np.array([[ds[i][j] for i in xrange(v)] for j in xrange(n)])
+	ds = [softmax(d) for d in ds]
+	return np.cov(ds, rowvar=0)
+	
+	
+	
