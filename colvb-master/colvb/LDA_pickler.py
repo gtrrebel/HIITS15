@@ -12,6 +12,11 @@ def bhr_lib_pickle_file_name():
 	t = time.strftime("%H_%M_%S_%d_%m_%Y")
 	return name + t
 
+def outputs_file_name():
+	name = 'outputs_'
+	t = time.strftime("%H_%M_%S_%d_%m_%Y")
+	return name + t
+
 def LDA3_compress(m):
 	return m.pickle_data
 
@@ -62,6 +67,7 @@ def LDA3_pickle(ms, directory = None, ukko = False):
 	data = [LDA3_compress(m) for m in ms]
 	f = open(directory + LDA3_pickle_file_name(), 'a+')
 	pickle.dump(data, f)
+	f.close()
 
 def LDA3_unpickle(filename, ukko=False):
 	if filename[0] != '/':
@@ -75,6 +81,7 @@ def LDA3_unpickle(filename, ukko=False):
 	for d in data:
 		ms.append(LDA3_uncompress(d))
 	return ms
+	f.close()
 
 def bhr_lib_pickle(lib, directory = None, ukko = False):
 	if directory == None:
@@ -88,6 +95,7 @@ def bhr_lib_pickle(lib, directory = None, ukko = False):
 	data = [dics_compress(dics) for dics in lib]
 	f = open(directory + bhr_lib_pickle_file_name(), 'a+')
 	pickle.dump(data, f)
+	f.close()
 
 def bhr_lib_unpickle(filename, ukko=False):
 	if filename[0] != '/':
@@ -98,4 +106,30 @@ def bhr_lib_unpickle(filename, ukko=False):
 	f = open(filename, 'r')
 	data = pickle.load(f)
 	data = [dics_uncompress(dics) for dics in data]
+	f.close()
 	return data
+
+def outputs_pickle(outputs, directory = None, ukko = False):
+	if directory == None:
+		if ukko:
+			directory = '/cs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_outputs/'
+		else:
+			directory = '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_outputs/'
+	else:
+		if directory[-1] != '/':
+			directory += '/'
+	f = open(directory + outputs_file_name(), 'a+')
+	pickle.dump(outputs, f)
+	f.close()
+
+def outputs_unpickle(filename, ukko=False):
+	if filename[0] != '/':
+		if ukko:
+			filename = '/cs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_outputs/' + filename
+		else:
+			filename =  '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_outputs/' + filename
+	f = open(filename, 'r')
+	data = pickle.load(f)
+	f.close()
+	return data
+
