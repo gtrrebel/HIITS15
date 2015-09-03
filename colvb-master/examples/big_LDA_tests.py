@@ -1,5 +1,11 @@
 from LDA_demo4 import *
 from LDA_creator import *
+import sys
+sys.path.append('/home/othe/Desktop/HIIT/HIITS15/colvb-master/colvb')
+sys.path.append('/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/colvb')
+sys.path.append('/Users/otteheinavaara/Desktop/HIITS15/colvb-master/colvb')
+from LDA_pickler import *
+from itertools import product
 
 K0c = [0.5, 1, 2]
 Vc = [2**(i) for i in xrange(-2, 11)]
@@ -49,3 +55,18 @@ def get_data(topic_params = (1,0,0), word_params = (1,0,0), K0 = 5, V = 50,  D =
 	output['method'] = method
 	output['dimension'] = K*N*D
 	return output
+
+def run_spec(spec):
+	return get_data(topic_params = spec['topic_params'], word_params = spec['word_params'], K0 = spec['K0'], V = spec['V'],
+		D = spec['D'], N = spec['N'], K = spec['K'], method = spec['method'], restarts = spec['restarts'],
+		build_seeds = spec['build_seeds'], param_seeds = spec['param_seeds'])
+
+def run_specs(specs):
+	outputs = [run_spec(spec) for spec in specs]
+	outputs_pickle(outputs)
+
+def run_tests(topic_params = [(1,1,0)], word_params = [(1,1,0)], K0 = [5], V = [50], D = [10], N = [100], K = [None], method = ['steepest'],
+			restarts = [10], build_seeds = [None], param_seeds = [None]):
+	for tup in product(topic_params, word_params, K0, V, D, N, K, method, restarts, build_seeds, param_seeds):
+		run_specs([dict(zip(['topic_params','word_params','K0','V','D','N','K','method','restarts','build_seeds','param_seeds'],list(tup)))])
+	
