@@ -1,19 +1,19 @@
+import sys
 from LDA_demo4 import *
 from LDA_creator import *
-import sys
 sys.path.append('/home/othe/Desktop/HIIT/HIITS15/colvb-master/colvb')
 sys.path.append('/cs/fs/home/othe/Windows/Desktop/hiit/HIITS15/colvb-master/colvb')
 sys.path.append('/Users/otteheinavaara/Desktop/HIITS15/colvb-master/colvb')
 from LDA_pickler import *
-from itertools import product
-import os
-from ukko_runner import ukko_runner
 
-def init_runner():
-	runner = ukko_runner.runner()
-	runner.remove_bad_hosts()
-	runner.MAXLOAD = 10
-	return runner
+arg = sys.argv[1:]
+topic_params = [int(i) for i in arg[:3]]
+word_params = [int(i) for i in arg[3:6]]
+specs = [int(i) for i in arg[6:12]]
+restarts = int(arg[12])
+build_seeds = [int(arg(13)), int(arg(14))]
+param_seeds = [int(i) for i in xrange(15: (15 + restarts))]
+dir_name = arg[-1]
 
 K0cl = [0.5, 1, 2]
 Vcl = [2**(i) for i in xrange(-2, 11)]
@@ -21,8 +21,6 @@ Kl = [2**(i) for i in xrange(2, 9)]
 Dl = [10**(i) for i in xrange(1, 4)]
 Nl = [100*2**(i) for i in xrange(8)]
 methodsl = ['steepest', 'FR']
-
-lens = [len(K0cl), len(Vcl), len(Kl), len(Dl), len(Nl), len(methodsl)]
 
 def get_data(topic_params = (1,0,0), word_params = (1,0,0), K0 = 5, V = 50,  D = 10, N = 100, K = None, 
 			method = 'steepest', restarts = 10, build_seeds = None, param_seeds = None):
@@ -66,38 +64,20 @@ def get_data(topic_params = (1,0,0), word_params = (1,0,0), K0 = 5, V = 50,  D =
 	output['dimension'] = K*N*D
 	return output
 
-def run_spec(spec):
-	return get_data(topic_params = spec['topic_params'], word_params = spec['word_params'], K0 = spec['K0'], V = spec['V'],
-		D = spec['D'], N = spec['N'], K = spec['K'], method = spec['method'], restarts = spec['restarts'],
-		build_seeds = spec['build_seeds'], param_seeds = spec['param_seeds'])
-
-def run_specs(specs):
-	outputs = [run_spec(spec) for spec in specs]
-	outputs_pickle(outputs)
-
-def run_tests(topic_params = [(1,1,0)], word_params = [(1,1,0)], K0 = [5], V = [50], D = [10], N = [100], K = [None], method = ['steepest'],
-			restarts = [10], build_seeds = [None], param_seeds = [None]):
-	for tup in product(topic_params, word_params, K0, V, D, N, K, method, restarts, build_seeds, param_seeds):
-		run_specs([dict(zip(['topic_params','word_params','K0','V','D','N','K','method','restarts','build_seeds','param_seeds'],list(tup)))])
-	
-
-def run_all(topic_params = (1,1,0), word_params = (1,1,0), specs):
-	for tup in product(*specs):
-		K0c = KOcl[tup[0]]
-		Vc = Vcl[tup[1]]
-		K = Kl[tup[2]]
-		D = Dl[tup[3]]
-		N = Nl[tup[4]]
-		method = methodsl[tup[5]]
-		V = Vc*K
-		K0 = K0c*K
-
-def collect_outputs():
-	outputs = [outputs_unpickle(filename)[0] for filename in os.listdir('/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_outputs')]
-	return outputs
-
 def outstring(spec):
 	return '_'.join([str(i) for i in spec])
 
+K0c = KOcl[specs[0]]
+Vc = Vcl[specs[1]]
+K = Kl[specs[2]]
+D = Dl[specs[3]]
+N = Nl[specs[4]]
+method = methodsl[specs[5]]
+V = Vc*K
+K0 = K0c*K
 
+data = get_data(topic_params= topic_params, word_params=word_params, K0 = K0, V = V, D = D, N = N, K = K, method = method,
+			build_seeds = build_seeds, param_seeds=param_seeds)
 
+outputs_pickle(data, directory = '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_outputs/' + dir_name,
+					ukko = True, filename = outstring(specs))

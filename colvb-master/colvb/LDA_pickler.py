@@ -12,11 +12,6 @@ def bhr_lib_pickle_file_name():
 	t = time.strftime("%H_%M_%S_%d_%m_%Y")
 	return name + t
 
-def outputs_file_name():
-	name = 'outputs_'
-	t = time.strftime("%H_%M_%S_%d_%m_%Y")
-	return name + t
-
 def LDA3_compress(m):
 	return m.pickle_data
 
@@ -109,7 +104,9 @@ def bhr_lib_unpickle(filename, ukko=False):
 	f.close()
 	return data
 
-def outputs_pickle(outputs, directory = None, ukko = False):
+def outputs_pickle(outputs, directory = None, ukko = False, filename = None):
+	if filename == None:
+		return 'LDA_' + time.strftime("%H_%M_%S_%d_%m_%Y")
 	if directory == None:
 		if ukko:
 			directory = '/cs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_outputs/'
@@ -118,7 +115,7 @@ def outputs_pickle(outputs, directory = None, ukko = False):
 	else:
 		if directory[-1] != '/':
 			directory += '/'
-	f = open(directory + outputs_file_name(), 'a+')
+	f = open(directory + filename, 'a+')
 	pickle.dump(outputs, f)
 	f.close()
 
