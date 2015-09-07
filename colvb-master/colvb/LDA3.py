@@ -56,7 +56,7 @@ class LDA3(col_vb2):
         self.beta_0 = np.ones(self.V)*beta_0
 
         if seed == None:
-            self.seed = np.random.randint(0, sys.maxint)
+            self.seed = np.random.randint(0, (1 << 32) - 1)
         else:
             self.seed = seed
         np.random.seed(self.seed)

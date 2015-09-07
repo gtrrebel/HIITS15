@@ -11,8 +11,8 @@ topic_params = [int(i) for i in arg[:3]]
 word_params = [int(i) for i in arg[3:6]]
 specs = [int(i) for i in arg[6:12]]
 restarts = int(arg[12])
-build_seeds = [int(arg(13)), int(arg(14))]
-param_seeds = [int(i) for i in xrange(15: (15 + restarts))]
+build_seeds = [int(arg[13]), int(arg[14])]
+param_seeds = [int(i) for i in arg[15: (15 + restarts)]]
 dir_name = arg[-1]
 
 K0cl = [0.5, 1, 2]
@@ -22,13 +22,8 @@ Dl = [10**(i) for i in xrange(1, 4)]
 Nl = [100*2**(i) for i in xrange(8)]
 methodsl = ['steepest', 'FR']
 
-def get_data(topic_params = (1,0,0), word_params = (1,0,0), K0 = 5, V = 50,  D = 10, N = 100, K = None, 
-			method = 'steepest', restarts = 10, build_seeds = None, param_seeds = None):
+def get_data(topic_params, word_params, K0, V, D, N, K, method, build_seeds, param_seeds):
 	Ns = [N for _ in xrange(D)]
-	if K == None:
-		K = K0
-	if build_seeds == None:
-		build_seeds = [None, None]
 	docs, build_seeds = new_create_gaussian_data(topic_params, word_params, K0, V, Ns, build_seeds[0], build_seeds[1])
 	docs = np.array(docs)
 	voc = np.arange(V)
@@ -67,17 +62,17 @@ def get_data(topic_params = (1,0,0), word_params = (1,0,0), K0 = 5, V = 50,  D =
 def outstring(spec):
 	return '_'.join([str(i) for i in spec])
 
-K0c = KOcl[specs[0]]
+K0c = K0cl[specs[0]]
 Vc = Vcl[specs[1]]
 K = Kl[specs[2]]
 D = Dl[specs[3]]
 N = Nl[specs[4]]
 method = methodsl[specs[5]]
-V = Vc*K
-K0 = K0c*K
+V = int(Vc*K)
+K0 = int(K0c*K)
 
 data = get_data(topic_params= topic_params, word_params=word_params, K0 = K0, V = V, D = D, N = N, K = K, method = method,
 			build_seeds = build_seeds, param_seeds=param_seeds)
 
-outputs_pickle(data, directory = '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_outputs/' + dir_name,
+outputs_pickle(data, directory = '/cs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/LDA_outputs/' + dir_name,
 					ukko = True, filename = outstring(specs))
