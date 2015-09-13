@@ -227,3 +227,107 @@ def color_point_voc(v, maxv):
 		return cmap(0)
 	else:
 		return cmap(np.sqrt(1- v/vmax))
+
+def plot_outs(outs, spec1, spec2, D = None, N = None, V = None, dim = None, K = None, K0 = None, method = None):
+	data2 = [d for d in outs]
+	if D != None:
+		data2 = [d for d in data2 if d['D'] == D]
+	if N != None:
+		data2 = [d for d in data2 if d['N'] == N]
+	if V != None:
+		data2 = [d for d in data2 if d['V'] == V]
+	if dim != None:
+		data2 = [d for d in data2 if d['dimension'] == dim]
+	if K0 != None:
+		data2 = [d for d in data2 if d['K0'] == K0]
+	if method != None:
+		data2 = [d for d in data2 if d['method'] == method]
+	plt.figure()
+	plt.xlabel(spec1)
+	plt.ylabel(spec2)
+	xs, ys = [], []
+	for out in data2:
+		xs.append(out[spec1])
+		ys.append(out[spec2])
+	plt.plot(xs, ys, 'ro')
+
+def psort(data, spec):
+	data2 = sorted(data, key=lambda run: run[spec])
+	toprint = set(['dimension', 'maxbounddiff', 'K', 'V'])
+	toprint.add(spec)
+	for dic in data2:
+		for spe in toprint:
+			print spe, dic[spe],
+		print
+
+def psort2(data, spec):
+	data2 = sorted(data, key=lambda run: run[spec])
+	toprint = set(['dimension', 'maxbounddiff', 'K', 'V'])
+	toprint.add(spec)
+	for dic in data2:
+		for spe in toprint:
+			print spe,' '*(20-len(spe)), dic[spe],
+		print
+
+def psort3(data, spec, D = None, N = None, V = None, dim = None, K = None, K0 = None, method = None):
+	data2 = [d for d in data]
+	if D != None:
+		data2 = [d for d in data2 if d['D'] == D]
+	if N != None:
+		data2 = [d for d in data2 if d['N'] == N]
+	if V != None:
+		data2 = [d for d in data2 if d['V'] == V]
+	if dim != None:
+		data2 = [d for d in data2 if d['dimension'] == dim]
+	if K0 != None:
+		data2 = [d for d in data2 if d['K0'] == K0]
+	if method != None:
+		data2 = [d for d in data2 if d['method'] == method]
+	data2 = sorted(data2, key=lambda run: run[spec])
+	toprint = set(['dimension', 'maxbounddiff', 'K', 'V', 'D', 'N', 'K0', 'method'])
+	toprint.add(spec)
+	print '    ',
+	for spe in toprint:
+		if spe == 'maxbounddiff':
+			print '     mbf',  '   ',
+		elif spe == 'dimension':
+			print '     dim',  '   ',
+		elif spe == 'method':
+			print '     method',  '   ',
+		else:
+			print ' '*(4-len(str(spe))), spe,  '   ',
+	print
+	counter = 0
+	for dic in data2:
+		counter += 1
+		print ' '*(3 - len(str(counter))) + str(counter), '',
+		for spe in toprint:
+			if spe == 'maxboundiff':
+				print ' '*(3-len(str(int(np.log(dic[spe]))))), int(np.log(dic[spe])),  '   ',
+			elif spe == 'maxbounddiff':
+				print "{:.2E}".format(dic[spe]), '   ',
+			elif spe == 'dimension':
+				print "{:.2E}".format(dic[spe]), '   ',
+			elif spe == 'method':
+				print ' '*(10-len(str(dic[spe]))), dic[spe],  '   ',
+			else:
+				print ' '*(4-len(str(dic[spe]))), dic[spe],  '   ',
+		print
+	print '    ',
+	for spe in toprint:
+		if spe == 'maxbounddiff':
+			print '     mbf',  '   ',
+		elif spe == 'dimension':
+			print '     dim',  '   ',
+		elif spe == 'method':
+			print '     method',  '   ',
+		else:
+			print ' '*(4-len(str(spe))), spe,  '   ',
+	print
+
+def testi4():
+	return 0
+
+def testi5():
+	return 0
+
