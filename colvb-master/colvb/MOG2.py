@@ -21,7 +21,7 @@ class MOG2(collapsed_mixture2):
     """
     A Mixture of Gaussians
     """
-    def __init__(self, X, K=2, prior_Z='symmetric', alpha=10., eps=1e-14, finite_difference_checks=False):
+    def __init__(self, X, K=2, prior_Z='symmetric', alpha=10., eps=1e-14, finite_difference_checks=False, make_fns = True, seed=None):
         self.eps = eps
         self.finite_difference_checks = finite_difference_checks
         self.X = X
@@ -39,7 +39,8 @@ class MOG2(collapsed_mixture2):
         self.XXT = self.X[:,:,np.newaxis]*self.X[:,np.newaxis,:]
 
         collapsed_mixture2.__init__(self, self.N, K, prior_Z, alpha)
-        self.make_functions()
+        if make_fns:
+            self.make_functions()
 
     def do_computations(self):
         #computations needed for bound, gradient and predictions
