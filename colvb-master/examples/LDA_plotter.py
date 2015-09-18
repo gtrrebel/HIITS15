@@ -247,9 +247,30 @@ def plot_outs(outs, spec1, spec2, D = None, N = None, V = None, dim = None, K = 
 	plt.ylabel(spec2)
 	xs, ys = [], []
 	for out in data2:
-		xs.append(out[spec1])
-		ys.append(out[spec2])
+		if spec1 in out:
+			xs.append(out[spec1])
+		else:
+			xs.append(special(out, spec1))
+		if spec2 in out:
+			ys.append(out[spec2])
+		else:
+			ys.append(special(out, spec2))
 	plt.plot(xs, ys, 'ro')
+
+def special(out, name):
+	possibles = globals().copy()
+	possibles.update(locals())
+	method = possibles.get(name)
+	return method(out)
+
+def bNratio(out):
+	return out['maxbounddiff']/out['N']
+
+def bDratio(out):
+	return out['maxbounddiff']/out['D']
+
+def bdimratio(out):
+	return out['maxbounddiff']/out['dimension']
 
 def psort(data, spec):
 	data2 = sorted(data, key=lambda run: run[spec])
