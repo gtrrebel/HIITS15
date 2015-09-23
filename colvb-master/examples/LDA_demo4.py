@@ -7,7 +7,7 @@ from data_creator import data_creator
 from input_parser import input_parser
 from LDA_plotter import *
 
-def init(args=[''], make_fns = True, ukko = False):
+def init(args=[''], make_fns = False, ukko = False):
 	ms = []
 	for arg in args:
 		nips_data = input_parser.LDA_parse3(arg.split())
@@ -18,7 +18,7 @@ def init(args=[''], make_fns = True, ukko = False):
 		ms.append(m)
 	return ms
 
-def run(args, out='return', restarts= 10, end_gather = ['bound', 'epsilon_positive'], methods=['FR'], trust_region =False, trust_count=10, param_seeds = None):
+def run(args, out='return', restarts= 10, end_gather = ['bound', 'epsilon_positive'], methods=['FR'], param_seeds = None, repeat = 0, length = 1):
 	if param_seeds == None:
 		param_seeds = [None]*restarts
 	else:
@@ -33,12 +33,16 @@ def run(args, out='return', restarts= 10, end_gather = ['bound', 'epsilon_positi
 		for method in m.runspecs['basics']['methods']:
 			for i in xrange(m.runspecs['basics']['restarts']):
 				m.new_param(param_seeds[i])
-				if trust_region:
-					m.trust_region_optimize(method=method, maxiter=1e4, trust_count=trust_count)
-				else:
-					m.optimize(method=method, maxiter=1e4)
+				m.optimize(method=method, maxiter=1e4)
 				m.end()
 				end_returns.append(m.end_return())
+				if repeat > 0:
+					diff, std, ite = do_repeat(m, repeat, length)
+				else:
+					diff, std, ite = 0, 0, 0
+				end_returns[-1]['repeatdiff'] = diff
+				end_returns[-1]['repeatstd'] = std
+				end_returns[-1]['repeatite'] = ite 
 		data.append((end_gather, save_specs, end_returns))
 	if out == 'plot':
 		for dat in data:
@@ -52,3 +56,17 @@ def run(args, out='return', restarts= 10, end_gather = ['bound', 'epsilon_positi
 	elif out == 'return':
 		return data
 
+def do_repeat(m, repeat, length):
+	starts = []
+	ends = []
+	iterations = []
+	for i in xrange(repeat):
+		m.random_jump(length)
+		starts.append(m.bound())
+		m.optimize()
+		iterations.append(m.iteration)
+		ends.append(m.bound())
+	diff = sum(abs(starts[i] - ends[i]) for i in xrange(len(starts)))/len(starts)
+	std = np.std(np.array(ends))
+	ite = sum(iterations)/len(iterations)
+	return diff, std, ite

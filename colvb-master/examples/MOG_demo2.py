@@ -56,14 +56,7 @@ print 'Nrestarts: ', Nrestarts
 print 'NClust: ', Nclust
 print
 
-#Make functions
-start_time = time.time()
-m.makeFunctions()
-v = vis1()
 plotstart = 3
-
-print 'Theano-function compilation time: ', '%s seconds' % (time.time() - start_time)
-print
 
 #starts = [np.random.randn(m.N*m.K) for i in range(Nrestarts)]
 
@@ -77,28 +70,7 @@ for i in range(Nrestarts):
 
 #mehtods: 'steepest', 'PR', 'FR', 'HS'
 main_time = time.time()
-for method in m.runspec_get('methods'):
-    for i in range(m.runspec_get('restarts')):
-        print 'Start\nMethod used: ', method
-        start_time = time.time()
-        m.set_vb_param(st)
-        m.optimize(method=method, maxiter=1e4, opt=None, index='full', tests = None)
-        v.stack(m.info[plotstart:])
-        print 'End\nMethod used: ', method, '\nRuntime: ', '%s seconds' % (time.time() - start_time) 
-
-pb.figure()
-v.plot_stack('iter', 'index')
-pb.show()
-pb.figure()
-v.plot_stack('iter', 'bound')
-pb.show()
-
-print
-print 'Main time: ', '%s seconds' % (time.time() - main_time)
-print 'Total time: ', '%s seconds' % (time.time() - real_time)
-
-#m.plot_tracks()
-#m.plot()
-
-
+for method in ['steepest']:
+    for i in xrange(10):
+        m.optimize(method=method, maxiter=1e4)
 
