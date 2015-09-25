@@ -47,7 +47,7 @@ def get_data(NClust, dim, Nmin, Nmax, meanscoeff, method, restarts):
 def outstring(spec):
 	return '_'.join([str(i) for i in spec])
 
-data = get_data(NClust=NClust, dim=dim, Nmin=Nmin, meanscoeff=meanscoeff, method = method, restarts=restarts)
+data = get_data(NClust=NClust, dim=dim, Nmin=Nmin, Nmax=Nmax, meanscoeff=meanscoeff, method = method, restarts=restarts)
 
 outputs_pickle(data, directory = '/cs/fs/home/othe/Windows/Desktop/hiit/hiit_test_results/MOG_outputs/' + dir_name,
 					ukko = True, filename = outstring(specs))
