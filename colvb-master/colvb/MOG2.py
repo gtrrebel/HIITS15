@@ -62,6 +62,14 @@ class MOG2(collapsed_mixture2):
             +self.H\
             -0.5*self.N*self.D*np.log(np.pi)
 
+    def new_param(self, seed=None):
+        if seed == None:
+            self.seed = np.random.randint(0, sys.maxint)
+        else:
+            self.seed = seed
+        np.random.seed(self.seed)
+        self.set_vb_param(np.random.randn(self.N*self.K))
+
 
     def vb_grad_natgrad(self):
         """Gradients of the bound"""

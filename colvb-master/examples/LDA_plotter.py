@@ -305,7 +305,7 @@ def psort3(data, spec, D = None, N = None, V = None, dim = None, K = None, K0 = 
 	if method != None:
 		data2 = [d for d in data2 if d['method'] == method]
 	data2 = sorted(data2, key=lambda run: run[spec])
-	toprint = set(['dimension', 'maxbounddiff', 'K', 'V', 'D', 'N', 'K0', 'method'])
+	toprint = set(['dimension', 'maxbounddiff', 'K', 'V', 'D', 'N', 'K0', 'method', 'maxrepeatstd', 'maxrepeatite'])
 	toprint.add(spec)
 	print '    ',
 	for spe in toprint:
@@ -315,6 +315,10 @@ def psort3(data, spec, D = None, N = None, V = None, dim = None, K = None, K0 = 
 			print '     dim',  '   ',
 		elif spe == 'method':
 			print '     method',  '   ',
+		elif spe == 'maxrepeatstd':
+			print '     mrs',  '   ',
+		elif spe == 'maxrepeatite':
+			print '     mri',  '   ',
 		else:
 			print ' '*(4-len(str(spe))), spe,  '   ',
 	print
@@ -331,6 +335,10 @@ def psort3(data, spec, D = None, N = None, V = None, dim = None, K = None, K0 = 
 				print "{:.2E}".format(dic[spe]), '   ',
 			elif spe == 'method':
 				print ' '*(10-len(str(dic[spe]))), dic[spe],  '   ',
+			elif spe == 'maxrepeatstd':
+				print "{:.2E}".format(dic[spe]), '   ',
+			elif spe == 'maxrepeatite':
+				print "{:8}".format(dic[spe]), '   ',
 			else:
 				print ' '*(4-len(str(dic[spe]))), dic[spe],  '   ',
 		print
@@ -342,6 +350,10 @@ def psort3(data, spec, D = None, N = None, V = None, dim = None, K = None, K0 = 
 			print '     dim',  '   ',
 		elif spe == 'method':
 			print '     method',  '   ',
+		elif spe == 'maxrepeatstd':
+			print '     mrs',  '   ',
+		elif spe == 'maxrepeatite':
+			print '     mri',  '   ',
 		else:
 			print ' '*(4-len(str(spe))), spe,  '   ',
 	print

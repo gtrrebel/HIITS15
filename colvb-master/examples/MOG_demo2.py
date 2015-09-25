@@ -14,24 +14,11 @@ sys.path.append('/home/othe/Desktop/HIIT/HIITS15/colvb-master/colvb')
 #sys.path.append('../colvb')
 
 from MOG2 import MOG2
-from vis1 import vis1
 
 pb.ion()
+basic = [10, 2, 10, 30, 5, 1]
 
-np.random.seed(0)
-
-#fetch input
-if len(sys.argv) > 1:
-    filename = sys.argv[1]
-else:
-    filename = '/home/tktl-csfs/fs/home/othe/Windows/Desktop/hiit/hiit_test_input/MOG_demo2.py/1/second_test_input.txt'
-inp = open(filename)
-input_list = []
-for line in inp:
-    input_list.append(int(line.split()[0]))
-
-inp.close()
-Nclust, dim, Nmin, Nmax, MeansCoeff, Nrestarts, Nclust = input_list
+Nclust, dim, Nmin, Nmax, MeansCoeff, Nrestarts = basic
 
 #make some Data which appears in clusters:
 Ndata = np.random.randint(Nmin, Nmax, Nclust)
@@ -45,23 +32,18 @@ m = MOG2(X, Nclust, prior_Z='DP')
 
 #Print Stats
 print 'MOG_demo2.py'
-print filename
 print 
-print'stats:'
+print 'stats:'
 print 'N: ', m.N, ' K: ' , m.K, ' D: ', m.D
 print 'Nclust: ', Nclust, ' dim: ', dim
 print 'Nmin: ', Nmin, ' Nmax: ', Nmax
 print 'MeansCoeff: ', MeansCoeff
 print 'Nrestarts: ', Nrestarts
-print 'NClust: ', Nclust
 print
-
-plotstart = 3
 
 #starts = [np.random.randn(m.N*m.K) for i in range(Nrestarts)]
 
 #The steak
-from scipy.cluster import vq
 starts = []
 for i in range(Nrestarts):
     means = X[np.random.permutation(X.shape[0])[:Nclust]]
@@ -73,4 +55,5 @@ main_time = time.time()
 for method in ['steepest']:
     for i in xrange(10):
         m.optimize(method=method, maxiter=1e4)
+        print m.bound()
 

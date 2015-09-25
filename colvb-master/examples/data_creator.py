@@ -75,4 +75,4 @@ class data_creator():
 		aa = [np.random.randn(dim, dim+1) for i in range(Nclust)]
 		Sigmas = [np.dot(a, a.T) for a in aa]
 		X = np.vstack([np.random.multivariate_normal(mu, cov, (n,)) for mu, cov, n in zip(means, Sigmas, Ndata)])/100
-		return X, Nclust
+		return X
