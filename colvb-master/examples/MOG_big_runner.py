@@ -19,10 +19,11 @@ specs = arg[0:-1]
 
 def get_data(NClust, dim, Nmin, Nmax, meanscoeff, method, restarts):
 	m = init([[NClust, dim, Nmin, Nmax, meanscoeff]])
-	res = run(m, restarts=restarts, end_gather=['bound', 'optimizetime'], methods=[method])[0]
+	res = run(m, restarts=restarts, end_gather=['bound', 'optimizetime', 'dimension'], methods=[method])[0]
 	output = {}
 	bounds = [doc['bound'] for doc in res]
 	times = [doc['optimizetime'] for doc in res]
+	dimension = res[0]['dimension']
 	maxruntime = max(times)
 	averuntime = sum(times)/len(times)
 	maxbounddiff = max(bounds)-min(bounds)
@@ -35,6 +36,12 @@ def get_data(NClust, dim, Nmin, Nmax, meanscoeff, method, restarts):
 	output['boundstd'] = boundstd
 	output['maxbounddiff'] = maxbounddiff
 	output['method'] = method
+	output['NClust'] = NClust
+	output['dim'] = dim
+	output['Nmin'] = Nmin
+	output['Nmax'] = Nmax
+	output['meanscoeff'] = meanscoeff
+	output['restarts'] = restarts
 	return output
 
 def outstring(spec):

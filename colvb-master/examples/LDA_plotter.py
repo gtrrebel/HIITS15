@@ -358,6 +358,68 @@ def psort3(data, spec, D = None, N = None, V = None, dim = None, K = None, K0 = 
 			print ' '*(4-len(str(spe))), spe,  '   ',
 	print
 
+def psort4(data, spec):
+	data2 = [d for d in data]
+	data2 = sorted(data2, key=lambda run: run[spec])
+	toprint = set(['maxbounddiff', 'method', 'maxruntime'])
+	toprint.add(spec)
+	print '    ',
+	for spe in toprint:
+		if spe == 'maxbounddiff':
+			print '     mbf',  '   ',
+		elif spe == 'dimension':
+			print '     dim',  '   ',
+		elif spe == 'method':
+			print '     method',  '   ',
+		elif spe == 'maxrepeatstd':
+			print '     mrs',  '   ',
+		elif spe == 'maxrepeatite':
+			print '     mri',  '   ',
+		elif spe == 'maxruntime':
+			print '     mrt',  '   ',
+		else:
+			print ' '*(4-len(str(spe))), spe,  '   ',
+	print
+	counter = 0
+	for dic in data2:
+		counter += 1
+		print ' '*(3 - len(str(counter))) + str(counter), '',
+		for spe in toprint:
+			if spe == 'maxboundiff':
+				print ' '*(3-len(str(int(np.log(dic[spe]))))), int(np.log(dic[spe])),  '   ',
+			elif spe == 'maxbounddiff':
+				print "{:.2E}".format(dic[spe]), '   ',
+			elif spe == 'dimension':
+				print "{:.2E}".format(dic[spe]), '   ',
+			elif spe == 'method':
+				print ' '*(10-len(str(dic[spe]))), dic[spe],  '   ',
+			elif spe == 'maxrepeatstd':
+				print "{:.2E}".format(dic[spe]), '   ',
+			elif spe == 'maxrepeatite':
+				print "{:8}".format(dic[spe]), '   ',
+			elif spe == 'maxruntime':
+				print "{:8}".format(round(dic[spe])), '   ',
+			else:
+				print ' '*(4-len(str(dic[spe]))), dic[spe],  '   ',
+		print
+	print '    ',
+	for spe in toprint:
+		if spe == 'maxbounddiff':
+			print '     mbf',  '   ',
+		elif spe == 'dimension':
+			print '     dim',  '   ',
+		elif spe == 'method':
+			print '     method',  '   ',
+		elif spe == 'maxrepeatstd':
+			print '     mrs',  '   ',
+		elif spe == 'maxrepeatite':
+			print '     mri',  '   ',
+		elif spe == 'maxruntime':
+			print '     mrt',  '   ',
+		else:
+			print ' '*(4-len(str(spe))), spe,  '   ',
+	print
+
 def testi4():
 	return 0
 
