@@ -202,6 +202,12 @@ class col_vb2(GPy.core.model.Model, investigable):
         self.set_vb_param(opt)
         print nf, 'iters'
 
+    def random_jump(self, length):
+        phi_old = self.get_vb_param().copy()
+        jump = np.random.randn(len(phi_old))
+        jump /= np.linalg.norm(jump)
+        self.set_vb_param(phi_old+length*jump)
+
     def trust_region_optimize(self,method=None, maxiter=500, ftol=1e-6, gtol=1e-6, step_length=1., line_search=False, \
             callback=None, orig_iteration_data=False, print_convergence=False, trust_count=10):
         """
@@ -231,6 +237,7 @@ class col_vb2(GPy.core.model.Model, investigable):
         assert method in ['FR', 'PR','HS','steepest']
         # track:
         self.newtrack(method)
+        self.method = method
 
         iteration = 0
         bound_old = self.bound()
@@ -245,7 +252,11 @@ class col_vb2(GPy.core.model.Model, investigable):
 
             self.road()
             phi_old = self.get_vb_param().copy()
-
+            #print iteration
+            #print self.bound()
+            bound_old2 = bound_old
+            phi_old2 = phi_old
+            bound = self.bound()
             for trustcount in xrange(trust_count):
                 grad,natgrad = self.vb_grad_natgrad()
                 grad,natgrad = -grad,-natgrad
@@ -266,14 +277,27 @@ class col_vb2(GPy.core.model.Model, investigable):
                 else:
                     searchDir = -natgrad
 
-                self.set_vb_param(phi_old + step_length*searchDir)
+                #print "eka:", bound
+                phi_new = phi_old + step_length*searchDir
+                self.set_vb_param(phi_new)
                 bound = self.bound()
 
                 #make sure there's an increase in L, else revert to steepest
-                if bound<bound_old:
+                if bound<bound_old2:
                     searchDir = -natgrad
-                    self.set_vb_param(phi_old + step_length*searchDir)
+                    phi_new = phi_old + step_length*searchDir
+                    self.set_vb_param(phi_new)
                     bound = self.bound()
+                if bound<bound_old2:
+                    self.set_vb_param(phi_old2)
+                    bound = self.bound()
+                else:
+                    phi_old2 = phi_new
+                #print "toka:", bound
+                if np.abs(bound-bound_old2)<=ftol:
+                    if self.optimize_parameters()<1e-1:
+                        break
+                bound_old2 = bound
 
             self.travelled_distance += linalg.norm(self.get_vb_param().copy() - phi_old)
             iteration += 1

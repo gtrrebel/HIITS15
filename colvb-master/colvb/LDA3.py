@@ -90,12 +90,6 @@ class LDA3(col_vb2):
         self.phi_flat = np.vstack(self.phi).flatten()
         self.log_phi_flat = np.vstack(self.log_phi).flatten()
 
-    def random_jump(self, length):
-        phi_old = self.get_vb_param().copy()
-        jump = np.random.randn(len(phi_old))
-        jump /= np.linalg.norm(jump)
-        self.set_vb_param(phi_old+length*jump)
-
     def bound(self):
         """Lower bound on the marginal likelihood"""
         entropy = -np.dot(self.phi_flat,self.log_phi_flat)
