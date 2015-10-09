@@ -239,7 +239,8 @@ class col_vb2(GPy.core.model.Model, investigable):
         self.newtrack(method)
         self.method = method
 
-        iteration = 0
+        self.iteration = 0
+        self.ite_counts = []
         bound_old = self.bound()
         self.orig_params = np.array(self.get_vb_param().copy())
         self.travelled_distance = 0
@@ -262,7 +263,7 @@ class col_vb2(GPy.core.model.Model, investigable):
                 grad,natgrad = -grad,-natgrad
                 squareNorm = np.dot(natgrad,grad) # used to monitor convergence
                 #find search direction
-                if (method=='steepest') or not iteration:
+                if (method=='steepest') or not self.iteration:
                     beta = 0
                 elif (method=='PR'):
                     beta = np.dot((natgrad-natgrad_old),grad)/squareNorm_old
@@ -296,15 +297,17 @@ class col_vb2(GPy.core.model.Model, investigable):
                 #print "toka:", bound
                 if np.abs(bound-bound_old2)<=ftol:
                     if self.optimize_parameters()<1e-1:
+                        self.ite_counts.append(trustcount + 1)
                         break
                 bound_old2 = bound
 
             self.travelled_distance += linalg.norm(self.get_vb_param().copy() - phi_old)
-            iteration += 1
+            #print self.bound()
+            self.iteration += 1
             # track:
             self.track(np.hstack((bound, beta)))
             if orig_iteration_data:
-                print '\riteration '+str(iteration)+' bound='+str(bound) + ' grad='+str(squareNorm) + ', beta='+str(beta),
+                print '\riteration '+str(self.iteration)+' bound='+str(bound) + ' grad='+str(squareNorm) + ', beta='+str(beta),
                 sys.stdout.flush()
             
             self.optimize_time = time.time() - t0
@@ -319,7 +322,7 @@ class col_vb2(GPy.core.model.Model, investigable):
                     print 'vb converged (gtol)'
                 if self.optimize_parameters()<1e-1:
                     break
-            if iteration>=maxiter:
+            if self.iteration>=maxiter:
                 if print_convergence:
                     print 'maxiter exceeded'
                 break
@@ -331,7 +334,7 @@ class col_vb2(GPy.core.model.Model, investigable):
             squareNorm_old = squareNorm
 
             # hyper param_optimisation
-            if (iteration >1) and not (iteration%self.hyperparam_interval):
+            if (self.iteration >1) and not (self.iteration%self.hyperparam_interval):
                 self.optimize_parameters()
 
             bound_old = bound
@@ -430,7 +433,7 @@ class col_vb2(GPy.core.model.Model, investigable):
                     self.iteration += 1
 
             self.travelled_distance += linalg.norm(self.get_vb_param().copy() - phi_old)
-
+            #print self.bound()
             # track:
             self.track(np.hstack((bound, beta)))
             if orig_iteration_data:
