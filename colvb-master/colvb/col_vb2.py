@@ -258,6 +258,7 @@ class col_vb2(GPy.core.model.Model, investigable):
             bound_old2 = bound_old
             phi_old2 = phi_old
             bound = self.bound()
+            self.new_param()
             for trustcount in xrange(trust_count):
                 grad,natgrad = self.vb_grad_natgrad()
                 grad,natgrad = -grad,-natgrad

@@ -22,7 +22,7 @@ def run_all(specs, restarts = 10):
 		f.write(str(specs))
 		f.write(str(restarts))
 	for tup in product(*specs):
-		input_string = ' '.join([str(i) for i in tup]) + ' ' + str(restarts)
+		input_string = ' '.join([str(i) for i in tup])
 		run_string = 'python ' + codepath + ' ' + input_string + ' ' + dirname
 		runner.add_jobs([(run_string,1)])
 	runner.start_batches()
