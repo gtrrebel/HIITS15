@@ -63,14 +63,15 @@ class investigable():
 		phi_orig = self.get_vb_param().copy()
 		phi_orig2 = self.get_param().copy()
 		M = len(phi_orig)
-		hessian_check, gradient_check = False, True
-		d = 4
+		hessian_check, gradient_check = True, False
+		d = 3
 		h, hr = float('1e-' + str(d)), float('1e' + str(d))
 		hij = h*np.eye(M)
 		if hessian_check:
 			H = np.zeros((M,M))
 			H2 = self.get_hessian()
 			for i in xrange(M):
+				print i
 				for j in xrange(M):
 					H[i][j] = hr*hr*(self.f1(phi_orig + hij[i] + hij[j]) - self.f1(phi_orig + hij[i]) - self.f1(phi_orig + hij[j]) + self.f1(phi_orig))
 			for i in xrange(M):
@@ -79,7 +80,7 @@ class investigable():
 						print H[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H[i][j] - H2[i][j])/(H2[i][j])), '%'
 		if gradient_check:
 			G = np.zeros((M))
-			G2, G3 = self.vb_grad_natgrad_test()
+			G2, G3 = self.vb_grad_natgrad()
 			for i in xrange(M):
 				G[i] = hr*(self.f1(phi_orig + hij[i]) - self.f1(phi_orig))
 			for i in xrange(M):

@@ -28,6 +28,7 @@ class col_vb2(GPy.core.model.Model, investigable):
         """"""
         GPy.core.model.Model.__init__(self, 'col_vb2')
         investigable.__init__(self)
+        self.hessian_calc = False
         #stuff for monitoring the different methods
         self.tracks = []
         self.tracktypes = []
@@ -481,7 +482,7 @@ class col_vb2(GPy.core.model.Model, investigable):
         if not self.make_fns:
             self.make_functions()
             self.make_fns = True
-        collaps = True
+        collaps = False
         if self.hessian_calc == False:
             self.hessian = self.f3(self.get_vb_param().copy())
             if collaps:

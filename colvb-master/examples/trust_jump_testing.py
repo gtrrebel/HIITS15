@@ -44,6 +44,39 @@ def MOG_trust_jump_test(args = [10, 2, 10, 30, 5]):
 	output = [normal_bounds, trust_bounds, jump_diffs, trust_ite, trust_real_ite, ite]
 	return output
 
+def MOG_trust_jump_test2(args = [10, 2, 10, 30, 5]):
+	jump_diffs = {}
+	jump_diffs2 = {}
+	trust_ite = []
+	trust_real_ite = []
+	normal_bounds = []
+	ite = []
+	for s in jump_sizes:
+		jump_diffs[s] = []
+		jump_diffs2[s] = []
+	for i in xrange(datacount):
+		m = MOG_demo4.init([args], make_fns = False)[0]
+		for j in xrange(restartcount):
+			seed = np.random.randint(0, (1 << 32) - 1)
+			m.new_param(seed)
+			m.optimize()
+			normal_bounds.append(m.bound())
+			old_phi = m.get_vb_param()
+			for s in jump_sizes:
+				for c in xrange(jump_counts):
+					m.set_vb_param(old_phi)
+					m.random_jump(length = s)
+					m.optimize()
+					jump_diffs[s].append(m.bound() - normal_bounds[-1])
+			for s in jump_sizes:
+				for c in xrange(jump_counts):
+					m.new_param(seed)
+					m.random_jump(length = s)
+					m.optimize()
+					jump_diffs2[s].append(m.bound() - normal_bounds[-1])
+	output = [normal_bounds, jump_diffs, jump_diffs2]
+	return output
+
 def LDA_trust_jump_test(args = ''):
 	jump_diffs = {}
 	trust_ite = []
@@ -88,6 +121,26 @@ def plot_diffs(output):
 	pb.figure()
 	pb.xlim(-1, len(jump_sizes) + 1)
 	pb.plot(xs, ys, 'b*')
+
+def plot_diffs(output):
+	xs = []
+	ys = []
+	for i in xrange(len(jump_sizes)):
+		for j in output[1][jump_sizes[i]]:
+			xs.append(i)
+			ys.append(j)
+	pb.figure()
+	pb.xlim(-1, len(jump_sizes) + 1)
+	pb.plot(xs, ys, 'b*')
+	xs = []
+	ys = []
+	for i in xrange(len(jump_sizes)):
+		for j in output[2][jump_sizes[i]]:
+			xs.append(i)
+			ys.append(j)
+	pb.figure()
+	pb.xlim(-1, len(jump_sizes) + 1)
+	pb.plot(xs, ys, 'r*')
 
 def plot_ite(output):
 	trust_ite = output[3]

@@ -39,6 +39,7 @@ class MOG2(collapsed_mixture2):
         self.XXT = self.X[:,:,np.newaxis]*self.X[:,np.newaxis,:]
 
         collapsed_mixture2.__init__(self, self.N, K, prior_Z, alpha)
+        self.make_fns = make_fns
         if make_fns:
             self.make_functions()
 
@@ -120,10 +121,10 @@ class MOG2(collapsed_mixture2):
         mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
         Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
         bound = 0
-        #bound += -T.tensordot(T.log(phi + 1e-10), phi) #entropy H_L                                 #Ei ihan
-        #bound += -self.D/2. * T.log(kappas).sum()                                                   #toimii
-        #bound += T.gammaln(alphas).sum()                                                            #toimii (ainakin symmetric)
-        #bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()                                 #toimii
+        bound += -T.tensordot(T.log(phi + 1e-10), phi) #entropy H_L                                 #Ei ihan
+        bound += -self.D/2. * T.log(kappas).sum()                                                   #toimii
+        bound += T.gammaln(alphas).sum()                                                            #toimii (ainakin symmetric)
+        bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()                                 #toimii
         boundH = 0                                                                                  #melko hyvin
         for k in range(self.K):
             boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
