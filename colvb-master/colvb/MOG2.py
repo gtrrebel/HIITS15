@@ -7,7 +7,7 @@ import numpy as np
 import pylab as pb
 from scipy import optimize, linalg
 from utilities import softmax, multiple_pdinv, lngammad, ln_dirichlet_C
-from scipy.special import gammaln, digamma
+from scipy.special import gammaln, digamma, polygamma
 from scipy import stats
 from scipy import linalg
 from col_mix2 import collapsed_mixture2
@@ -74,11 +74,16 @@ class MOG2(collapsed_mixture2):
 
     def vb_grad_natgrad(self):
         """Gradients of the bound"""
+        print self.K, self.D, self.N
         x_m = self.X[:,:,None]-self.mun[None,:,:]
         dS = x_m[:,:,None,:]*x_m[:,None,:,:]
         SnidS = self.Sns_inv[None,:,:,:]*dS
         dlndtS_dphi = np.dot(np.ones(self.D), np.dot(np.ones(self.D), SnidS))
 
+        print (-0.5*self.D/self.kNs).shape
+        print (0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0)).shape
+        print (self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.).shape
+        print ((self.Hgrad-0.5*dlndtS_dphi*self.vNs)).shape
         grad_phi =  (-0.5*self.D/self.kNs + 0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0) + self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.) + (self.Hgrad-0.5*dlndtS_dphi*self.vNs)
 
         natgrad = grad_phi - np.sum(self.phi*grad_phi, 1)[:,None] # corrects for softmax (over) parameterisation
@@ -93,7 +98,7 @@ class MOG2(collapsed_mixture2):
         SnidS = self.Sns_inv[None,:,:,:]*dS
         dlndtS_dphi = np.dot(np.ones(self.D), np.dot(np.ones(self.D), SnidS))
 
-        grad_phi =  - self.Sns_halflogdet -0.5*dlndtS_dphi*self.vNs #+ self.Hgrad - 1
+        grad_phi = - self.Sns_halflogdet - 0.5*dlndtS_dphi*self.vNs
         natgrad = grad_phi - np.sum(self.phi*grad_phi, 1)[:,None] # corrects for softmax (over) parameterisation
         grad = natgrad*self.phi
 
@@ -121,14 +126,14 @@ class MOG2(collapsed_mixture2):
         mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
         Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
         bound = 0
-        bound += -T.tensordot(T.log(phi + 1e-10), phi) #entropy H_L                                 #Ei ihan
+        bound += -T.tensordot(T.log(phi + 1e-10), phi) #entropy H_L                                 #toimii
         bound += -self.D/2. * T.log(kappas).sum()                                                   #toimii
         bound += T.gammaln(alphas).sum()                                                            #toimii (ainakin symmetric)
         bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()                                 #toimii
-        boundH = 0                                                                                  #melko hyvin
-        for k in range(self.K):
-            boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
-        bound -= boundH
+        #boundH = 0                                                                                  #melko hyvin
+        #for k in range(self.K):
+        #    boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
+        #    bound -= boundH
         
         #Make the functions
         input = [x]
@@ -137,6 +142,19 @@ class MOG2(collapsed_mixture2):
         self.f2 = theano.function(input, grad)
         hess = theano.gradient.hessian(bound, wrt=input)[0]
         self.f3 = theano.function(input, hess)
+
+    def brute_hessian(self):
+        """Calculate hessian matrix (without automatic differentiation)"""
+        phis = self.get_vb_param().copy()
+        n = self.D*self.N*self.K
+        H = 0
+        H += np.diag(-1/phis) #Entropy
+        Hk = 0
+        Hk += 0.5*self.D/(self.kNs)**2
+        Hk += polygamma(1, self.alpha + self.phi_hat)
+        Hk += 0.25*polygamma(1, (self.vNs-np.arange(self.D)[:,None])/2.).sum(0)
+        a = np.ones((self.N, self.N))
+        return H
 
 
     def predict_components_ln(self, Xnew):

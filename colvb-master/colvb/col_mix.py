@@ -4,7 +4,7 @@
 import numpy as np
 import pylab as pb
 from scipy import optimize, linalg
-from utilities import softmax, ln_dirichlet_C, softmax_weave
+from utilities import softmax, ln_dirichlet_C, softmax_weave, polygammad
 from scipy.special import gammaln, digamma
 from col_vb import col_vb
 

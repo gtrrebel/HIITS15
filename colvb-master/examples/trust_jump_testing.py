@@ -7,7 +7,7 @@ from LDA_creator import *
 
 datacount = 5
 restartcount = 5
-jump_sizes = [0.01, 0.01, 0.1, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000]
+jump_sizes = [0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000]
 jump_counts = 5
 
 def MOG_trust_jump_test(args = [10, 2, 10, 30, 5]):
@@ -43,6 +43,33 @@ def MOG_trust_jump_test(args = [10, 2, 10, 30, 5]):
 					jump_diffs[s].append(m.bound() - normal_bounds[-1])
 	output = [normal_bounds, trust_bounds, jump_diffs, trust_ite, trust_real_ite, ite]
 	return output
+
+def MOG_jumper(args = [10, 2, 10, 30, 5]):
+	m = MOG_demo4.init([args])[0]
+	eps = 1e-14
+	m.optimize()
+	N = len(m.get_vb_param())
+	bound = m.bound()
+	poss = []
+	sposs = []
+	for i in xrange(10):
+		old_phi = m.get_vb_param()
+		for j in xrange(100):
+			l = np.random.choice(jump_sizes[3:10])
+			print l
+			m.random_jump(length = l)
+			m.optimize()
+			if m.bound() > bound:
+				bound = m.bound()
+				break
+			m.set_vb_param(old_phi)
+			if i == 99:
+				return bound, sposs, poss, N
+		eigs = m.eigenvalues()
+		poss.append(sum(1 for i in eigs if i > 0))
+		sposs.append(sum(1 for i in eigs if i > eps))
+		print bound, sposs[-1], poss[-1]
+	return bound, sposs, poss, N
 
 def MOG_trust_jump_test2(args = [10, 2, 10, 30, 5]):
 	jump_diffs = {}
