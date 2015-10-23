@@ -8,6 +8,7 @@ import pylab as pb
 from scipy import optimize, linalg
 from utilities import softmax, multiple_pdinv, lngammad, ln_dirichlet_C
 from scipy.special import gammaln, digamma, polygamma
+from brute_hessian import block_dia
 from scipy import stats
 from scipy import linalg
 from col_mix2 import collapsed_mixture2
@@ -74,16 +75,16 @@ class MOG2(collapsed_mixture2):
 
     def vb_grad_natgrad(self):
         """Gradients of the bound"""
-        print self.K, self.D, self.N
+        #print self.K, self.D, self.N
         x_m = self.X[:,:,None]-self.mun[None,:,:]
         dS = x_m[:,:,None,:]*x_m[:,None,:,:]
         SnidS = self.Sns_inv[None,:,:,:]*dS
         dlndtS_dphi = np.dot(np.ones(self.D), np.dot(np.ones(self.D), SnidS))
 
-        print (-0.5*self.D/self.kNs).shape
-        print (0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0)).shape
-        print (self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.).shape
-        print ((self.Hgrad-0.5*dlndtS_dphi*self.vNs)).shape
+        #print (-0.5*self.D/self.kNs).shape
+        #print (0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0)).shape
+        #print (self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.).shape
+        #print ((self.Hgrad-0.5*dlndtS_dphi*self.vNs)).shape
         grad_phi =  (-0.5*self.D/self.kNs + 0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0) + self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.) + (self.Hgrad-0.5*dlndtS_dphi*self.vNs)
 
         natgrad = grad_phi - np.sum(self.phi*grad_phi, 1)[:,None] # corrects for softmax (over) parameterisation
@@ -143,17 +144,28 @@ class MOG2(collapsed_mixture2):
         hess = theano.gradient.hessian(bound, wrt=input)[0]
         self.f3 = theano.function(input, hess)
 
-    def brute_hessian(self):
+    def brutehessian(self):
         """Calculate hessian matrix (without automatic differentiation)"""
-        phis = self.get_vb_param().copy()
+        phis = self.phi_.copy()
         n = self.D*self.N*self.K
         H = 0
-        H += np.diag(-1/phis) #Entropy
+        H += np.diag(-1/phis.flatten()) #Entropy
         Hk = 0
         Hk += 0.5*self.D/(self.kNs)**2
         Hk += polygamma(1, self.alpha + self.phi_hat)
         Hk += 0.25*polygamma(1, (self.vNs-np.arange(self.D)[:,None])/2.).sum(0)
-        a = np.ones((self.N, self.N))
+        H += block_dia(Hk, self.N)
+        print self.Sns_inv.shape
+        for k in xrange(self.K):
+            for n1 in xrange(self.N):
+                a = (self.X[n1]-self.mun[k]).T*self.Sns_inv[:,:,k]*(self.X[n1]-self.mun[k]).T*self.Sns_inv[k]
+                for n2 in xrange(self.N):
+                    H[k*self.N + n1][k*self.N + n2] += -0.5*a
+        for k in xrange(self.K):
+            for n1 in xrange(self.N):
+                for n2 in xrange(self.N):
+                    a = (self.X[n1]-self.mun[k]).T*self.Sns_inv[:,:,k]*(self.X[n2]-self.mun[k]).T*self.Sns_inv[k]
+                    H[k*self.N + n1][k*self.N + n2] += - 0.5*self.vNs[k]*a*a - a/self.kNs[k]
         return H
 
 
