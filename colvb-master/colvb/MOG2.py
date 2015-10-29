@@ -94,16 +94,22 @@ class MOG2(collapsed_mixture2):
 
     def vb_grad_natgrad_test(self):
         """Gradients of the bound"""
+        #print self.K, self.D, self.N
         x_m = self.X[:,:,None]-self.mun[None,:,:]
         dS = x_m[:,:,None,:]*x_m[:,None,:,:]
         SnidS = self.Sns_inv[None,:,:,:]*dS
         dlndtS_dphi = np.dot(np.ones(self.D), np.dot(np.ones(self.D), SnidS))
 
-        grad_phi = - self.Sns_halflogdet - 0.5*dlndtS_dphi*self.vNs
+        #print (-0.5*self.D/self.kNs).shape
+        #print (0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0)).shape
+        #print (self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.).shape
+        #print ((self.Hgrad-0.5*dlndtS_dphi*self.vNs)).shape
+        grad_phi =  (-0.5*self.D/self.kNs + 0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0) + self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.) + (self.Hgrad-0.5*dlndtS_dphi*self.vNs)
+
         natgrad = grad_phi - np.sum(self.phi*grad_phi, 1)[:,None] # corrects for softmax (over) parameterisation
         grad = natgrad*self.phi
 
-        return grad.flatten(), natgrad.flatten()
+        return grad_phi
 
     def make_functions(self):
         """Initializes the theano-functions for
@@ -147,27 +153,72 @@ class MOG2(collapsed_mixture2):
     def brutehessian(self):
         """Calculate hessian matrix (without automatic differentiation)"""
         phis = self.phi_.copy()
-        n = self.D*self.N*self.K
-        H = 0
-        H += np.diag(-1/phis.flatten()) #Entropy
+        d = self.N*self.K
+        H = np.zeros((self.N, self.K, self.N, self.K))
+        for n1 in xrange(self.N):
+            for k1 in xrange(self.K):
+                H[n1][k1][n1][k1] += -1/phis[n1][k1]
+        #Gather common terms for Hessian
         Hk = 0
         Hk += 0.5*self.D/(self.kNs)**2
         Hk += polygamma(1, self.alpha + self.phi_hat)
         Hk += 0.25*polygamma(1, (self.vNs-np.arange(self.D)[:,None])/2.).sum(0)
-        H += block_dia(Hk, self.N)
-        print self.Sns_inv.shape
+        for n1 in xrange(self.N):
+            for n2 in xrange(self.N):
+                for k1 in xrange(self.K):
+                    H[n1][k1][n2][k1] += Hk[k1]
+        #Logdet thingies
         for k in xrange(self.K):
             for n1 in xrange(self.N):
-                a = (self.X[n1]-self.mun[k]).T*self.Sns_inv[:,:,k]*(self.X[n1]-self.mun[k]).T*self.Sns_inv[k]
+                a1 = np.dot(np.dot((self.X[n1]-self.mun[:,k]).T,self.Sns_inv[:,:,k]),(self.X[n1]-self.mun[:,k]))
                 for n2 in xrange(self.N):
-                    H[k*self.N + n1][k*self.N + n2] += -0.5*a
-        for k in xrange(self.K):
-            for n1 in xrange(self.N):
+                    a2 = np.dot(np.dot((self.X[n1]-self.mun[:,k]).T,self.Sns_inv[:,:,k]),(self.X[n2]-self.mun[:,k]))
+                    H[n1][k][n2][k] += -0.5*a1-0.5*self.vNs[k]*a2*a2 - a2/self.kNs[k]
+        G = self.vb_grad_natgrad_test()
+        A = np.zeros((self.N, self.K, self.N, self.K))
+        #First term
+        #1
+        for n1 in xrange(self.N):
+            for k1 in xrange(self.K):
+                A[n1][k1][n1][k1] += G[n1][k1]*phis[n1][k1]
+        #2 & 3
+        for n1 in xrange(self.N):
+            for k1 in xrange(self.K):
+                for k2 in xrange(self.K):
+                    A[n1][k1][n1][k2] -= (G[n1][k1]+G[n1][k2])*phis[n1][k1]*phis[n1][k2]
+        #4
+        for n1 in xrange(self.N):
+            s1 = np.dot(phis[n1],G[n1])
+            for k1 in xrange(self.K):
+                A[n1][k1][n1][k1] -= +phis[n1][k1]*s1
+        #5
+        for n1 in xrange(self.N):
+            s1 = np.dot(phis[n1],G[n1])
+            for k1 in xrange(self.K):
+                for k2 in xrange(self.K):
+                    A[n1][k1][n1][k2] += 2*phis[n1][k1]*phis[n1][k2]*s1
+        #Second term
+        #1
+        for n1 in xrange(self.N):
+            for k1 in xrange(self.K):
                 for n2 in xrange(self.N):
-                    a = (self.X[n1]-self.mun[k]).T*self.Sns_inv[:,:,k]*(self.X[n2]-self.mun[k]).T*self.Sns_inv[k]
-                    H[k*self.N + n1][k*self.N + n2] += - 0.5*self.vNs[k]*a*a - a/self.kNs[k]
-        return H
-
+                    for k2 in xrange(self.K):
+                        A[n1][k1][n2][k2] += H[n1][k1][n2][k2]*phis[n1][k1]*phis[n2][k2]
+        #2 & 3
+        for n1 in xrange(self.N):
+            for k1 in xrange(self.K):
+                for n2 in xrange(self.N):
+                    s1 = np.dot(phis[n2],H[n1][k1][n2]) + np.dot(phis[n1],H[n2][k2][n1])
+                    for k2 in xrange(self.K):
+                        A[n1][k1][n2][k2] -= s1*phis[n1][k1]*phis[n2][k2]
+        #4
+        for n1 in xrange(self.N):
+            for n2 in xrange(self.N):
+                s1 = np.dot(phis[n1],np.dot(H[n1,:,n2,:], phis[n2].T))
+                for k1 in xrange(self.K):
+                    for k2 in xrange(self.K):
+                        A[n1][k1][n2][k2] = s1*phis[n1][k1]*phis[n2][k2]
+        return A
 
     def predict_components_ln(self, Xnew):
         """The predictive density under each component"""
