@@ -21,7 +21,7 @@ def var_change(G, H, phis):
     for n1 in xrange(N):
         s1 = np.dot(phis[n1],G[n1])
         for k1 in xrange(K):
-            A[n1][k1][n1][k1] = -phis[n1][k1]*s1
+            A[n1][k1][n1][k1] += -phis[n1][k1]*s1
     #5
     for n1 in xrange(N):
         s1 = np.dot(phis[n1],G[n1])
@@ -29,7 +29,6 @@ def var_change(G, H, phis):
             for k2 in xrange(K):
                 A[n1][k1][n1][k2] += 2*phis[n1][k1]*phis[n1][k2]*s1
     #Second term
-    print A
     #1
     for n1 in xrange(N):
         for k1 in xrange(K):
@@ -40,9 +39,16 @@ def var_change(G, H, phis):
     for n1 in xrange(N):
         for k1 in xrange(K):
             for n2 in xrange(N):
-                s1 = np.dot(phis[n2],H[n1][k1][n2]) + np.dot(phis[n1],H[n2][k2][n1])
+                s1 = np.dot(phis[n2],H[n1][k1][n2])
                 for k2 in xrange(K):
-                    A[n1][k1][n2][k2] -= s1*phis[n1][k1]*phis[n2][k2]
+                    A[n1][k1][n2][k2] += -s1*phis[n1][k1]*phis[n2][k2]
+    #3
+    for n1 in xrange(N):
+        for k2 in xrange(K):
+            for n2 in xrange(N):
+                s1 = np.dot(phis[n1],H[n2][k2][n1])
+                for k1 in xrange(K):
+                    A[n1][k1][n2][k2] += -s1*phis[n1][k1]*phis[n2][k2]
     #4
     for n1 in xrange(N):
         for n2 in xrange(N):

@@ -225,12 +225,18 @@ class MOG2(collapsed_mixture2):
                 for k1 in xrange(self.K):
                     H[n1][k1][n2][k1] += Hk[k1]
         #Logdet thingies
+
+        x_m = self.X[:,:,None]-self.mun[None,:,:]
+        dS = x_m[:,:,None,:]*x_m[:,None,:,:]
+        SnidS = self.Sns_inv[None,:,:,:]*dS
+        Ank = np.dot(np.ones(self.D), np.dot(np.ones(self.D), SnidS))
+
         if 5 in terms:
             for k in xrange(self.K):
                 for n1 in xrange(self.N):
                     for n2 in xrange(self.N):
-                        a11 = np.dot(np.dot((self.X[n1]-self.mun[:,k]).T,self.Sns_inv[:,:,k]),(self.X[n1]-self.mun[:,k]))
-                        a12 = np.dot(np.dot((self.X[n2]-self.mun[:,k]).T,self.Sns_inv[:,:,k]),(self.X[n2]-self.mun[:,k]))
+                        a11 = Ank[n1][k]
+                        a12 = Ank[n2][k]
                         a2 = np.dot(np.dot((self.X[n1]-self.mun[:,k]).T,self.Sns_inv[:,:,k]),(self.X[n2]-self.mun[:,k]))
                         H[n1][k][n2][k] += -0.5*(a11+a12)+0.5*self.vNs[k]*a2*a2 + self.vNs[k]*a2/self.kNs[k]
         G = self.vb_grad_natgrad_test(terms = terms, change = False)

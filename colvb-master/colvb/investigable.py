@@ -128,9 +128,13 @@ class investigable():
 			else:
 				H = self.f3(self.get_param())
 			H2 = self.brutehessian(terms=terms, change=change)
+			H3 = np.zeros((M,M))
 			for i in xrange(M):
 				for j in xrange(M):
-					print H[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H[i][j] - H2[i][j])/(H2[i][j])), '%'
+					H3[i][j] = hr*hr*(self.f1(phi_orig + hij[i] + hij[j]) - self.f1(phi_orig + hij[i]) - self.f1(phi_orig + hij[j]) + self.f1(phi_orig))
+			for i in xrange(M):
+				for j in xrange(M):
+					print H[i][j],'vs', H3[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H3[i][j] - H2[i][j])/(H2[i][j])), '%'
 
 	def end_print(self):
 		if self.runspecs['prints']['runtime_distribution']:
