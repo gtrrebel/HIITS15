@@ -6,6 +6,7 @@ from model_display import model_display
 from scipy import linalg
 import scipy
 import numpy as np
+import time
 
 
 class investigable():
@@ -59,11 +60,10 @@ class investigable():
 	def get_vb_param(self):
 		raise NotImplementedError( "Implement vb parameter returning method \"get_vb_param\"")
 
-	def finite_difference_check(self):
+	def finite_difference_check(self, hessian_check = False, gradient_check=False, brute_hessian_check = True):
 		phi_orig = self.get_vb_param().copy()
 		phi_orig2 = self.get_param().copy()
 		M = len(phi_orig)
-		hessian_check, gradient_check = False, True
 		d = 3
 		h, hr = float('1e-' + str(d)), float('1e' + str(d))
 		hij = h*np.eye(M)
@@ -71,7 +71,6 @@ class investigable():
 			H = np.zeros((M,M))
 			H2 = self.get_hessian()
 			for i in xrange(M):
-				print i
 				for j in xrange(M):
 					H[i][j] = hr*hr*(self.f1(phi_orig + hij[i] + hij[j]) - self.f1(phi_orig + hij[i]) - self.f1(phi_orig + hij[j]) + self.f1(phi_orig))
 			for i in xrange(M):
@@ -86,7 +85,53 @@ class investigable():
 			for i in xrange(M):
 				if abs(G[i]) + abs(G2[i]) > h:
 					print G[i], ' vs ', G2[i], ' ------ rel. err. ', 100*abs((G[i] - G2[i])/(G2[i])), '%'
-		
+		if brute_hessian_check:
+			H = np.zeros((M,M))
+			H2 = self.brutehessian()
+			for i in xrange(M):
+				for j in xrange(M):
+					H[i][j] = hr*hr*(self.f1(phi_orig + hij[i] + hij[j]) - self.f1(phi_orig + hij[i]) - self.f1(phi_orig + hij[j]) + self.f1(phi_orig))
+			for i in xrange(M):
+				for j in xrange(M):
+					if abs(H[i][j]) > h:
+						print H[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H[i][j] - H2[i][j])/(H2[i][j])), '%'
+	
+	def finite_difference_check2(self, hessian_check = False, gradient_check=False, brute_hessian_check = True, terms = [1,2,3,4,5], change = True):
+		phi_orig = self.get_vb_param().copy()
+		phi_orig2 = self.get_param().copy()
+		M = len(phi_orig)
+		d = 3
+		h, hr = float('1e-' + str(d)), float('1e' + str(d))
+		hij = h*np.eye(M)
+		if hessian_check:
+			H = np.zeros((M,M))
+			H2 = self.get_hessian()
+			for i in xrange(M):
+				for j in xrange(M):
+					H[i][j] = hr*hr*(self.f1(phi_orig + hij[i] + hij[j]) - self.f1(phi_orig + hij[i]) - self.f1(phi_orig + hij[j]) + self.f1(phi_orig))
+			for i in xrange(M):
+				for j in xrange(M):
+					if abs(H[i][j]) > h:
+						print H[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H[i][j] - H2[i][j])/(H2[i][j])), '%'
+		if gradient_check:
+			G = np.zeros((M))
+			G2, G3 = self.vb_grad_natgrad_test()
+			for i in xrange(M):
+				G[i] = hr*(self.f1(phi_orig + hij[i]) - self.f1(phi_orig))
+			for i in xrange(M):
+				if abs(G[i]) + abs(G2[i]) > h:
+					print G[i], ' vs ', G2[i], ' ------ rel. err. ', 100*abs((G[i] - G2[i])/(G2[i])), '%'
+		if brute_hessian_check:
+			self.make_functions2(terms = terms, change = change)
+			if change:
+				H = self.f3(self.get_vb_param())
+			else:
+				H = self.f3(self.get_param())
+			H2 = self.brutehessian(terms=terms, change=change)
+			for i in xrange(M):
+				for j in xrange(M):
+					print H[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H[i][j] - H2[i][j])/(H2[i][j])), '%'
+
 	def end_print(self):
 		if self.runspecs['prints']['runtime_distribution']:
 			self.print_runtime_distribution()

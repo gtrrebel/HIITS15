@@ -490,6 +490,18 @@ class col_vb2(GPy.core.model.Model, investigable):
             self.hessian_calc = True
         return self.hessian
 
+    def get_hessian2(self):
+        if not self.make_fns:
+            self.make_functions()
+            self.make_fns = True
+        collaps = False
+        if self.hessian_calc == False:
+            self.hessian = self.f3(self.get_param().copy())
+            if collaps:
+                self.hessian = self.collapse(self.hessian)
+            self.hessian_calc = True
+        return self.hessian
+
     def optimize_parameters(self):
         """ optimises the model parameters (non variational parameters)
         Returns the increment in the bound acheived"""
