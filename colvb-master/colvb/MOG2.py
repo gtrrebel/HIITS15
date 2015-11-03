@@ -146,7 +146,7 @@ class MOG2(collapsed_mixture2):
         boundH = 0                                                                                  #melko hyvin
         #for k in range(self.K):
         #    boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
-        #    bound -= boundH
+        #bound -= boundH
         
         #Make the functions
         input = [x]
@@ -193,7 +193,7 @@ class MOG2(collapsed_mixture2):
             boundH = 0                                                                                  #5
             for k in range(self.K):
                 boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
-                bound -= boundH
+            bound -= boundH
         
         #Make the functions
         input = [x]
@@ -238,6 +238,11 @@ class MOG2(collapsed_mixture2):
                         a11 = Ank[n1][k]
                         a12 = Ank[n2][k]
                         a2 = np.dot(np.dot((self.X[n1]-self.mun[:,k]).T,self.Sns_inv[:,:,k]),(self.X[n2]-self.mun[:,k]))
+                        #a31 = np.dot((self.X[n1] - self.mun[:,k]).T,self.Sns_inv[:,:,k])
+                        #a32 = np.dot((self.X[n2] - self.mun[:,k])[:,None], (self.X[n2] - self.mun[:,k])[None,:])
+                        #a33 = np.dot(self.Sns_inv[:,:,k], (self.X[n1] - self.mun[:,k]).T)
+                        #a34 = np.dot(a32, a33)
+                        #a35 = np.dot(a31, a34)
                         H[n1][k][n2][k] += -0.5*(a11+a12)+0.5*self.vNs[k]*a2*a2 + self.vNs[k]*a2/self.kNs[k]
         G = self.vb_grad_natgrad_test(terms = terms, change = False)
         if change:
