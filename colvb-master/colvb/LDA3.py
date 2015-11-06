@@ -37,6 +37,8 @@ class LDA3(col_vb2):
         self.save_specs = save_specs
         self.make_fns = make_fns
 
+        print self.documents, self.vocabulary
+        print self.V
 
         #this is used when packing/unpacking  the model, to reshape a vector into our document shapes
 
