@@ -189,6 +189,15 @@ class investigable():
 		else:
 			return 1
 
+	def big_components(self, a=1):
+		para = sorted(self.get_param().reshape((self.N, self.K)).sum(0))
+		printit = 1
+		if printit == 1:
+			for i in para:
+				print "{0:.2f}".format(i),
+			print
+		return sum(1 for i in para if i > a)
+
 	def return_m(self):
 		return self
 

@@ -6,8 +6,9 @@ from MOG2 import MOG2
 from data_creator import data_creator
 from input_parser import input_parser
 import numpy as np
+import pylab as pb
 
-def init(args=[[]], make_fns = False, ukko = False):
+def init(args=[[]], make_fns = False, ukko = False, alpha = 10):
 	ms = []
 	for arg in args:
 		mog_data = arg
@@ -15,7 +16,6 @@ def init(args=[[]], make_fns = False, ukko = False):
 			mog_data = [10, 2, 10, 30, 5]
 		X = data_creator.mog_basic_data(*mog_data)
 		N_TOPICS = mog_data[0]
-		alpha = 10
 		m = MOG2(X,N_TOPICS, alpha=alpha, make_fns = make_fns)
 		ms.append(m)
 	return ms
@@ -70,3 +70,38 @@ def do_repeat(m, repeat, length):
 	std = np.std(np.array(ends))
 	ite = sum(iterations)/len(iterations)
 	return diff, std, ite
+
+def repeating_test(spec1, spec2, N = 100, args = [[]], method = 'steepest'):
+	data1 = []
+	data2 = []
+	if args == None:
+		args = [10, 2, 10, 30, 5]
+	ms = init(args = [args])
+	out = run(ms, restarts = N, methods = [method], end_gather = [spec1, spec2])
+	for d in out[0]:
+		data1.append(d[spec1])
+		data2.append(d[spec2])
+	pb.figure()
+	axes = pb.gca()
+	axes.set_ylim([-1, args[0] + 1])
+	pb.plot(data1, data2, 'r*')
+	pb.show()
+
+def coeff_test(restarts = 100):
+	for i in xrange(0,1):
+		mog_data = [5, 2, 30, 50, 10**(i*1.)]
+		N_TOPICS = mog_data[0]
+		X = data_creator.mog_basic_data(*mog_data)
+		m = MOG2(X,N_TOPICS, make_fns=False)
+		data1 = []
+		data2 = []
+		out = run([m], restarts=restarts, methods = ['steepest'], end_gather=['bound', 'big_components'])[0]
+		m.plot()
+		for d in out:
+			data1.append(d['bound'])
+			data2.append(d['big_components'])
+		pb.figure()
+		axes = pb.gca()
+		axes.set_ylim([-1, mog_data[0] + 1])
+		pb.plot(data1, data2, 'r*')
+		pb.show()
