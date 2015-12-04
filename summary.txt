@@ -1,0 +1,36 @@
+# Write here thoughts on the process so far. Commit messages? Code? ToRead.txt? Ideas.txt?
+
+PARAMETRES:
+
+- LDA
+	- D - number of documents
+	- N - length of documents
+	- K - number of topics
+	- V - length of vocabulary
+	- alpha - distribution of topic among documents
+	- beta - distribution of words among topics
+
+- MOG
+	- N - number of datapoints
+	- K - dimension
+	- alpha - parameter componentwise parameters
+	- beta - mixture weight parameter
+
+
+WAYS TO EVALUATE:
+	- Bound distribution
+	- Hessian
+	- Random Jumps
+	- Graph of endpoints
+	- dim vs bounddist
+	- roadmap
+	- random index
+
+History:
+	- Autodiff gradient, hessian
+	- gauss index, plain index, power index: lab
+
+Ideas:
+	- How does 2d MOG good/bad choices look?
+	- plot parameter vectors
+	- #{phi_i | phi_i > c}
