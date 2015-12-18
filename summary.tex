@@ -1,0 +1,72 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\title{Summary}
+\author{Otte Heinävaara}
+\date{\today}
+
+
+\begin{document}
+
+\maketitle
+
+\begin{section}{Introduction}
+\noindent
+The purpose of this text is to go through the main aspects that came up during the project in the summer and the fall.
+\end{section}
+
+\begin{section}{The Main Problem}
+	\noindent
+	The main problem is to investigate how gradient descent based optimization methods behave on certain variational bounds applied to Latent Dirichlet Allocation (LDA) and Mixture of Gaussians (MOG) with the hope of seeing general phenomena relating the performance to the geometry of the method.
+\end{section}
+
+\begin{section}{Implementation}
+	\noindent
+	Implementation [INSERT REFERENCE HERE] is based on: [INSERT REFERENCE HERE].
+	Further modifications made:
+	\begin{subsection}{Additions}
+		\begin{itemize}
+			\item Calculation of the gradient and the hessian of the bound with automatic differentiation (Theano).
+			\item (Standard) calculation of the Hessian of the bound of MOG.
+			\item Calculation of the eigenvalue(-like) data from the hessian.
+		\end{itemize}
+	\end{subsection}
+	\begin{subsection}{Findings about modifications}
+		\begin{itemize}
+			\item The calculation of the Hessian turned out to be surprisingly imprecise, with both methods: especially the part with logarightmic determinant. The reason for which is not clear. Possible causes might be: (1) Bug in the code, (2) imprecision in the Theano evaluation AND standard evaluation; both of which sound weird.
+			\item Ignoring precision errors, calculation naturally takes significant amount of time, much smaller than with... 
+			\item Eigenvalue calculation, biggest bottleneck.
+		\end{itemize}
+	\end{subsection}
+\end{section}
+
+\begin{section}{Ways to measure}
+	\noindent
+	Ways to pinpoint the behaviour have been devised.
+	\begin{subsection}{Findings about ways to measure}
+		\begin{itemize}
+			\item Calculating all the eigenvalues is extremely slow (how slow?) even in the moderately small cases, so that can't be applied to the interesting big cases.
+			\item Estimation of the biggest eigenvalue with power iteration style methods is doable to some extent (to what extent?), but still, eigenvalues being close to zero raise the question whether the hessian was accurate enough.
+			\item In LDA, for which the Hessian calculation works better than MOGs, only small amount f bad eigenvalues were found, leading to the conclusion that the idea of saddle points might be off.
+			\item Estimation of the index via Chebychev polynomials (with the idea of estimating eigenprojection with polynomials) didn't seem to be good idea, since the eigenvalues are clustered around discontinuity, for which the approximation is bad (how bad?).
+			\item The same can be said about naive projections, approximation is very bad, especially with the edge cases (how bad?).
+			\item Checking whether some components wither: for some reason, this seemed to happen in the easier cases (where the clusters are separated), but in the harder cases, all the components remain, with varying performance. Cavaet: the relation of difficulty and withering was investigated in relatively small cases (in which difficulty could be grasped visually), leading to question whether the observed behaviour is really illustrative.
+			\item How are the found solutions distributed globally? With index shuffling, the solutions showed small amount of clusters.
+			\item Jumping was tested: Converge, jump, converge... with the idea of revealing how locally are the solutions optimal. The tests showed no significant findings: with small jumps, we don't get to better results, with moderately long the variance decreases, until far away we converge mostly to bad results.
+		\end{itemize}
+	\end{subsection}
+\end{section}
+
+\begin{section}{Data used}
+	\noindent
+	Data used was
+	\begin{itemize}
+		\item Data originally in demos: (1) Data from papers of nips 2011 (2) Original data creators.
+		\item Data creation based on gaussians with random structured covariance matrix.
+	\end{itemize}
+\end{section}
+
+
+
+\end{document}
