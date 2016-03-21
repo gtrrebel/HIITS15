@@ -1,5 +1,7 @@
 # Copyright (c) 2012 James Hensman
 # Licensed under the GPL v3 (see LICENSE.txt)
+from __future__ import absolute_import
+
 import sys
 sys.path.append('/home/othe/Desktop/HIIT/HIITS15/Moduleita/pyautodiff-python2-ast')
 sys.path.append('/home/fs/othe/Windows/Desktop/hiit/HIITS15/Moduleita/pyautodiff-python2-ast')
@@ -18,6 +20,10 @@ from theano import *
 import time
 import random
 import matplotlib.pyplot as plt
+
+import autograd.numpy as np
+import matplotlib.pyplot as plt
+from autograd import elementwise_grad
 
 class MOG2(collapsed_mixture2):
 	"""
@@ -203,6 +209,73 @@ class MOG2(collapsed_mixture2):
 		self.f2 = theano.function(input, grad)
 		hess = theano.gradient.hessian(bound, wrt=input)[0]
 		self.f3 = theano.function(input, hess)
+
+	def test_autograd_bound(self, x, terms = [1,2,3,4,5], change = True):
+		if change:
+			phi_ = x.reshape((self.N, self.K))
+			phi = T.exp(phi_)
+			phi /= phi.sum(1)[:, None]
+		else:
+			phi = x.reshape((self.N, self.K))
+		phi_hats = phi.sum(0)
+		alphas = self.alpha + phi_hats
+		kappas = self.k0 + phi_hats
+		nus = self.v0 + phi_hats
+		Ybars = np.tensordot(self.X, phi,((0),(0)))
+		Cks = np.tensordot(phi, self.XXT,((0),(0))).T
+		mks = (self.k0*self.m0[:,None] + Ybars)/kappas[None,:]
+		mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
+		Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
+		bound = 0
+		if 1 in terms:
+			bound += -np.tensordot(np.log(phi + 1e-10), phi) #entropy H_L                                 #1
+		if 2 in terms:
+			bound += -self.D/2. * np.log(kappas).sum()                                                   #2
+		if 3 in terms:
+			bound += np.gammaln(alphas).sum()                                                            #3
+		if 4 in terms:
+			bound += np.gammaln((nus-np.arange(self.D)[:,None])/2.).sum()                                 #4
+		if 5 in terms:
+			boundH = 0                                                                                  #5
+			for k in range(self.K):
+				boundH += 0.5*np.log(np.nlinalg.det(Sks[:, :, k]))*nus[k]
+			bound -= boundH
+		return bound
+
+	def autograd_bound(x, alpha, k0, v0, m0, X, XXT, S0, k0m0m0T, N, K, D, terms = [1,2,3,4,5], change = True):
+		if change:
+			phi_ = x.reshape((N, K))
+			phi = np.exp(phi_)
+			phi /= phi.sum(1)[:, None]
+		else:
+			phi = x.reshape((N, K))
+		phi_hats = phi.sum(0)
+		alphas = alpha + phi_hats
+		kappas = k0 + phi_hats
+		nus = v0 + phi_hats
+		Ybars = np.tensordot(X, phi,((0),(0)))
+		Cks = np.tensordot(phi, XXT,((0),(0))).T
+		mks = (k0*m0[:,None] + Ybars)/kappas[None,:]
+		mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
+		Sks = S0[:,:,None] + Cks + k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
+		bound = 0
+		if 1 in terms:
+			bound += -np.tensordot(np.log(phi + 1e-10), phi) #entropy H_L                                 #1
+		if 2 in terms:
+			bound += -D/2. * np.log(kappas).sum()                                                   #2
+		if 3 in terms:
+			bound += np.gammaln(alphas).sum()                                                            #3
+		if 4 in terms:
+			bound += np.gammaln((nus-np.arange(self.D)[:,None])/2.).sum()                                 #4
+		if 5 in terms:
+			boundH = 0                                                                                  #5
+			for k in range(K):
+				boundH += 0.5*np.log(np.nlinalg.det(Sks[:, :, k]))*nus[k]
+			bound -= boundH
+		return bound
+
+	def bound_grad(self):
+		return elementwise_grad(autograd_bound)
 
 	def brutehessian(self, terms = [1,2,3,4,5], change = True):
 		"""Calculate hessian matrix (without automatic differentiation)"""
