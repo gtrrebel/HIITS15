@@ -21,7 +21,8 @@ import time
 import random
 import matplotlib.pyplot as plt
 
-import autograd.numpy as np
+import autograd.numpy as np_a
+import autograd.scipy as sp_a
 import matplotlib.pyplot as plt
 from autograd import elementwise_grad
 
@@ -210,72 +211,50 @@ class MOG2(collapsed_mixture2):
 		hess = theano.gradient.hessian(bound, wrt=input)[0]
 		self.f3 = theano.function(input, hess)
 
-	def test_autograd_bound(self, x, terms = [1,2,3,4,5], change = True):
-		if change:
-			phi_ = x.reshape((self.N, self.K))
-			phi = T.exp(phi_)
-			phi /= phi.sum(1)[:, None]
-		else:
-			phi = x.reshape((self.N, self.K))
-		phi_hats = phi.sum(0)
-		alphas = self.alpha + phi_hats
-		kappas = self.k0 + phi_hats
-		nus = self.v0 + phi_hats
-		Ybars = np.tensordot(self.X, phi,((0),(0)))
-		Cks = np.tensordot(phi, self.XXT,((0),(0))).T
-		mks = (self.k0*self.m0[:,None] + Ybars)/kappas[None,:]
-		mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
-		Sks = self.S0[:,:,None] + Cks + self.k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
-		bound = 0
-		if 1 in terms:
-			bound += -np.tensordot(np.log(phi + 1e-10), phi) #entropy H_L                                 #1
-		if 2 in terms:
-			bound += -self.D/2. * np.log(kappas).sum()                                                   #2
-		if 3 in terms:
-			bound += np.gammaln(alphas).sum()                                                            #3
-		if 4 in terms:
-			bound += np.gammaln((nus-np.arange(self.D)[:,None])/2.).sum()                                 #4
-		if 5 in terms:
-			boundH = 0                                                                                  #5
-			for k in range(self.K):
-				boundH += 0.5*np.log(np.nlinalg.det(Sks[:, :, k]))*nus[k]
-			bound -= boundH
-		return bound
+	def autograd_bound_helper(self, alpha, k0, v0, m0, X, XXT, S0, k0m0m0T, N, K, D, terms = [1,2,3,4,5], change = True):
+		def autograd_bound_help2(x):
+			if change:
+				phi_ = x.reshape((N, K))
+				phi = np_a.exp(phi_)
+				phi /= phi.sum(axis=1, keepdims=True)
+			else:
+				phi = x.reshape((N, K))
+			phi_hats = phi.sum(0)
+			alphas = alpha + phi_hats
+			kappas = k0 + phi_hats
+			nus = v0 + phi_hats
+			Ybars = np_a.tensordot(X, phi, axes=([0,],[0,]))
+			Cks = np_a.tensordot(phi, XXT, axes=([0,],[0,])).T
+			mks = (k0*m0[:,np.newaxis] + Ybars)/(np_a.expand_dims(kappas, axis=0))
+			mkprods = np_a.expand_dims(mks, axis=1)*np_a.expand_dims(mks, axis=0) #product of mk and it's transpose
+			Sks = S0[:,:,None] + Cks + k0m0m0T[:,:,None] - np_a.expand_dims(np_a.expand_dims(kappas, axis=0), axis=0)*mkprods
+			bound = 0
+			if 1 in terms:
+				bound = bound - np_a.tensordot(np_a.log(phi + 1e-10), phi) #entropy H_L                                 #1
+			if 2 in terms:
+				bound = bound - D/2. * np_a.log(kappas).sum()                                                   #2
+			if 3 in terms:
+				bound = bound + sp_a.special.gammaln(alphas).sum()                                                            #3
+			if 4 in terms:
+				bound = bound + sp_a.special.gammaln((nus-np_a.arange(self.D)[:,None])/2.).sum()                                 #4
+			if 5 in terms:
+				boundH = 0                                                                                  #5
+				for k in range(K):
+					boundH = boundH + 0.5*nus[k]*np_a.linalg.slogdet(Sks[:, :, k])[1]
+				bound -= boundH
+			return bound
+		return autograd_bound_help2
 
-	def autograd_bound(x, alpha, k0, v0, m0, X, XXT, S0, k0m0m0T, N, K, D, terms = [1,2,3,4,5], change = True):
-		if change:
-			phi_ = x.reshape((N, K))
-			phi = np.exp(phi_)
-			phi /= phi.sum(1)[:, None]
-		else:
-			phi = x.reshape((N, K))
-		phi_hats = phi.sum(0)
-		alphas = alpha + phi_hats
-		kappas = k0 + phi_hats
-		nus = v0 + phi_hats
-		Ybars = np.tensordot(X, phi,((0),(0)))
-		Cks = np.tensordot(phi, XXT,((0),(0))).T
-		mks = (k0*m0[:,None] + Ybars)/kappas[None,:]
-		mkprods = mks[:,None,:]*mks[None,:,:] #product of mk and it's transpose
-		Sks = S0[:,:,None] + Cks + k0m0m0T[:,:,None] - kappas[None,None,:]*mkprods
-		bound = 0
-		if 1 in terms:
-			bound += -np.tensordot(np.log(phi + 1e-10), phi) #entropy H_L                                 #1
-		if 2 in terms:
-			bound += -D/2. * np.log(kappas).sum()                                                   #2
-		if 3 in terms:
-			bound += np.gammaln(alphas).sum()                                                            #3
-		if 4 in terms:
-			bound += np.gammaln((nus-np.arange(self.D)[:,None])/2.).sum()                                 #4
-		if 5 in terms:
-			boundH = 0                                                                                  #5
-			for k in range(K):
-				boundH += 0.5*np.log(np.nlinalg.det(Sks[:, :, k]))*nus[k]
-			bound -= boundH
-		return bound
+	def autograd_bound(self, terms=[1,2,3,4,5], change = True):
+		autograd_bound_h = self.autograd_bound_helper(self.alpha, self.k0, self.v0, self.m0, self.X, self.XXT, self.S0, \
+								self.k0m0m0T, self.N, self.K, self.D, terms=terms, change=change)
+		return autograd_bound_h
 
-	def bound_grad(self):
-		return elementwise_grad(autograd_bound)
+	def bound_grad(self, terms=[1,2,3,4,5], change=True):
+		return elementwise_grad(self.autograd_bound(terms=terms, change=change))
+
+	def bound_hessian(self, terms=[1,2,3,4,5], change=True):
+		return elementwise_grad(self.bound_grad(terms=terms, change=change))
 
 	def brutehessian(self, terms = [1,2,3,4,5], change = True):
 		"""Calculate hessian matrix (without automatic differentiation)"""
@@ -312,16 +291,18 @@ class MOG2(collapsed_mixture2):
 						a11 = Ank[n1][k]
 						a12 = Ank[n2][k]
 						a2 = np.dot(np.dot((self.X[n1]-self.mun[:,k]).T,self.Sns_inv[:,:,k]),(self.X[n2]-self.mun[:,k]))
-						#a31 = np.dot((self.X[n1] - self.mun[:,k]).T,self.Sns_inv[:,:,k])
-						#a32 = np.dot((self.X[n2] - self.mun[:,k])[:,None], (self.X[n2] - self.mun[:,k])[None,:])
-						#a33 = np.dot(self.Sns_inv[:,:,k], (self.X[n1] - self.mun[:,k]).T)
-						#a34 = np.dot(a32, a33)
-						#a35 = np.dot(a31, a34)
 						H[n1][k][n2][k] += -0.5*(a11+a12)+0.5*self.vNs[k]*a2*a2 + self.vNs[k]*a2/self.kNs[k]
 		G = self.vb_grad_natgrad_test(terms = terms, change = False)
 		if change:
 			return var_change(G, H, phis)
 		return H.flatten().reshape((self.N*self.K,self.N*self.K))
+
+	def test_terms(self, terms = [1,2,3,4,5], change=True):
+		#YAY
+		grad1 = self.vb_grad_natgrad_test(terms=terms)
+		print grad1
+		grad2 = self.bound_grad(terms=terms)(self.get_vb_param())
+		print grad2
 
 	def predict_components_ln(self, Xnew):
 		"""The predictive density under each component"""
