@@ -215,6 +215,8 @@ class MOG2(collapsed_mixture2):
 		def autograd_bound_help2(x):
 			if change:
 				phi_ = x.reshape((N, K))
+				phi_m = np_a.amax(phi_)
+				phi_ = phi_ - phi_m
 				phi = np_a.exp(phi_)
 				phi /= phi.sum(axis=1, keepdims=True)
 			else:
@@ -299,9 +301,9 @@ class MOG2(collapsed_mixture2):
 
 	def test_terms(self, terms = [1,2,3,4,5], change=True):
 		#YAY
-		grad1 = self.vb_grad_natgrad_test(terms=terms)
+		grad1 = self.vb_grad_natgrad_test(terms=terms, change=change)
 		print grad1
-		grad2 = self.bound_grad(terms=terms)(self.get_vb_param())
+		grad2 = self.bound_grad(terms=terms, change=change)(self.get_vb_param())
 		print grad2
 
 	def predict_components_ln(self, Xnew):
