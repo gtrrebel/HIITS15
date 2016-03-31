@@ -46,7 +46,6 @@ class MOG2(collapsed_mixture2):
 		#precomputed stuff
 		self.k0m0m0T = self.k0*self.m0[:,np.newaxis]*self.m0[np.newaxis,:]
 		self.XXT = self.X[:,:,np.newaxis]*self.X[:,np.newaxis,:]
-
 		collapsed_mixture2.__init__(self, self.N, K, prior_Z, alpha)
 		self.make_fns = make_fns
 		if make_fns:
@@ -72,27 +71,13 @@ class MOG2(collapsed_mixture2):
 			+self.H\
 			-0.5*self.N*self.D*np.log(np.pi)
 
-	def new_param(self, seed=None):
-		if seed == None:
-			self.seed = np.random.randint(0, (1 << 32) - 1)
-		else:
-			self.seed = seed
-		np.random.seed(self.seed)
-		self.set_vb_param(np.random.randn(self.N*self.K))
-
-
 	def vb_grad_natgrad(self):
 		"""Gradients of the bound"""
-		#print self.K, self.D, self.N
 		x_m = self.X[:,:,None]-self.mun[None,:,:]
 		dS = x_m[:,:,None,:]*x_m[:,None,:,:]
 		SnidS = self.Sns_inv[None,:,:,:]*dS
 		dlndtS_dphi = np.dot(np.ones(self.D), np.dot(np.ones(self.D), SnidS))
 
-		#print (-0.5*self.D/self.kNs).shape
-		#print (0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0)).shape
-		#print (self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.).shape
-		#print ((self.Hgrad-0.5*dlndtS_dphi*self.vNs)).shape
 		grad_phi =  (-0.5*self.D/self.kNs + 0.5*digamma((self.vNs-np.arange(self.D)[:,None])/2.).sum(0) + self.mixing_prop_bound_grad() - self.Sns_halflogdet -1.) + (self.Hgrad-0.5*dlndtS_dphi*self.vNs)
 
 		natgrad = grad_phi - np.sum(self.phi*grad_phi, 1)[:,None] # corrects for softmax (over) parameterisation
@@ -153,7 +138,7 @@ class MOG2(collapsed_mixture2):
 		bound += T.gammaln((nus-T.arange(self.D)[:,None])/2.).sum()                                 #toimii
 		boundH = 0                                                                                  #melko hyvin
 		for k in range(self.K):
-		    boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
+			boundH += 0.5*T.log(T.nlinalg.det(Sks[:, :, k]))*nus[k]
 		bound -= boundH
 		
 		#Make the functions
@@ -258,6 +243,14 @@ class MOG2(collapsed_mixture2):
 	def bound_hessian(self, terms=[1,2,3,4,5], change=True):
 		return elementwise_grad(self.bound_grad(terms=terms, change=change))
 
+	def get_brute_bound(self, vb_param):
+		copy_params = self.get_vb_param().copy()
+		self.set_vb_param(vb_param)
+		b = self.bound()
+		self.set_vb_param(copy_params)
+		return b
+
+
 	def brutehessian(self, terms = [1,2,3,4,5], change = True):
 		"""Calculate hessian matrix (without automatic differentiation)"""
 		phis = self.phi.copy()
@@ -299,12 +292,26 @@ class MOG2(collapsed_mixture2):
 			return var_change(G, H, phis)
 		return H.flatten().reshape((self.N*self.K,self.N*self.K))
 
-	def test_terms(self, terms = [1,2,3,4,5], change=True):
-		#YAY
-		grad1 = self.vb_grad_natgrad_test(terms=terms, change=change)
-		print grad1
-		grad2 = self.bound_grad(terms=terms, change=change)(self.get_vb_param())
-		print grad2
+	def test_terms(self, terms = [1,2,3,4,5], change=True, to_check = "grad"):
+		if (change):
+			params = self.get_vb_param()
+		else:
+			params = self.get_param()
+		if (to_check == "grad"):
+			grad1, grad3 = self.vb_grad_natgrad_test(terms=terms, change=change)
+			print "real grad:"
+			print grad1
+			grad2 = self.bound_grad(terms=terms, change=change)(params)
+			print "autograd grad:"
+			print grad2
+		elif (to_check == "bound"):
+			bound1 = self.bound()
+			bound2 = self.autograd_bound(change=change)(params)
+			print "real bound:"
+			print bound1
+			print "autograd bound:"
+			print bound2
+			print bound1 - bound2
 
 	def predict_components_ln(self, Xnew):
 		"""The predictive density under each component"""

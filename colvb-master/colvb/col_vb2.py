@@ -254,8 +254,6 @@ class col_vb2(GPy.core.model.Model, investigable):
 
             self.road()
             phi_old = self.get_vb_param().copy()
-            #print iteration
-            #print self.bound()
             bound_old2 = bound_old
             phi_old2 = phi_old
             bound = self.bound()
@@ -280,7 +278,6 @@ class col_vb2(GPy.core.model.Model, investigable):
                 else:
                     searchDir = -natgrad
 
-                #print "eka:", bound
                 phi_new = phi_old + step_length*searchDir
                 self.set_vb_param(phi_new)
                 bound = self.bound()
@@ -296,7 +293,6 @@ class col_vb2(GPy.core.model.Model, investigable):
                     bound = self.bound()
                 else:
                     phi_old2 = phi_new
-                #print "toka:", bound
                 if np.abs(bound-bound_old2)<=ftol:
                     if self.optimize_parameters()<1e-1:
                         self.ite_counts.append(trustcount + 1)
@@ -304,7 +300,6 @@ class col_vb2(GPy.core.model.Model, investigable):
                 bound_old2 = bound
 
             self.travelled_distance += linalg.norm(self.get_vb_param().copy() - phi_old)
-            #print self.bound()
             self.iteration += 1
             # track:
             self.track(np.hstack((bound, beta)))

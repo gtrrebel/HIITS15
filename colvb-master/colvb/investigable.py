@@ -96,11 +96,10 @@ class investigable():
 					if abs(H[i][j]) > h:
 						print H[i][j], ' vs ', H2[i][j], ' ------ rel. err. ', 100*abs((H[i][j] - H2[i][j])/(H2[i][j])), '%'
 	
-	def finite_difference_check2(self, hessian_check = False, gradient_check=False, brute_hessian_check = True, terms = [1,2,3,4,5], change = True):
+	def finite_difference_check2(self, hessian_check = False, gradient_check=False, brute_hessian_check = True, terms = [1,2,3,4,5], change = True, d = 3):
 		phi_orig = self.get_vb_param().copy()
 		phi_orig2 = self.get_param().copy()
 		M = len(phi_orig)
-		d = 3
 		h, hr = float('1e-' + str(d)), float('1e' + str(d))
 		hij = h*np.eye(M)
 		if hessian_check:
@@ -116,11 +115,13 @@ class investigable():
 		if gradient_check:
 			G = np.zeros((M))
 			G2, G3 = self.vb_grad_natgrad_test()
+			G4 = self.bound_grad()(self.get_vb_param())
+			self.make_functions2(terms = terms, change = change)
 			for i in xrange(M):
-				G[i] = hr*(self.f1(phi_orig + hij[i]) - self.f1(phi_orig))
+				G[i] = hr*(self.get_brute_bound(phi_orig + hij[i]) - self.get_brute_bound(phi_orig))
 			for i in xrange(M):
 				if abs(G[i]) + abs(G2[i]) > h:
-					print G[i], ' vs ', G2[i], ' ------ rel. err. ', 100*abs((G[i] - G2[i])/(G2[i])), '%'
+					print G[i], ' vs ', G2[i], '  ...   ', G4[i], ' ------ rel. err. ', 100*abs((G[i] - G2[i])/(G2[i])), '%'
 		if brute_hessian_check:
 			self.make_functions2(terms = terms, change = change)
 			if change:
