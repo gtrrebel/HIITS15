@@ -24,7 +24,10 @@ import matplotlib.pyplot as plt
 import autograd.numpy as np_a
 import autograd.scipy as sp_a
 import matplotlib.pyplot as plt
-from autograd import elementwise_grad
+from autograd.util import *
+from autograd import (grad, elementwise_grad, jacobian, value_and_grad,
+					  grad_and_aux, hessian_vector_product, hessian, multigrad,
+					  jacobian, vector_jacobian_product)
 
 class MOG2(collapsed_mixture2):
 	"""
@@ -224,11 +227,9 @@ class MOG2(collapsed_mixture2):
 				bound = bound + sp_a.special.gammaln(alphas).sum()                                                            #3
 			if 4 in terms:
 				bound = bound + sp_a.special.gammaln((nus-np_a.arange(self.D)[:,None])/2.).sum()                                 #4
-			if 5 in terms:
-				boundH = 0                                                                                  #5
+			if 5 in terms:                                                                                #5
 				for k in range(K):
-					boundH = boundH + 0.5*nus[k]*np_a.linalg.slogdet(Sks[:, :, k])[1]
-				bound -= boundH
+					bound = bound - 0.5*nus[k]*np_a.linalg.slogdet(Sks[:, :, k])[1]
 			return bound
 		return autograd_bound_help2
 
@@ -238,10 +239,10 @@ class MOG2(collapsed_mixture2):
 		return autograd_bound_h
 
 	def bound_grad(self, terms=[1,2,3,4,5], change=True):
-		return elementwise_grad(self.autograd_bound(terms=terms, change=change))
+		return jacobian(self.autograd_bound(terms=terms, change=change))
 
 	def bound_hessian(self, terms=[1,2,3,4,5], change=True):
-		return elementwise_grad(self.bound_grad(terms=terms, change=change))
+		return hessian(self.autograd_bound(terms=terms, change=change))
 
 	def get_brute_bound(self, vb_param):
 		copy_params = self.get_vb_param().copy()

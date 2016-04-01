@@ -170,6 +170,9 @@ class investigable():
 	def eigenvalues(self):
 		return self.lab.eigenvalues(self.get_hessian())
 
+	def autograd_eigenvalues(self):
+		return self.lab.eigenvalues(self.bound_hessian()(self.get_vb_param()))
+
 	def dimension(self):
 		return len(self.get_param())
 

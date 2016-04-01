@@ -13,7 +13,7 @@ def init(args=[[]], make_fns = False, ukko = False, alpha = 10):
 	for arg in args:
 		mog_data = arg
 		if arg == []:
-			mog_data = [10, 2, 10, 30, 5]
+			mog_data = [5, 2, 5, 10, 5]
 		X = data_creator.mog_basic_data(*mog_data)
 		N_TOPICS = mog_data[0]
 		m = MOG2(X,N_TOPICS, alpha=alpha, make_fns = make_fns)
