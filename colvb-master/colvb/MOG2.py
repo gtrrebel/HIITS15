@@ -220,14 +220,14 @@ class MOG2(collapsed_mixture2):
 			Sks = S0[:,:,None] + Cks + k0m0m0T[:,:,None] - np_a.expand_dims(np_a.expand_dims(kappas, axis=0), axis=0)*mkprods
 			bound = 0
 			if 1 in terms:
-				bound = bound - np_a.tensordot(np_a.log(phi + 1e-10), phi) #entropy H_L                                 #1
+				bound = bound - np_a.tensordot(np_a.log(phi + 1e-10), phi) #entropy H_L											#1
 			if 2 in terms:
-				bound = bound - D/2. * np_a.log(kappas).sum()                                                   #2
+				bound = bound - D/2. * np_a.log(kappas).sum()																	#2
 			if 3 in terms:
-				bound = bound + sp_a.special.gammaln(alphas).sum()                                                            #3
+				bound = bound + sp_a.special.gammaln(alphas).sum()																#3
 			if 4 in terms:
-				bound = bound + sp_a.special.gammaln((nus-np_a.arange(self.D)[:,None])/2.).sum()                                 #4
-			if 5 in terms:                                                                                #5
+				bound = bound + sp_a.special.gammaln((nus-np_a.arange(self.D)[:,None])/2.).sum()								#4
+			if 5 in terms:																										#5
 				for k in range(K):
 					bound = bound - 0.5*nus[k]*np_a.linalg.slogdet(Sks[:, :, k])[1]
 			return bound
