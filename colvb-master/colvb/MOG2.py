@@ -293,27 +293,6 @@ class MOG2(collapsed_mixture2):
 			return var_change(G, H, phis)
 		return H.flatten().reshape((self.N*self.K,self.N*self.K))
 
-	def test_terms(self, terms = [1,2,3,4,5], change=True, to_check = "grad"):
-		if (change):
-			params = self.get_vb_param()
-		else:
-			params = self.get_param()
-		if (to_check == "grad"):
-			grad1, grad3 = self.vb_grad_natgrad_test(terms=terms, change=change)
-			print "real grad:"
-			print grad1
-			grad2 = self.bound_grad(terms=terms, change=change)(params)
-			print "autograd grad:"
-			print grad2
-		elif (to_check == "bound"):
-			bound1 = self.bound()
-			bound2 = self.autograd_bound(change=change)(params)
-			print "real bound:"
-			print bound1
-			print "autograd bound:"
-			print bound2
-			print bound1 - bound2
-
 	def predict_components_ln(self, Xnew):
 		"""The predictive density under each component"""
 		Dist = Xnew[:,:,np.newaxis]-self.mun[np.newaxis,:,:] # Nnew x D x K
