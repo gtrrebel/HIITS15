@@ -133,9 +133,32 @@ def check_original_bound_vs_new_bound(d = default_d):
 	for diff in diffs:
 		print diff - diffs[0]
 
+def check_original_bound_vs_new_no_change_bound(d = default_d):
+	# Works like a charm, error of 1-13 with removed constant
+	# Error is in original gradient
+	m = get_m()
+	phi_orig = m.get_param().copy()
+	M = len(phi_orig)
+	diffs = []
+	for i in xrange(M):
+		m.randomize()
+		b1 = m.bound()
+		b2 = m.autograd_bound(change=False)(m.get_param())
+		diffs.append(b1 - b2)
+	for diff in diffs:
+		print diff - diffs[0]
+
 def check_autograd_hessian_vs_gradient(d = default_d):
 	m = get_m()
 	phi_orig = m.get_vb_param().copy()
 	gradient_fn = m.bound_grad()
 	hessian = m.bound_hessian()(m.get_vb_param())
 	hessian_vs_gradient_finite_difference(phi_orig, gradient_fn, hessian, d)
+
+def check_autograd_natgrad_consistency(d = default_d):
+	# 1e-5
+	m = get_m()
+	phi_orig = m.get_param()
+	bound_fn = m.autograd_bound(change=False)
+	gradient = m.bound_grad(change=False)(m.get_param())
+	gradient_vs_finite_difference(phi_orig, bound_fn, gradient, d)

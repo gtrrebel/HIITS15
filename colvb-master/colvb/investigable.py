@@ -237,6 +237,21 @@ class investigable():
 	def det(self):
 		return np.linalg.det(self.get_hessian())
 
+	def negative(self):
+		return self.lab.functions['negative'](self.lab.eigenvalues(self.get_hessian()))
+
+	def positive(self):
+		return self.lab.functions['positive'](self.lab.eigenvalues(self.get_hessian()))
+
+	def epsilon_negative(self):
+		return self.lab.functions['epsilon_negative'](self.lab.eigenvalues(self.get_hessian()))
+
+	def epsilon_positive(self):
+		try:
+			return self.lab.functions['epsilon_positive'](self.lab.eigenvalues(self.get_hessian()))
+		except ValueError:
+			return -1
+
 	def collapse(self, hessian):
 		collapsed = np.zeros((self.D*self.N*(self.K - 1), self.D*self.N*(self.K - 1)))
 		for i1 in xrange(self.K - 1):
