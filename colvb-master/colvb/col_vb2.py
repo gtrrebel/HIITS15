@@ -384,6 +384,9 @@ class col_vb2(GPy.core.model.Model, investigable):
 
 			grad,natgrad = self.vb_grad_natgrad()
 			grad,natgrad = -grad,-natgrad
+			print self.iteration
+			print self.bound_grad()(self.get_vb_param())
+			print self.vb_grad_natgrad()[0]
 			squareNorm = np.dot(natgrad,grad) # used to monitor convergence
 
 			self.road()
@@ -514,6 +517,9 @@ class col_vb2(GPy.core.model.Model, investigable):
 
 			grad, natgrad = self.bound_grad()(self.get_vb_param()), self.bound_grad(change=False)(self.get_param())
 			grad,natgrad = -grad,-natgrad
+			print self.iteration
+			print self.bound_grad()(self.get_vb_param())
+			print self.vb_grad_natgrad()[0]
 			squareNorm = np.dot(natgrad,grad) # used to monitor convergence
 
 			self.road()
@@ -604,7 +610,7 @@ class col_vb2(GPy.core.model.Model, investigable):
 		return self.autograd_bound()(self.get_vb_param())
 
 	def get_gradient(self):
-		return self.bound_gradient()(self.get_vb_param())
+		return self.bound_grad()(self.get_vb_param())
 
 	def get_hessian(self):
 		return self.bound_hessian()(self.get_vb_param())

@@ -319,14 +319,18 @@ class MOG2(collapsed_mixture2):
 		Z *= pi[np.newaxis,:]
 		return Z.sum(1)
 
+	def test_mgrid(self):
+		pass
+
 	def plot(self, newfig=True):
+		import numpy as npp
 		if self.X.shape[1]==2:
 			if newfig:pb.figure()
 			xmin, ymin = self.X.min(0)
 			xmax, ymax = self.X.max(0)
 			xmin, xmax = xmin-0.1*(xmax-xmin), xmax+0.1*(xmax-xmin)
 			ymin, ymax = ymin-0.1*(ymax-ymin), ymax+0.1*(ymax-ymin)
-			xx, yy = np.mgrid[xmin:xmax:100j, ymin:ymax:100j]
+			xx, yy = npp.mgrid[xmin:xmax:100j, ymin:ymax:100j]
 			Xgrid = np.vstack((xx.flatten(), yy.flatten())).T
 			zz = self.predict(Xgrid).reshape(100, 100)
 			zz_data = self.predict(self.X)
