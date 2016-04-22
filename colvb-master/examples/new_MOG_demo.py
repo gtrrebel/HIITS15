@@ -97,6 +97,7 @@ def compare_bound_deviations(M = 100, N = 10):
 			m.optimize_autograd()
 			bounds2.append(m.bound())
 			positives2.append(m.epsilon_positive())
+			print bounds1[-1], bounds2[-1]
 		boundss1.append(bounds1)
 		boundss2.append(bounds2)
 		positivess1.append(positives1)
@@ -135,6 +136,7 @@ def dimension_variation(M = 10, N = 10, use_autograd=True):
 			else:
 				m.optimize()
 			bounds1.append(m.bound())
+			m.plot()
 			positives1.append(m.epsilon_positive())
 		boundss1.append(bounds1)
 		positivess1.append(positives1)

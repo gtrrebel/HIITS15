@@ -60,6 +60,9 @@ class investigable():
 	def get_vb_param(self):
 		raise NotImplementedError( "Implement vb parameter returning method \"get_vb_param\"")
 
+	def smooth_param(self):
+		raise NotImplementedError( "Implement vb parameter smoothing method \"smooth_param\"")
+
 	def finite_difference_check(self, hessian_check = False, gradient_check=False, brute_hessian_check = True):
 		phi_orig = self.get_vb_param().copy()
 		phi_orig2 = self.get_param().copy()
@@ -246,11 +249,15 @@ class investigable():
 	def epsilon_negative(self):
 		return self.lab.functions['epsilon_negative'](self.lab.eigenvalues(self.get_hessian()))
 
-	def epsilon_positive(self):
+	def epsilon_positive(self, cap = 90):
 		try:
 			return self.lab.functions['epsilon_positive'](self.lab.eigenvalues(self.get_hessian()))
 		except ValueError:
-			return -1
+			if (cap < 50):
+				return -1
+			self.smooth_param(cap)
+			return self.epsilon_positive(cap - 10)
+
 
 	def collapse(self, hessian):
 		collapsed = np.zeros((self.D*self.N*(self.K - 1), self.D*self.N*(self.K - 1)))

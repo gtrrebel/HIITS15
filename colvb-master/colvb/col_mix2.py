@@ -35,13 +35,22 @@ class collapsed_mixture2(col_vb2):
 
 		col_vb2.__init__(self)
 
+	def smooth_param(self, cap):
+		phi_ = np.array([xx for xx in self.phi_])
+		max_phi_ = np.amax(phi_, axis = 1, keepdims = True)
+		phi_ = phi_.reshape(self.N,self.K)
+		phi_ = phi_ - max_phi_
+		min_phi = -cap*np.ones((self.N, self.K))
+		phi_ = np.maximum(phi_, min_phi)
+		self.set_vb_param(phi_)
+
 	def set_vb_param(self,phi_):
 		#unflatten and softmax
-		cap = 250
-		min_phi = -cap*np.ones((self.N, self.K))
-		max_phi_ = max(phi_)
+		cap = 100
 		self.phi_ = phi_.reshape(self.N,self.K)
-		self.phi_ = self.phi_ - max_phi_*np.ones((self.N, self.K))
+		max_phi_ = np.amax(self.phi_, axis = 1, keepdims = True)
+		self.phi_ = self.phi_ - max_phi_
+		min_phi = -cap*np.ones((self.N, self.K))
 		self.phi_ = np.maximum(self.phi_, min_phi)
 		self.phi, logphi, self.H = softmax_weave(self.phi_)
 		self.phi_hat = self.phi.sum(0)
