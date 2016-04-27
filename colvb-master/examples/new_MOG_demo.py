@@ -71,7 +71,28 @@ def compare_optimizes(M = 10):
 	plt.plot(bounds2, positives2, 'g.')
 	plt.show()
 
-def compare_bound_deviations(M = 100, N = 10):
+def bound_vs_ind(M = 100, N = 10):
+	bounds = []
+	positives = []
+	delta_bound = 0.01
+	delta_positive = 0.01
+	m = get_m2(N)
+	print m.dimension()
+	for i in xrange(M):
+		m.randomize()
+		print i
+		m.optimize_autograd()
+		bounds.append(m.bound())
+		positives.append(m.epsilon_positive())
+	plt.figure()
+	axes = plt.gca()
+	bounds = np.array(bounds, dtype='float64')
+	positives = np.array(positives, dtype='float64')
+	min_bound, max_bound = np.amin(bounds), np.amax(bounds)
+	plt.plot(bounds + delta_bound*np.random.randn(M), positives + delta_positive*np.random.randn(M), 'b.')
+	plt.show()
+
+def compare_bound_deviations(M = 100, N = 1):
 	boundss1 = []
 	boundss2 = []
 	positivess1 = []
@@ -136,16 +157,16 @@ def dimension_variation(M = 10, N = 10, use_autograd=True):
 			else:
 				m.optimize()
 			bounds1.append(m.bound())
-			m.plot()
+			#m.plot()
 			positives1.append(m.epsilon_positive())
 		boundss1.append(bounds1)
 		positivess1.append(positives1)
 	plt.figure()
 	bounds1 = np.array(boundss1, dtype='float64')
 	for dim, bounds1 in zip(dimensions,boundss1):
-		plt.plot(dim*np.ones(N), bounds1 + delta_bound*np.random.randn(N), 'b.')
+		plt.plot(dim*np.ones(M), bounds1 + delta_bound*np.random.randn(M), 'b.')
 	positives1 = np.array(positivess1, dtype='float64')
 	plt.figure()
 	for dim, positives1 in zip(dimensions,positivess1):
-		plt.plot(dim*np.ones(N), positives1 + delta_positive*np.random.randn(N), 'r.')
+		plt.plot(dim*np.ones(M), positives1 + delta_positive*np.random.randn(M), 'r.')
 	plt.show()
