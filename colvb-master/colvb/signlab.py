@@ -4,7 +4,7 @@ from scipy import linalg
 
 class signlab():
 
-	def __init__(self, eps = 1e-14):
+	def __init__(self, eps = 1e-9):
 		self.eps = eps
 		self.build_functions(eps)
 

@@ -153,7 +153,7 @@ def dimension_variation(M = 10, N = 10, use_autograd=True):
 			print ii, i
 			m.randomize()
 			if use_autograd:
-				m.optimize_autograd()
+				m.optimize_autograd(method='steepest')
 			else:
 				m.optimize()
 			bounds1.append(m.bound())
