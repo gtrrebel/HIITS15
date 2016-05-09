@@ -28,7 +28,7 @@ def run_rms(rms, m, iters = 200):
 		if info['n_iter'] >= iters:
 			#print "ite"
 			break
-		if abs(nor) < 1e-3:
+		if abs(nor) < 1e-4:
 			#print "nor: ", nor
 			break
 	return rms
@@ -52,6 +52,22 @@ def rms_optimize(m, iters = 200, step_rate=0.1):
 	rms = run_rms(rms, m, iters)
 	m.set_vb_param(rms.wrt)
 	return m
+
+def try_one(iters = 200):
+	m = get_m()
+	params = m.get_vb_param().copy()
+	m = rms_optimize(m, iters)
+	b1 = m.bound()
+	pos1 = m.epsilon_positive()
+	m.plot()
+	m.set_vb_param(params)
+	m.optimize_autograd(method = "steepest")
+	b2 = m.bound()
+	pos2 = m.epsilon_positive()
+	m.plot()
+	print b1, b2
+	print pos1, pos2
+	return (m, params)
 
 def compare_optimizes_rms(M = 10, iters = 200):
 	m = get_m()
