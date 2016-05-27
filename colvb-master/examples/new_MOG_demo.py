@@ -1,5 +1,6 @@
 from MOG_demo4 import *
 import matplotlib.pyplot as plt
+from image_maker import make_m
 
 def get_m():
 	return init()[0]
@@ -145,7 +146,8 @@ def dimension_variation(M = 10, N = 10, use_autograd=True):
 	delta_positive = 0.01
 	dimensions = []
 	for ii in xrange(N):
-		m = get_m2(ii)
+		m = make_m(data_size = 10 + ii*10)
+		print m.dimension()
 		bounds1 = []
 		positives1 = []
 		dimensions.append(m.dimension())

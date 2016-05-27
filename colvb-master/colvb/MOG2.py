@@ -33,7 +33,7 @@ class MOG2(collapsed_mixture2):
 	"""
 	A Mixture of Gaussians
 	"""
-	def __init__(self, X, K=2, prior_Z='symmetric', alpha=10., eps=1e-9, finite_difference_checks=False, make_fns = True, seed=None):
+	def __init__(self, X, K=2, prior_Z='symmetric', alpha=10., eps=1e-9, finite_difference_checks=False, make_fns = False, seed=None):
 		self.eps = eps
 		self.finite_difference_checks = finite_difference_checks
 		self.X = X
